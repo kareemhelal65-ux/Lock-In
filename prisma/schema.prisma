@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String             @id @default(uuid())
+  email                String             @unique
+  username             String             @unique
+  passwordHash         String
+  name                 String
+  avatar               String
+  hypeScore            Int                @default(0)
+  keysAvailable        Int                @default(0)
+  activeCardId         String?
+  walletBalance        Float              @default(0.0)
+  locksUntilMysteryCop Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  streaksAsFriend      FriendshipStreak[] @relation("FriendStreak")
+  streaksAsUser        FriendshipStreak[] @relation("UserStreak")
+  hostedOrders         Order[]            @relation("HostRelation")
+  participantOrders    ParticipantOrder[]
+  inventory            UserCard[]
+  hypeLogs             HypeLog[]
+}
+
+model HypeLog {
+  id        String   @id @default(uuid())
+  userId    String
+  points    Int
+  reason    String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Card {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String
+  perkCode    String     @unique
+  rarity      String
+  dropRate    Float      @default(0.1)
+  usage       String     @default("ONE_TIME")
+  users       UserCard[]
+}
+
+model UserCard {
+  id         String   @id @default(uuid())
+  userId     String
+  cardId     String
+  isUsed     Boolean  @default(false)
+  acquiredAt DateTime @default(now())
+  card       Card     @relation(fields: [cardId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model FriendshipStreak {
+  id        String   @id @default(uuid())
+  userId    String
+  friendId  String
+  streak    Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  friend    User     @relation("FriendStreak", fields: [friendId], references: [id])
+  user      User     @relation("UserStreak", fields: [userId], references: [id])
+
+  @@unique([userId, friendId])
+}
+
+model Vendor {
+  id                    String      @id @default(uuid())
+  username              String      @unique
+  passwordHash          String
+  name                  String
+  image                 String
+  bannerImage           String?
+  rating                Float       @default(0.0)
+  ratingCount           Int         @default(0)
+  status                String      @default("LIVE")
+  announcementBanner    String?
+  instapayAddress       String?
+  instapayName          String?
+  commissionOwedBalance Float       @default(0.0)
+  ledgerPinHash         String?
+  hypeMultiplier        Float       @default(1.0)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  flashDrops            FlashDrop[]
+  menuItems             MenuItem[]
+  orders                Order[]
+}
+
+model MenuItem {
+  id                String      @id @default(uuid())
+  vendorId          String
+  name              String
+  description       String
+  price             Float
+  image             String
+  inStock           Boolean     @default(true)
+  requiredHypeLevel Int         @default(0)
+  category          String
+  addOns            String      @default("[]")
+  vendor            Vendor      @relation(fields: [vendorId], references: [id])
+  orderItems        OrderItem[]
+}
+
+model FlashDrop {
+  id            String      @id @default(uuid())
+  vendorId      String
+  itemName      String
+  originalPrice Float
+  dropPrice     Float
+  totalQuantity Int
+  quantityLeft  Int
+  expiresAt     DateTime
+  isActive      Boolean     @default(true)
+  vendor        Vendor      @relation(fields: [vendorId], references: [id])
+  orderItems    OrderItem[]
+}
+
+model Order {
+  id              String             @id @default(uuid())
+  orderNumber     String
+  hostId          String
+  vendorId        String
+  totalAmount     Float
+  isCoveredByHost Boolean            @default(false)
+  status          String             @default("AWAITING_PAYMENT")
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  vendor          Vendor             @relation(fields: [vendorId], references: [id])
+  host            User               @relation("HostRelation", fields: [hostId], references: [id])
+  items           OrderItem[]
+  participants    ParticipantOrder[]
+}
+
+model ParticipantOrder {
+  id                   String  @id @default(uuid())
+  orderId              String
+  userId               String
+  shareAmount          Float
+  hasPaid              Boolean @default(false)
+  paymentScreenshotUrl String?
+  ocrVerificationLog   String?
+  user                 User    @relation(fields: [userId], references: [id])
+  order                Order   @relation(fields: [orderId], references: [id])
+}
+
+model OrderItem {
+  id          String     @id @default(uuid())
+  orderId     String
+  menuItemId  String?
+  flashDropId String?
+  name        String
+  price       Float
+  quantity    Int        @default(1)
+  modifiers   String
+  specialNotes String?
+  flashDrop   FlashDrop? @relation(fields: [flashDropId], references: [id])
+  menuItem    MenuItem?  @relation(fields: [menuItemId], references: [id])
+  order       Order      @relation(fields: [orderId], references: [id])
+}
+
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+

@@ -1,0 +1,244 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 16 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 72 100% 50%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 220 9% 46%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 72 100% 50%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 10%;
+    --input: 0 0% 90%;
+    --ring: 16 100% 50%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-sneaker-white text-deep-charcoal font-body antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-size: clamp(1rem, 1vw + 0.8rem, 1.125rem);
+    /* Fluid body text */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 5vw + 1rem, 4rem);
+    line-height: 1.1;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4vw + 1rem, 3rem);
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 3vw + 1rem, 2.25rem);
+    line-height: 1.3;
+  }
+}
+
+@layer components {
+
+  /* Neo-Brutalist Card */
+  .brutal-card {
+    @apply bg-white border-2 border-deep-charcoal rounded-sticker shadow-brutal;
+  }
+
+  .brutal-card-hover {
+    @apply transition-all duration-200;
+  }
+
+  .brutal-card-hover:hover {
+    @apply shadow-brutal-hover -translate-y-1;
+  }
+
+  .brutal-card-hover:active {
+    @apply shadow-brutal-active translate-x-1 translate-y-1;
+  }
+
+  /* Neo-Brutalist Button */
+  .brutal-btn {
+    @apply inline-flex items-center justify-center px-6 py-3 font-display font-bold uppercase tracking-wide text-sm border-2 border-deep-charcoal rounded-pill transition-all duration-150;
+  }
+
+  .brutal-btn-primary {
+    @apply brutal-btn bg-electric-red text-white shadow-brutal-sm;
+  }
+
+  .brutal-btn-primary:hover {
+    @apply shadow-brutal -translate-y-0.5;
+  }
+
+  .brutal-btn-primary:active {
+    @apply shadow-brutal-active translate-x-1 translate-y-1 scale-95;
+  }
+
+  .brutal-btn-secondary {
+    @apply brutal-btn bg-white text-deep-charcoal shadow-brutal-sm;
+  }
+
+  .brutal-btn-secondary:hover {
+    @apply shadow-brutal -translate-y-0.5;
+  }
+
+  .brutal-btn-secondary:active {
+    @apply shadow-brutal-active translate-x-1 translate-y-1 scale-95;
+  }
+
+  .brutal-btn-dark {
+    @apply brutal-btn bg-deep-charcoal text-white shadow-brutal-sm;
+  }
+
+  .brutal-btn-dark:hover {
+    @apply shadow-brutal -translate-y-0.5;
+  }
+
+  .brutal-btn-dark:active {
+    @apply shadow-brutal-active translate-x-1 translate-y-1 scale-95;
+  }
+
+  /* Volt Green Live Badge */
+  .live-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 bg-volt-green text-deep-charcoal font-display font-bold text-xs uppercase tracking-wider rounded-pill border-2 border-deep-charcoal;
+  }
+
+  .live-dot {
+    @apply w-2 h-2 bg-electric-red rounded-full animate-pulse-live;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-sneaker-white border-t-2 border-deep-charcoal z-50;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center justify-center gap-1 p-2 transition-colors duration-200;
+  }
+
+  .nav-item.active {
+    @apply text-electric-red;
+  }
+
+  .nav-item:not(.active) {
+    @apply text-deep-charcoal/60;
+  }
+
+  /* Center Action Button */
+  .center-action-btn {
+    @apply relative -mt-8 w-16 h-16 bg-electric-red rounded-full border-2 border-deep-charcoal shadow-brutal flex items-center justify-center transition-all duration-150;
+  }
+
+  .center-action-btn:hover {
+    @apply shadow-brutal-lg -translate-y-1;
+  }
+
+  .center-action-btn:active {
+    @apply shadow-brutal-active translate-x-1 translate-y-1 scale-95;
+  }
+
+  /* Progress Bar */
+  .progress-brutal {
+    @apply w-full h-4 bg-white border-2 border-deep-charcoal rounded-pill overflow-hidden;
+  }
+
+  .progress-brutal-fill {
+    @apply h-full bg-volt-green transition-all duration-500;
+  }
+
+  /* Avatar Stack */
+  .avatar-stack {
+    @apply flex -space-x-3;
+  }
+
+  .avatar-stack>* {
+    @apply w-10 h-10 rounded-full border-2 border-deep-charcoal bg-white;
+  }
+
+  /* Modal / Bottom Sheet */
+  .modal-overlay {
+    @apply fixed inset-0 bg-deep-charcoal/60 backdrop-blur-sm z-50;
+  }
+
+  .bottom-sheet {
+    @apply w-full mt-auto mb-0 bg-sneaker-white rounded-t-sticker border-t-2 border-x-2 border-deep-charcoal shadow-brutal-lg z-50;
+    @apply md:my-auto md:max-w-[480px] md:rounded-3xl md:border-2 md:shadow-brutal-lg;
+    max-height: 85vh;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-deep-charcoal/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-deep-charcoal/40;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
