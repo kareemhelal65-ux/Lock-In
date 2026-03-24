@@ -1,16 +1,12 @@
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
-import { Sparkles, Users, Zap, Lock, TrendingUp } from 'lucide-react';
+import { Sparkles, Zap, Lock, TrendingUp } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
-interface VaultInventoryProps {
-  onUseCard?: (cardType: 'mystery-cop' | 'squad-spinner') => void;
-}
 
-export default function VaultInventory({ onUseCard }: VaultInventoryProps) {
+export default function VaultInventory() {
   const { 
     currentUser,
-    keysAvailable,
     setInventory,
     inventory
   } = useApp();

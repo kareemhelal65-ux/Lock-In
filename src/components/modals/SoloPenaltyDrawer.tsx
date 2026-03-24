@@ -25,8 +25,8 @@ export default function SoloPenaltyDrawer({
   const { currentUser } = useApp();
   const isZeroFee = currentUser?.activeCard?.perkCode === 'THE01';
   const standardFee = 10;
-  const serviceFee = isZeroFee ? 0 : standardFee;
   const savings = data.total - data.discountedTotal;
+
   const [showCheckout, setShowCheckout] = useState(false);
   const [useActivePerk, setUseActivePerk] = useState(isZeroFee);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);

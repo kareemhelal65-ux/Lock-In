@@ -5,11 +5,9 @@ import {
   Zap,
   UserPlus,
   CheckCircle2,
-  ChevronRight,
   Flame,
   Loader2
 } from 'lucide-react';
-import { activeSafes } from '@/data/mockData';
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 import type { Notification } from '@/types';
@@ -31,15 +29,9 @@ function formatTimeAgo(date: Date | string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 export default function RadarTab({ onJoinSafe }: RadarTabProps) {
   const { currentUser, notifications, markNotificationRead } = useApp();
-  const [timers, setTimers] = useState<Record<string, number>>({});
   const [invites, setInvites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,27 +57,6 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
     return () => clearInterval(pollInterval);
   }, [fetchInvites]);
 
-  useEffect(() => {
-    const initialTimers: Record<string, number> = {};
-    activeSafes.forEach(safe => {
-      initialTimers[safe.id] = safe.timeRemaining;
-    });
-    setTimers(initialTimers);
-
-    const interval = setInterval(() => {
-      setTimers(prev => {
-        const updated = { ...prev };
-        Object.keys(updated).forEach(key => {
-          if (updated[key] > 0) {
-            updated[key] -= 1;
-          }
-        });
-        return updated;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const getIcon = (type: string) => {
     switch (type) {
