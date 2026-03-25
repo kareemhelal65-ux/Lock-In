@@ -7,7 +7,7 @@
     "dev": "vite",
     "server": "tsx watch server/index.ts",
     "dev:all": "start cmd /k npx tsx watch server/index.ts && vite",
-    "build": "tsc -b && vite build",
+    "build": "prisma generate && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
