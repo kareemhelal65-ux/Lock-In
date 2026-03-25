@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { updateHypeScore } from './consumer';
+import { updateHypeScore } from './consumer.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
