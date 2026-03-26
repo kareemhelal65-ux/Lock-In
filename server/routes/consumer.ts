@@ -122,17 +122,12 @@ if (!fs.existsSync(UPLOADS_DIR)) {
     fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Multer Setup for Avatars
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, UPLOADS_DIR);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'user-' + uniqueSuffix + path.extname(file.originalname));
-    }
+// Multer Setup (Memory Storage is better for Vercel/Serverless)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
-const upload = multer({ storage });
 
 // 1. Consumer Signup
 consumerRouter.post('/signup', async (req, res) => {
@@ -314,34 +309,38 @@ consumerRouter.post('/upload-receipt', upload.single('receipt'), async (req, res
 
         // Only attempt Supabase upload if configured (for production/Vercel)
         if (supabase) {
-            const fileBuffer = fs.readFileSync(req.file.path);
             const fileName = `receipts/${Date.now()}-${req.file.originalname}`;
 
             const { data, error } = await supabase.storage
                 .from('receipts')
-                .upload(fileName, fileBuffer, {
+                .upload(fileName, req.file.buffer, {
                     contentType: req.file.mimetype,
                     upsert: true
                 });
 
             if (error) {
                 console.error('Supabase Storage Error:', error);
-                // Fallback to local if Supabase fails
+                // Fallback to local if Supabase fails (handled below)
             } else {
-                // Get public URL
                 const { data: { publicUrl } } = supabase.storage
                     .from('receipts')
                     .getPublicUrl(fileName);
-                
-                // Cleanup local temp file
-                fs.unlinkSync(req.file.path);
-                
                 return res.json({ url: publicUrl });
             }
         }
 
         // Default / Fallback: Local Storage (Works for localhost/dev)
-        const url = `/uploads/${req.file.filename}`;
+        if (process.env.VERCEL) {
+             return res.status(400).json({ 
+                error: 'Supabase Storage keys missing on Vercel. Production uploads require cloud storage.' 
+             });
+        }
+
+        const fileName = `receipt-${Date.now()}${path.extname(req.file.originalname)}`;
+        const filePath = path.join(UPLOADS_DIR, fileName);
+        fs.writeFileSync(filePath, req.file.buffer);
+
+        const url = `/uploads/${fileName}`;
         res.json({ url });
     } catch (error) {
         console.error('Upload error:', error);
@@ -702,45 +701,24 @@ consumerRouter.post('/payment-verification', async (req, res) => {
 // 7. Generic OCR Mock Endpoint (Alternative approach for testing)
 consumerRouter.post('/ocr', upload.single('receipt'), async (req, res) => {
     try {
-        const { expectedAmount } = req.body;
-
-        // This endpoint just returns the mock OCR result without directly updating the DB
-        // The client would then use this result to call /payment-verification, or this endpoint could do both
-        // For testing purposes, we'll simulate reading the file's original name or using a test flag.
-
-        const isTestOverride = req.body.testOverride;
-        const testAmount = req.body.testAmount;
-
-        if (isTestOverride === 'valid') {
-            return res.json({
-                success: true,
-                extractedAmount: testAmount ? parseFloat(testAmount) : parseFloat(expectedAmount),
-                confidence: 0.98,
-                rawText: `InstaPay Transfer\nAmount: ${testAmount || expectedAmount} EGP\nStatus: Successful`
-            });
-        } else if (isTestOverride === 'invalid_amount') {
-            return res.json({
-                success: true,
-                extractedAmount: testAmount ? parseFloat(testAmount) : 10.00, // Very low amount
-                confidence: 0.95,
-                rawText: `InstaPay Transfer\nAmount: ${testAmount || 10.00} EGP\nStatus: Successful`
-            });
-        } else if (isTestOverride === 'not_receipt') {
-            return res.json({
-                success: false,
-                error: "Could not detect a valid receipt in the provided image.",
-                confidence: 0.12,
-            });
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
         }
-
-        // Default behavior (if no test override is provided)
-        res.json({ success: true, extractedAmount: expectedAmount });
-
+        
+        // This is a mock endpoint for testing. We just return a success message.
+        // Tesseract.js could be used here if real OCR was needed from the buffer.
+        
+        res.json({ 
+            status: 'ok', 
+            text: 'MOCK OCR RESULT: 150 EGP detected',
+            confidence: 0.95
+        });
     } catch (error) {
-        console.error('OCR mock error:', error);
+        console.error('OCR error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 
 // 8. Friends: Search users by username
