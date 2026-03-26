@@ -668,6 +668,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import LandingSwitcher from '@/components/LandingSwitcher';
 import VendorApp from './VendorApp';
 import DevDashboardApp from './DevDashboardApp';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function App() {
   return (
@@ -684,6 +685,7 @@ function App() {
         {/* Redirect any other route to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <SpeedInsights />
     </Router>
   );
 }
@@ -702,4 +704,3 @@ function HomeRoute() {
 }
 
 export default App;
-
