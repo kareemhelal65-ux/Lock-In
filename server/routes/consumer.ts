@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { supabase } from '../lib/supabase.js';
 
 const prisma = new PrismaClient();
 export const consumerRouter = Router();
@@ -304,12 +305,42 @@ consumerRouter.patch('/stats', async (req, res) => {
 });
 // Update Friendship Streaks logic has been moved to vendorData.ts (awarded on FIRE));
 
-// Upload Receipt (Real file upload)
+// Upload Receipt (Now with Supabase Storage Cloud fallback)
 consumerRouter.post('/upload-receipt', upload.single('receipt'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
+
+        // Only attempt Supabase upload if configured (for production/Vercel)
+        if (supabase) {
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const fileName = `receipts/${Date.now()}-${req.file.originalname}`;
+
+            const { data, error } = await supabase.storage
+                .from('receipts')
+                .upload(fileName, fileBuffer, {
+                    contentType: req.file.mimetype,
+                    upsert: true
+                });
+
+            if (error) {
+                console.error('Supabase Storage Error:', error);
+                // Fallback to local if Supabase fails
+            } else {
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('receipts')
+                    .getPublicUrl(fileName);
+                
+                // Cleanup local temp file
+                fs.unlinkSync(req.file.path);
+                
+                return res.json({ url: publicUrl });
+            }
+        }
+
+        // Default / Fallback: Local Storage (Works for localhost/dev)
         const url = `/uploads/${req.file.filename}`;
         res.json({ url });
     } catch (error) {
