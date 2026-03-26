@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Sparkles, Zap, Lock, TrendingUp } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
@@ -7,9 +7,42 @@ import { useApp } from '@/context/AppContext';
 export default function VaultInventory() {
   const { 
     currentUser,
+    setCurrentUser,
     setInventory,
     inventory
   } = useApp();
+
+  const [isEquipping, setIsEquipping] = React.useState<string | null>(null);
+
+  const handleEquipCard = async (userCardId: string) => {
+    if (!currentUser?.id || isEquipping) return;
+    
+    setIsEquipping(userCardId);
+    try {
+      const isCurrentlyActive = currentUser?.activeCard?.id === userCardId;
+      const res = await fetch('/api/consumer/user/activate-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: currentUser.id, 
+          userCardId: isCurrentlyActive ? null : userCardId 
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Update currentUser context with the new activeCard
+        setCurrentUser({
+          ...currentUser,
+          activeCard: isCurrentlyActive ? null : data.activeCard
+        });
+      }
+    } catch (err) {
+      console.error('Failed to equip card', err);
+    } finally {
+      setIsEquipping(null);
+    }
+  };
 
   useEffect(() => {
     console.log('VaultInventory: useEffect triggered', { userId: currentUser?.id });
@@ -82,6 +115,18 @@ export default function VaultInventory() {
                          SLOT: {uc.card.perkCode}
                        </span>
                     </div>
+
+                    <button
+                      onClick={() => handleEquipCard(uc.id)}
+                      disabled={isEquipping !== null}
+                      className={`mt-4 w-full py-2 rounded-pill font-display font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
+                        currentUser?.activeCard?.id === uc.id
+                          ? 'bg-volt-green text-black border-black'
+                          : 'bg-white text-black border-black/20 hover:border-black'
+                      } ${isEquipping === uc.id ? 'opacity-50' : ''}`}
+                    >
+                      {isEquipping === uc.id ? 'Activating...' : currentUser?.activeCard?.id === uc.id ? '✓ Equipped' : 'Equip Perk'}
+                    </button>
                   </div>
                 </div>
               </motion.div>

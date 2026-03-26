@@ -17,16 +17,30 @@ app.use(express.json());
 // Serve static images from /uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
+// Health check that also tests DB
+app.get('/api/health', async (req, res) => {
+    try {
+        const userCount = await prisma.user.count();
+        res.json({ 
+            status: 'ok', 
+            message: 'LOCK IN API is running', 
+            database: 'CONNECTED',
+            users: userCount 
+        });
+    } catch (err: any) {
+        res.status(500).json({ 
+            status: 'error', 
+            message: 'API is up but Database is DISCONNECTED',
+            error: err.message 
+        });
+    }
+});
+
 // Routes
 app.use('/api/vendor', vendorRouter);
 app.use('/api/vendorData', vendorDataRouter);
 app.use('/api/consumer', consumerRouter);
 app.use('/api/admin', adminRouter);
-
-// Base route for health check
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'LOCK IN API is running' });
-});
 
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
