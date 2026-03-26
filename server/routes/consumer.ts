@@ -936,6 +936,17 @@ consumerRouter.post('/safes/create', async (req, res) => {
             }
         }
 
+        // Check if the host has LURKER active (cache it to avoid N+1 on every poll)
+        let hostIsLurker = false;
+        if (hostUser?.activeCardId) {
+            const activeUserCard = await prisma.userCard.findUnique({
+                where: { id: hostUser.activeCardId },
+                include: { card: true }
+            });
+            if (activeUserCard?.card.perkCode === 'LURKER') hostIsLurker = true;
+        }
+
+        const safeStartTime = timeRemaining || 900;
         activeSafeSessions[id] = {
             id,
             hostId,
@@ -945,14 +956,30 @@ consumerRouter.post('/safes/create', async (req, res) => {
             targetAmount,
             currentAmount: 0,
             expiresAt,
-            timeRemaining: timeRemaining || 900,
-            maxTime: timeRemaining || 900,
+            timeRemaining: safeStartTime,
+            maxTime: safeStartTime,
             isGlobal,
             status: 'ACTIVE',
-            participants: [{ userId: hostId, name: hostName, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${hostName}`, hasLockedIn: false }],
+            participants: [{ userId: hostId, name: hostName, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${hostName}`, hasLockedIn: false, isLurker: hostIsLurker }],
             orders: [], // Holds completed partial orders inside the safe
             deployedCards: []
         };
+
+        // Server-side timer: decrement every second to keep all clients in sync
+        const timerInterval = setInterval(() => {
+            const s = activeSafeSessions[id];
+            if (!s || s.status !== 'ACTIVE') {
+                clearInterval(timerInterval);
+                return;
+            }
+            if (s.timeRemaining > 0) {
+                s.timeRemaining -= 1;
+            } else {
+                s.status = 'EXPIRED';
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+
         res.status(201).json(activeSafeSessions[id]);
     } catch (e) {
         res.status(500).json({ error: 'Internal server error' });
@@ -972,29 +999,19 @@ consumerRouter.get('/safes/user/:userId', async (req, res) => {
     }
 });
 
-consumerRouter.get('/safes/:safeId', async (req, res) => {
+consumerRouter.get('/safes/:safeId', (req, res) => {
     const safe = activeSafeSessions[req.params.safeId];
     if (!safe) return res.status(404).json({ error: 'No Active Safe Found' });
     const userId = req.query.userId as string | undefined;
     const userRole = userId && safe.hostId === userId ? 'host' : 'guest';
     
-    // Apply Lurker Logic: Hide names of participants with LURKER active
-    const obfuscatedParticipants = await Promise.all(safe.participants.map(async (p: any) => {
-        const user = await prisma.user.findUnique({
-            where: { id: p.userId }
-        });
-        
-        if (user?.activeCardId) {
-            const activeUserCard = await prisma.userCard.findUnique({
-                where: { id: user.activeCardId },
-                include: { card: true }
-            });
-            if (activeUserCard?.card.perkCode === 'LURKER') {
-                return { ...p, name: 'Anonymous Lurker', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=lurker' };
-            }
+    // Apply Lurker Logic using the CACHED isLurker flag on each participant — zero extra DB queries
+    const obfuscatedParticipants = safe.participants.map((p: any) => {
+        if (p.isLurker) {
+            return { ...p, name: 'Anonymous Lurker', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=lurker' };
         }
         return p;
-    }));
+    });
 
     res.json({ ...safe, participants: obfuscatedParticipants, userRole });
 });
@@ -1007,12 +1024,26 @@ consumerRouter.post('/safes/:safeId/join', async (req, res) => {
 
         const exists = safe.participants.find((p: any) => p.userId === userId);
         if (!exists) {
+            // Cache lurker status on the participant object to avoid N+1 on every poll
+            let isLurker = false;
+            try {
+                const joiningUser = await prisma.user.findUnique({ where: { id: userId } });
+                if (joiningUser?.activeCardId) {
+                    const activeCard = await prisma.userCard.findUnique({
+                        where: { id: joiningUser.activeCardId },
+                        include: { card: true }
+                    });
+                    if (activeCard?.card.perkCode === 'LURKER') isLurker = true;
+                }
+            } catch (_) { /* non-critical */ }
+
             safe.participants.push({
                 userId,
                 name: userName,
                 avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`,
                 hasLockedIn: false,
-                sharedTotal: 0
+                sharedTotal: 0,
+                isLurker
             });
         }
         const userRole = safe.hostId === userId ? 'host' : 'guest';

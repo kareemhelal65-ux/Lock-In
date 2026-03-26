@@ -106,7 +106,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const [isHostCoverMode, setIsHostCoverMode] = useState(false);
   const [showHostSuccess, setShowHostSuccess] = useState(false);
 
-  // Countdown timer
+  // Local countdown as a smooth fallback (server is authoritative via polling)
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeRemaining(prev => (prev > 0 ? prev - 1 : 0));
@@ -134,6 +134,10 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             isCoveredByHost: latestSafeData.isCoveredByHost,
             orderId: latestSafeData.orderId
           });
+          // Sync timer from server (authoritative source to prevent drift)
+          if (typeof latestSafeData.timeRemaining === 'number') {
+            setTimeRemaining(latestSafeData.timeRemaining);
+          }
         }
       } catch (e) {
         console.error("Polling safe failed", e);
@@ -141,7 +145,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     };
 
     pollSafe(); // Fire immediately
-    const interval = setInterval(pollSafe, 3000);
+    const interval = setInterval(pollSafe, 800);
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -254,17 +258,6 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   // Proceed to checkout automatically if the host and all connected users (even if just 1 extra) have locked in.
   const allCurrentParticipantsLockedIn = safe.participants.every(p => p.hasLockedIn) && hasLockedIn;
   const hasAtLeastOneExtraUser = safe.participants.length > 0;
-
-  // Watch for server checkout trigger for guests
-  useEffect(() => {
-    if (safe.status === 'CHECKOUT_READY' && !showCheckout && !isHost && !showOwedScreen) {
-      if (safe.isCoveredByHost) {
-        setShowOwedScreen(true);
-      } else {
-        setShowCheckout(true);
-      }
-    }
-  }, [safe.status, safe.isCoveredByHost, showCheckout, isHost, showOwedScreen]);
 
   // Watch for server checkout trigger for guests
   useEffect(() => {
