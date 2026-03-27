@@ -674,13 +674,11 @@ consumerRouter.post('/payment-verification', async (req, res) => {
                 data: { status: 'AWAITING_VERIFICATION' }
             });
             
-            // Auto-remove safe: find the in-memory safe linked to this order and mark COMPLETED
-            for (const [safeId, safe] of Object.entries(activeSafeSessions)) {
-                if ((safe as any).orderId === orderId) {
-                    (safe as any).status = 'COMPLETED';
-                    break;
-                }
-            }
+            // Auto-mark safe as COMPLETED in DB when all participants have paid
+            await (prisma as any).safeSession.updateMany({
+                where: { orderId },
+                data: { status: 'COMPLETED' }
+            }).catch(() => {}); // non-critical
         }
 
         // 4. Hype Score awarding is now deferred until the vendor approves & fires the order.
@@ -912,76 +910,87 @@ consumerRouter.get('/:userId/invites', async (req, res) => {
     }
 });
 
+
 // ==========================================
-// 10. Multiplayer Safe logic (in-memory)
+// 10. Multiplayer Safe logic (DB-backed for Vercel serverless)
 // ==========================================
-const activeSafeSessions: Record<string, any> = {};
+
+// Helper: compute current timeRemaining from when safe was created
+const computeTimeRemaining = (safe: any): number => {
+    const elapsed = Math.floor((Date.now() - new Date(safe.createdAt).getTime()) / 1000);
+    return Math.max(0, safe.maxTime - elapsed);
+};
+
+// Helper to recalculate sharedTotals across participants (operates on JSON arrays)
+const recalculateSharedTotals = (participants: any[], orders: any[]): any[] => {
+    const updated = participants.map((p: any) => ({ ...p, sharedTotal: 0 }));
+    orders.filter((o: any) => o.type === 'SHARED').forEach((orderSet: any) => {
+        if (!orderSet.rawSharedItems) return;
+        orderSet.rawSharedItems.forEach((sharedItem: any) => {
+            const includedUsers = sharedItem.includedUserIds;
+            if (!includedUsers || includedUsers.length === 0) return;
+            const splitCost = sharedItem.price / (includedUsers.includes('all') ? updated.length : includedUsers.length);
+            updated.forEach((p: any) => {
+                if (includedUsers.includes('all') || includedUsers.includes(p.userId)) {
+                    p.sharedTotal = (p.sharedTotal || 0) + splitCost;
+                }
+            });
+        });
+    });
+    return updated;
+};
+
+// Helper to serialize safe for client (adds computed timeRemaining)
+const serializeSafe = (safe: any) => ({
+    ...safe,
+    participants: safe.participants,
+    orders: safe.orders,
+    deployedCards: safe.deployedCards,
+    timeRemaining: computeTimeRemaining(safe),
+});
 
 consumerRouter.post('/safes/create', async (req, res) => {
     try {
         const { id, hostId, hostName, restaurantId, restaurantName, targetAmount, expiresAt, timeRemaining } = req.body;
-        
+
         // Apply MAGNET Logic for Global Broadcast
         let isGlobal = false;
+        let hostIsLurker = false;
         const hostUser = await prisma.user.findUnique({ where: { id: hostId } });
         if (hostUser?.activeCardId) {
             const activeUserCard = await prisma.userCard.findUnique({
                 where: { id: hostUser.activeCardId },
                 include: { card: true }
             });
-            if (activeUserCard?.card.perkCode === 'MAGNET') {
-                isGlobal = true;
-                // Note: Card usage is usually handled during trigger-checkout or payment, 
-                // but for Global Broadcast, it starts at creation.
-            }
-        }
-
-        // Check if the host has LURKER active (cache it to avoid N+1 on every poll)
-        let hostIsLurker = false;
-        if (hostUser?.activeCardId) {
-            const activeUserCard = await prisma.userCard.findUnique({
-                where: { id: hostUser.activeCardId },
-                include: { card: true }
-            });
+            if (activeUserCard?.card.perkCode === 'MAGNET') isGlobal = true;
             if (activeUserCard?.card.perkCode === 'LURKER') hostIsLurker = true;
         }
 
-        const safeStartTime = timeRemaining || 900;
-        activeSafeSessions[id] = {
-            id,
-            hostId,
-            hostName,
-            restaurantId,
-            restaurantName,
-            targetAmount,
-            currentAmount: 0,
-            expiresAt,
-            timeRemaining: safeStartTime,
-            maxTime: safeStartTime,
-            isGlobal,
-            status: 'ACTIVE',
-            participants: [{ userId: hostId, name: hostName, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${hostName}`, hasLockedIn: false, isLurker: hostIsLurker }],
-            orders: [], // Holds completed partial orders inside the safe
-            deployedCards: []
-        };
+        const safeStartTime = timeRemaining || 300;
+        const participants = [{ userId: hostId, name: hostName, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${hostName}`, hasLockedIn: false, isLurker: hostIsLurker, sharedTotal: 0 }];
 
-        // Server-side timer: decrement every second to keep all clients in sync
-        const timerInterval = setInterval(() => {
-            const s = activeSafeSessions[id];
-            if (!s || s.status !== 'ACTIVE') {
-                clearInterval(timerInterval);
-                return;
+        const safe = await (prisma as any).safeSession.create({
+            data: {
+                id,
+                hostId,
+                hostName,
+                restaurantId,
+                restaurantName,
+                targetAmount: targetAmount || 2,
+                maxTime: safeStartTime,
+                timeRemaining: safeStartTime,
+                isGlobal,
+                status: 'ACTIVE',
+                participants: participants as any,
+                orders: [] as any,
+                deployedCards: [] as any,
+                expiresAt: expiresAt ? new Date(expiresAt) : new Date(Date.now() + safeStartTime * 1000)
             }
-            if (s.timeRemaining > 0) {
-                s.timeRemaining -= 1;
-            } else {
-                s.status = 'EXPIRED';
-                clearInterval(timerInterval);
-            }
-        }, 1000);
+        });
 
-        res.status(201).json(activeSafeSessions[id]);
-    } catch (e) {
+        res.status(201).json(serializeSafe(safe));
+    } catch (e: any) {
+        console.error('Safe create error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -990,39 +999,59 @@ consumerRouter.post('/safes/create', async (req, res) => {
 consumerRouter.get('/safes/user/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
-        const userSafes = Object.values(activeSafeSessions).filter((safe: any) =>
-            safe.participants.some((p: any) => p.userId === userId) || safe.hostId === userId
-        );
-        res.json({ safes: userSafes });
+        const safes = await (prisma as any).safeSession.findMany({
+            where: {
+                status: { in: ['ACTIVE', 'CHECKOUT_READY'] },
+                OR: [
+                    { hostId: userId },
+                    { participants: { path: '$[*].userId', array_contains: userId } }
+                ]
+            }
+        }).catch(async () => {
+            // Fallback: fetch all active and filter in JS (if JSON path query not supported)
+            const all = await (prisma as any).safeSession.findMany({
+                where: { status: { in: ['ACTIVE', 'CHECKOUT_READY'] } }
+            });
+            return all.filter((s: any) =>
+                s.hostId === userId || (Array.isArray(s.participants) && s.participants.some((p: any) => p.userId === userId))
+            );
+        });
+        res.json({ safes: safes.map(serializeSafe) });
     } catch (e) {
+        console.error('Safe list error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-consumerRouter.get('/safes/:safeId', (req, res) => {
-    const safe = activeSafeSessions[req.params.safeId];
-    if (!safe) return res.status(404).json({ error: 'No Active Safe Found' });
-    const userId = req.query.userId as string | undefined;
-    const userRole = userId && safe.hostId === userId ? 'host' : 'guest';
-    
-    // Apply Lurker Logic using the CACHED isLurker flag on each participant — zero extra DB queries
-    const obfuscatedParticipants = safe.participants.map((p: any) => {
-        if (p.isLurker) {
-            return { ...p, name: 'Anonymous Lurker', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=lurker' };
-        }
-        return p;
-    });
+consumerRouter.get('/safes/:safeId', async (req, res) => {
+    try {
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+        if (!safe) return res.status(404).json({ error: 'No Active Safe Found' });
 
-    res.json({ ...safe, participants: obfuscatedParticipants, userRole });
+        const userId = req.query.userId as string | undefined;
+        const userRole = userId && safe.hostId === userId ? 'host' : 'guest';
+
+        // Apply Lurker logic using cached isLurker flag on participant (zero extra DB queries)
+        const obfuscatedParticipants = (safe.participants as any[]).map((p: any) => {
+            if (p.isLurker) return { ...p, name: 'Anonymous Lurker', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=lurker' };
+            return p;
+        });
+
+        res.json({ ...serializeSafe(safe), participants: obfuscatedParticipants, userRole });
+    } catch (e) {
+        console.error('Safe get error:', e);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 consumerRouter.post('/safes/:safeId/join', async (req, res) => {
     try {
         const { userId, userName } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'No Active Safe Found' });
 
-        const exists = safe.participants.find((p: any) => p.userId === userId);
+        const participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        const exists = participants.find((p: any) => p.userId === userId);
         if (!exists) {
             // Cache lurker status on the participant object to avoid N+1 on every poll
             let isLurker = false;
@@ -1037,65 +1066,45 @@ consumerRouter.post('/safes/:safeId/join', async (req, res) => {
                 }
             } catch (_) { /* non-critical */ }
 
-            safe.participants.push({
-                userId,
-                name: userName,
-                avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`,
-                hasLockedIn: false,
-                sharedTotal: 0,
-                isLurker
-            });
+            participants.push({ userId, name: userName, avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`, hasLockedIn: false, sharedTotal: 0, isLurker });
+            await (prisma as any).safeSession.update({ where: { id: req.params.safeId }, data: { participants: participants as any } });
         }
-        const userRole = safe.hostId === userId ? 'host' : 'guest';
-        res.json({ ...safe, userRole });
+
+        const updatedSafe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+        const userRole = updatedSafe.hostId === userId ? 'host' : 'guest';
+        res.json({ ...serializeSafe(updatedSafe), userRole });
     } catch (e) {
+        console.error('Safe join error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-const recalculateSharedTotals = (safe: any) => {
-    safe.participants.forEach((p: any) => {
-        p.sharedTotal = 0;
-    });
-
-    safe.orders.filter((o: any) => o.type === 'SHARED').forEach((orderSet: any) => {
-        if (!orderSet.rawSharedItems) return;
-        orderSet.rawSharedItems.forEach((sharedItem: any) => {
-            const includedUsers = sharedItem.includedUserIds;
-            if (!includedUsers || includedUsers.length === 0) return;
-
-            const splitCost = sharedItem.price / (includedUsers.includes('all') ? safe.participants.length : includedUsers.length);
-            safe.participants.forEach((p: any) => {
-                if (includedUsers.includes('all') || includedUsers.includes(p.userId)) {
-                    p.sharedTotal += splitCost;
-                }
-            });
-        });
-    });
-};
-
 consumerRouter.post('/safes/:safeId/lockin', async (req, res) => {
     try {
         const { userId, orderItems, sharedItems, isHostCoverMode } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'Safe not found' });
 
-        // Handle Host checkout bypassing locks
+        let participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        let orders: any[] = Array.isArray(safe.orders) ? safe.orders : [];
+
         if (isHostCoverMode) {
-            safe.participants = safe.participants.map((p: any) => ({ ...p, hasLockedIn: true }));
-            safe.orders.push(orderItems);
-            return res.json(safe);
+            participants = participants.map((p: any) => ({ ...p, hasLockedIn: true }));
+            if (orderItems) orders.push(orderItems);
+            await (prisma as any).safeSession.update({ where: { id: req.params.safeId }, data: { participants: participants as any, orders: orders as any } });
+            const updated = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+            return res.json(serializeSafe(updated));
         }
 
-        safe.participants = safe.participants.map((p: any) =>
+        participants = participants.map((p: any) =>
             p.userId === userId ? { ...p, hasLockedIn: true } : p
         );
 
         // Remove any previous orders from this user to prevent compounding on re-lock
-        safe.orders = safe.orders.filter((o: any) => o.userId !== userId && o.sourceUserId !== userId);
+        orders = orders.filter((o: any) => o.userId !== userId && o.sourceUserId !== userId);
 
         if (sharedItems && sharedItems.length > 0) {
-            safe.orders.push({
+            orders.push({
                 type: 'SHARED',
                 sourceUserId: userId,
                 items: sharedItems.map((i: any) => `${i.name} (Shared)`),
@@ -1104,14 +1113,19 @@ consumerRouter.post('/safes/:safeId/lockin', async (req, res) => {
             });
         }
 
-        if (orderItems) {
-            safe.orders.push(orderItems);
-        }
+        if (orderItems) orders.push(orderItems);
 
-        recalculateSharedTotals(safe);
+        participants = recalculateSharedTotals(participants, orders);
 
-        res.json(safe);
+        await (prisma as any).safeSession.update({
+            where: { id: req.params.safeId },
+            data: { participants: participants as any, orders: orders as any }
+        });
+
+        const updated = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+        res.json(serializeSafe(updated));
     } catch (e) {
+        console.error('Safe lockin error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -1119,19 +1133,27 @@ consumerRouter.post('/safes/:safeId/lockin', async (req, res) => {
 consumerRouter.post('/safes/:safeId/unlock', async (req, res) => {
     try {
         const { userId } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'Safe not found' });
 
-        safe.participants = safe.participants.map((p: any) =>
+        let participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        let orders: any[] = Array.isArray(safe.orders) ? safe.orders : [];
+
+        participants = participants.map((p: any) =>
             p.userId === userId ? { ...p, hasLockedIn: false } : p
         );
+        orders = orders.filter((o: any) => o.userId !== userId && o.sourceUserId !== userId);
+        participants = recalculateSharedTotals(participants, orders);
 
-        safe.orders = safe.orders.filter((o: any) => o.userId !== userId && o.sourceUserId !== userId);
+        await (prisma as any).safeSession.update({
+            where: { id: req.params.safeId },
+            data: { participants: participants as any, orders: orders as any }
+        });
 
-        recalculateSharedTotals(safe);
-
-        res.json(safe);
+        const updated = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+        res.json(serializeSafe(updated));
     } catch (e) {
+        console.error('Safe unlock error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -1140,21 +1162,19 @@ consumerRouter.post('/safes/:safeId/unlock', async (req, res) => {
 consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
     try {
         const { isCoveredByHost } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'Safe not found' });
+
+        const participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        const orders: any[] = Array.isArray(safe.orders) ? safe.orders : [];
 
         // Only create the order once if not already created
         if (!safe.orderId) {
-            // Calculate totals
             const allItems: any[] = [];
             const participantShares: Record<string, number> = {};
 
-            safe.orders.forEach((orderSet: any) => {
-                if (Array.isArray(orderSet)) {
-                    orderSet.forEach((item: any) => {
-                        allItems.push(item);
-                    });
-                } else if (orderSet.type === 'SHARED') {
+            orders.forEach((orderSet: any) => {
+                if (orderSet.type === 'SHARED') {
                     if (orderSet.items) {
                         orderSet.items.forEach((itemName: any) => {
                             allItems.push({ name: typeof itemName === 'string' ? itemName : itemName.name, price: 0, quantity: 1 });
@@ -1164,47 +1184,34 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     participantShares[orderSet.userId] = orderSet.total || 0;
                     if (orderSet.items) {
                         (Array.isArray(orderSet.items) ? orderSet.items : []).forEach((item: any) => {
-                            // item can be a string (old format) or object (new format)
                             if (typeof item === 'string') {
                                 allItems.push({ name: item, price: 0, quantity: 1, modifiers: '[]' });
                             } else {
-                                allItems.push({ 
-                                    name: item.name, 
-                                    price: item.price, 
-                                    quantity: item.quantity, 
-                                    modifiers: item.modifiers || '[]',
-                                    specialNotes: item.specialNotes,
-                                    menuItemId: item.menuItemId 
-                                });
+                                allItems.push({ name: item.name, price: item.price, quantity: item.quantity, modifiers: item.modifiers || '[]', specialNotes: item.specialNotes, menuItemId: item.menuItemId });
                             }
                         });
                     }
                 }
             });
 
-            safe.participants.forEach((p: any) => {
+            participants.forEach((p: any) => {
                 if (p.sharedTotal) {
                     participantShares[p.userId] = (participantShares[p.userId] || 0) + p.sharedTotal;
                 }
             });
 
-            let totalAmount = Object.values(participantShares).reduce((a, b) => (a as number) + (b as number), 0) || allItems.reduce((s, i) => s + (i.price || 0) * (i.quantity || 1), 0);
-            
-            // Add Service Fee (5 EGP per person)
-            // 0.1% Perk: If host has THE01, entire safe fee is waived.
+            let totalAmount = Object.values(participantShares).reduce((a, b) => (a as number) + (b as number), 0) as number
+                || allItems.reduce((s, i) => s + (i.price || 0) * (i.quantity || 1), 0);
+
+            // Add service fee
             const hostUserForFee = await prisma.user.findUnique({ where: { id: safe.hostId } });
             let isZeroFeeSafe = false;
             if (hostUserForFee?.activeCardId) {
-                const activeUserCard = await prisma.userCard.findUnique({
-                    where: { id: hostUserForFee.activeCardId },
-                    include: { card: true }
-                });
-                if (activeUserCard?.card.perkCode === 'THE01') {
-                    isZeroFeeSafe = true;
-                }
+                const activeUserCard = await prisma.userCard.findUnique({ where: { id: hostUserForFee.activeCardId }, include: { card: true } });
+                if (activeUserCard?.card.perkCode === 'THE01') isZeroFeeSafe = true;
             }
 
-            const totalFee = isZeroFeeSafe ? 0 : (safe.participants.length * 5);
+            const totalFee = isZeroFeeSafe ? 0 : (participants.length * 5);
             totalAmount += totalFee;
             const newOrderNumber = await getNextOrderNumber();
 
@@ -1242,34 +1249,23 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     });
                 }
 
-                for (const participant of safe.participants) {
-                    const baseShare = participantShares[participant.userId] || (totalAmount / safe.participants.length);
-                    const shareWithFee = baseShare + 5; // adding the 5 EGP fee per person
+                for (const participant of participants) {
+                    const baseShare = participantShares[participant.userId] || (totalAmount / participants.length);
+                    const shareWithFee = isZeroFeeSafe ? baseShare : baseShare + 5;
                     await tx.participantOrder.create({
-                        data: {
-                            orderId: orderDoc.id,
-                            userId: participant.userId,
-                            shareAmount: shareWithFee,
-                            hasPaid: isCoveredByHost
-                        }
+                        data: { orderId: orderDoc.id, userId: participant.userId, shareAmount: shareWithFee, hasPaid: isCoveredByHost }
                     });
                 }
 
-                // Award points immediately ONLY if covered by host (pre-paid)
-                // Otherwise points are awarded in /payment-verification upon receipt upload
                 if (isCoveredByHost) {
                     await updateHypeScore(safe.hostId, 75, tx);
-                    for (let i = 0; i < safe.participants.length; i++) {
-                        const participant = safe.participants[i];
+                    for (let i = 0; i < participants.length; i++) {
+                        const participant = participants[i];
                         if (participant.userId !== safe.hostId) {
                             const pUser = await tx.user.findUnique({ where: { id: participant.userId } });
                             let points = 25;
-                            // First joiner is at index 1 (index 0 is host)
                             if (i === 1 && pUser?.activeCardId) {
-                                const activeUserCard = await tx.userCard.findUnique({
-                                    where: { id: pUser.activeCardId },
-                                    include: { card: true }
-                                });
+                                const activeUserCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
                                 if (activeUserCard?.card.perkCode === 'EARLYBIRD') {
                                     points *= 2;
                                     await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
@@ -1281,61 +1277,37 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     }
                 }
 
-                // Magnet Logic remains here as it affects Safe state immediately
-
-                // Apply Magnet Logic for Host
+                // Magnet & Market Maker logic
                 const hostUser = await tx.user.findUnique({ where: { id: safe.hostId } });
                 if (hostUser?.activeCardId) {
-                    const activeUserCard = await tx.userCard.findUnique({
-                        where: { id: hostUser.activeCardId },
-                        include: { card: true }
-                    });
+                    const activeUserCard = await tx.userCard.findUnique({ where: { id: hostUser.activeCardId }, include: { card: true } });
                     if (activeUserCard?.card.perkCode === 'MAGNET') {
-                        // Global Broadcast + Priority Expiry + 60s and Pin Host
-                        safe.priorityExpiry = Date.now() + 60000;
-                        safe.isPinned = true;
-                        safe.isGlobal = true; // New Perk: MAGNET broadcast to everyone
-                        // Mark card as used
                         await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
                         await tx.user.update({ where: { id: safe.hostId }, data: { activeCardId: null } });
                     }
                 }
 
-                // Market Maker Logic
-                const hasMarketMaker = await Promise.all(safe.participants.map(async (p: any) => {
-                    const u = await tx.user.findUnique({ where: { id: p.userId } });
-                    if (u?.activeCardId) {
-                        const activeUserCard = await tx.userCard.findUnique({
-                            where: { id: u.activeCardId },
-                            include: { card: true }
-                        });
-                        return activeUserCard?.card.perkCode === 'MARKET_DATA' ? false : activeUserCard?.card.perkCode === 'MARKET_MAKER';
-                    }
-                    return false;
-                }));
-
-                if (hasMarketMaker.some(Boolean)) {
-                    safe.isMarketMakerActive = true;
-                }
-
-                let hostReward = null;
-                let participantResults: any[] = [];
-                return { ...orderDoc, hostReward, participantResults };
+                return orderDoc;
             });
 
-            safe.orderId = order.id;
-            safe.orderNumber = newOrderNumber;
-            safe.isCoveredByHost = isCoveredByHost; // Flag for frontend
-            safe.rewards = {
-                host: order.hostReward,
-                participants: order.participantResults
-            };
+            await (prisma as any).safeSession.update({
+                where: { id: req.params.safeId },
+                data: {
+                    orderId: order.id,
+                    orderNumber: newOrderNumber,
+                    status: 'CHECKOUT_READY',
+                    isCoveredByHost,
+                }
+            });
+        } else {
+            await (prisma as any).safeSession.update({
+                where: { id: req.params.safeId },
+                data: { status: 'CHECKOUT_READY', isCoveredByHost }
+            });
         }
 
-        safe.status = 'CHECKOUT_READY'; // Always go through CHECKOUT_READY for frontend UI flow
-        safe.isCoveredByHost = isCoveredByHost;
-
-        res.json({ message: 'Checkout triggered', safe });
+        const updatedSafe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
+        res.json({ message: 'Checkout triggered', safe: serializeSafe(updatedSafe) });
     } catch (e) {
         console.error('Safe trigger checkout error:', e);
         res.status(500).json({ error: 'Internal server error' });
@@ -1346,45 +1318,63 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
 consumerRouter.post('/safes/:safeId/leave', async (req, res) => {
     try {
         const { userId } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'Safe not found' });
 
+        let participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        let orders: any[] = Array.isArray(safe.orders) ? safe.orders : [];
 
+        participants = participants.filter((p: any) => p.userId !== userId);
+        orders = orders.filter((o: any) => !o.userId || o.userId !== userId);
+        participants = recalculateSharedTotals(participants, orders);
 
-        safe.participants = safe.participants.filter((p: any) => p.userId !== userId);
-        safe.orders = safe.orders.filter((o: any) => !o.userId || o.userId !== userId);
-
-        recalculateSharedTotals(safe);
+        await (prisma as any).safeSession.update({
+            where: { id: req.params.safeId },
+            data: { participants: participants as any, orders: orders as any }
+        });
 
         res.json({ message: 'Left safe successfully' });
     } catch (e) {
+        console.error('Safe leave error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// Abandon safe (completly remove it)
+// Abandon safe (completely remove it)
 consumerRouter.post('/safes/:safeId/abandon', async (req, res) => {
     try {
         const { userId } = req.body;
-        const safe = activeSafeSessions[req.params.safeId];
+        const safe = await (prisma as any).safeSession.findUnique({ where: { id: req.params.safeId } });
         if (!safe) return res.status(404).json({ error: 'Safe not found' });
 
-        // If host abandons, remove the whole session
+        // If host abandons, delete the whole session
         if (safe.hostId === userId) {
-            delete activeSafeSessions[req.params.safeId];
+            await (prisma as any).safeSession.delete({ where: { id: req.params.safeId } });
             return res.json({ message: 'Safe abandoned and removed' });
         }
 
         // If guest abandons, same as leaving
-        safe.participants = safe.participants.filter((p: any) => p.userId !== userId);
-        safe.orders = safe.orders.filter((o: any) => !o.userId || o.userId !== userId);
-        recalculateSharedTotals(safe);
+        let participants: any[] = Array.isArray(safe.participants) ? safe.participants : [];
+        let orders: any[] = Array.isArray(safe.orders) ? safe.orders : [];
+
+        participants = participants.filter((p: any) => p.userId !== userId);
+        orders = orders.filter((o: any) => !o.userId || o.userId !== userId);
+        participants = recalculateSharedTotals(participants, orders);
+
+        await (prisma as any).safeSession.update({
+            where: { id: req.params.safeId },
+            data: { participants: participants as any, orders: orders as any }
+        });
 
         res.json({ message: 'Left safe successfully' });
     } catch (e) {
+        console.error('Safe abandon error:', e);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
+
 
 consumerRouter.get('/:userId/friends', async (req, res) => {
     try {
@@ -1436,7 +1426,9 @@ consumerRouter.get('/feed/:userId', async (req, res) => {
             orderBy: { updatedAt: 'desc' }, take: 10
         });
 
-        const globalSafes = Object.values(activeSafeSessions).filter((s: any) => s.isGlobal && !s.isPaid);
+        const globalSafes = await (prisma as any).safeSession.findMany({
+            where: { isGlobal: true, status: { in: ['ACTIVE', 'CHECKOUT_READY'] } }
+        }).catch(() => []);
 
         res.json({ friendOrders, flashDrops, announcements, globalSafes });
     } catch (error) {

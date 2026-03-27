@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -175,3 +176,25 @@ model SystemConfig {
   updatedAt DateTime @updatedAt
 }
 
+// Safe Session — DB-backed to survive Vercel serverless cold starts
+model SafeSession {
+  id             String   @id
+  hostId         String
+  hostName       String
+  restaurantId   String
+  restaurantName String
+  targetAmount   Int      @default(2)
+  timeRemaining  Int      @default(300)
+  maxTime        Int      @default(300)
+  status         String   @default("ACTIVE")
+  isCoveredByHost Boolean @default(false)
+  isGlobal       Boolean  @default(false)
+  orderId        String?
+  orderNumber    String?
+  participants   Json     @default("[]")
+  orders         Json     @default("[]")
+  deployedCards  Json     @default("[]")
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
