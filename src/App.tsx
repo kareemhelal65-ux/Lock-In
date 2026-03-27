@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams, BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import {
   Home,
   Compass,
@@ -61,6 +62,20 @@ function AppContent() {
     incrementLocksUntilMysteryCop,
     activeSafes
   } = useApp();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle joinSafe from query param
+  useEffect(() => {
+    const joinSafeId = searchParams.get('joinSafe');
+    if (joinSafeId && isAuthenticated && currentUser) {
+      console.log('Detected joinSafe in URL:', joinSafeId);
+      handleJoinSafe(joinSafeId);
+      // Clean up URL
+      searchParams.delete('joinSafe');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, isAuthenticated, currentUser]);
 
   // Restore auth from AppContext persistent state
   useEffect(() => {
@@ -664,7 +679,7 @@ function AppContent() {
   );
 }
 
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+
 import LandingSwitcher from '@/components/LandingSwitcher';
 import VendorApp from './VendorApp';
 import DevDashboardApp from './DevDashboardApp';
