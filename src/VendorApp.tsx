@@ -240,7 +240,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                     <ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-                    <h1 className="font-display font-black text-5xl uppercase mb-2 text-white">Join The Lock</h1>
+                    <h1 className="font-display font-black text-5xl uppercase mb-2 text-white">Join Sawa</h1>
                     <p className="text-cool-gray mb-8">Setup your merchant account credentials.</p>
 
                     {errorMessage && (
@@ -410,7 +410,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                 <div className="flex items-center justify-between md:justify-start gap-4 md:gap-6 w-full md:w-auto">
                     <div>
                         <h1 className="font-display font-black text-2xl md:text-3xl uppercase tracking-tighter leading-none">
-                            LOCK IN
+                            SAWA
                         </h1>
                         {vendorProfile.name && (
                             <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">{vendorProfile.name}</p>

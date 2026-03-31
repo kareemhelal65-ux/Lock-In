@@ -418,7 +418,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
       <div className="flex items-center justify-between px-4 mt-6 mb-2">
         <button
           onClick={async () => {
-            if (window.confirm("Are you sure you want to abandon this safe? Your shared items will be deleted.")) {
+            if (window.confirm("Are you sure you want to abandon this session? Your shared items will be deleted.")) {
               try {
                 if (currentUser?.id) {
                   await fetch(`/api/consumer/safes/${safeId}/abandon`, {
@@ -440,7 +440,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
         <div className="flex bg-volt-green/20 border-2 border-volt-green rounded-full px-4 py-1.5 items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-volt-green animate-pulse" />
           <span className="text-volt-green font-display font-bold text-sm tracking-widest uppercase">
-            Safe Connection
+            Hub Connection
           </span>
         </div>
         <button
@@ -578,7 +578,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
               <Flame className="w-24 h-24 text-black" />
             </div>
             <div className="relative z-10">
-              <h3 className="text-black font-display font-black text-lg uppercase leading-tight">The Safe</h3>
+              <h3 className="text-black font-display font-black text-lg uppercase leading-tight">The Hub</h3>
               <p className="text-black/80 text-sm font-bold font-display uppercase tracking-widest mt-1">Total</p>
               <p className="text-black font-display font-black text-3xl tabular-nums">{safeTotal} <span className="text-lg">EGP</span></p>
             </div>
@@ -878,11 +878,11 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             >
               <div className="flex items-center">
                 <CheckCircle2 className="w-6 h-6 mr-2" />
-                Locked In
+                Synced
               </div>
               {!(allCurrentParticipantsLockedIn && hasAtLeastOneExtraUser) && (
                 <div className="absolute inset-0 bg-electric-red text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg font-bold">
-                  TAP TO UNLOCK
+                  TAP TO UNSYNC
                 </div>
               )}
             </div>
@@ -895,7 +895,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                 : 'bg-gray-200 text-gray-400 opacity-50'
                 }`}
             >
-              Lock In <ChevronRight className="w-6 h-6 ml-2 -mr-2" />
+              Go Sawa <ChevronRight className="w-6 h-6 ml-2 -mr-2" />
             </button>
           )}
         </div>
@@ -938,8 +938,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
               <CheckCircle2 className="w-12 h-12 text-volt-green" />
             </motion.div>
             <h1 className="font-display font-black text-6xl uppercase mb-4 leading-tight">BAG SECURED</h1>
-            <p className="font-bold text-2xl opacity-80 uppercase tracking-widest">You covered the entire lock!</p>
-            <p className="mt-8 text-sm font-bold opacity-60">Redirecting to Locks tab...</p>
+            <p className="font-bold text-2xl opacity-80 uppercase tracking-widest">You covered the entire Sawa!</p>
+            <p className="mt-8 text-sm font-bold opacity-60">Redirecting to Sawas tab...</p>
           </div>
         )}
       </AnimatePresence>

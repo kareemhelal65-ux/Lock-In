@@ -132,7 +132,7 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
                     <Zap className="w-4 h-4 text-black" />
                   </div>
                   <div>
-                    <h3 className="font-display font-bold text-sm">{invite.hostName} invited you to lock in!</h3>
+                    <h3 className="font-display font-bold text-sm">{invite.hostName} invited you to sync up!</h3>
                     <p className="text-xs text-cool-gray uppercase font-bold">{invite.restaurantName}</p>
                   </div>
                 </div>

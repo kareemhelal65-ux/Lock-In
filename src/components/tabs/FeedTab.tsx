@@ -333,7 +333,7 @@ export default function FeedTab({ onStartLock, onSuccess }: FeedTabProps) {
             <TrendingUp className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="font-display font-black text-xl uppercase mb-2">Feed Is Empty</h3>
-          <p className="text-cool-gray font-bold text-sm">Add friends and lock in vendors to see activity here!</p>
+          <p className="text-cool-gray font-bold text-sm">Add friends and sync with vendors to see activity here!</p>
         </div>
       )}
 

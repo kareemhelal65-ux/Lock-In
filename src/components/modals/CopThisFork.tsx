@@ -48,7 +48,7 @@ export default function CopThisFork({
         <div className="px-4 pb-4 border-b-2 border-deep-charcoal/10">
           <div className="flex items-center justify-between">
             <h2 className="font-display font-extrabold text-2xl uppercase">
-              Cop This Order
+              Order this Sawa
             </h2>
             <button
               onClick={onClose}
@@ -58,7 +58,7 @@ export default function CopThisFork({
             </button>
           </div>
           <p className="text-cool-gray text-sm mt-1">
-            Choose how you want to lock in
+            Choose how you want to Sawa
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export default function CopThisFork({
               <div className="flex-1 text-left">
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="font-display font-extrabold text-lg uppercase">
-                    START A LOCK
+                    JOIN SAWA
                   </h3>
                   <span className="live-badge text-[10px] py-0">
                     <Zap className="w-3 h-3" />
@@ -100,7 +100,7 @@ export default function CopThisFork({
                   </span>
                 </div>
                 <p className="text-sm text-cool-gray mb-2">
-                  Generate a new Safe with this item pre-carted
+                  Generate a new Hub with this item pre-carted
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="line-through text-cool-gray text-sm">{order.total} EGP</span>
@@ -124,7 +124,7 @@ export default function CopThisFork({
             </div>
             <div className="flex-1 text-left">
               <h3 className="font-display font-bold text-gray-500">
-                SOLO COP
+                SOLO BUY
               </h3>
               <p className="text-xs text-gray-400">
                 Pay full price. No discount.
@@ -141,7 +141,7 @@ export default function CopThisFork({
           <div className="brutal-card p-3 bg-electric-red/10 border-electric-red/30">
             <p className="text-xs text-electric-red text-center flex items-center justify-center gap-1">
               <Lock className="w-3 h-3" />
-              Starting a Lock saves you {savings} EGP and brings the crew
+              Starting a Sawa saves you {savings} EGP and brings the crew
             </p>
           </div>
         </div>

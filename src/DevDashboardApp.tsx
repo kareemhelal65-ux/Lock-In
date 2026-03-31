@@ -46,7 +46,7 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
         { id: 'hype', label: 'Hype Engine', icon: TrendingUp },
         { id: 'cards', label: 'Card Management', icon: CreditCard },
         { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-        { id: 'social', label: 'Social Safe Pulse', icon: Users },
+        { id: 'social', label: 'Social Hub Pulse', icon: Users },
         { id: 'retention', label: 'Retention', icon: LayoutDashboard },
         { id: 'vendor-friction', label: 'Vendor Friction', icon: Clock },
         { id: 'financial', label: 'Financial Health', icon: DollarSign },

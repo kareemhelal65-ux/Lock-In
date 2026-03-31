@@ -175,7 +175,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                         onClick={() => setReviewingOrder(order)}
                                         className="w-full bg-volt-green text-deep-charcoal font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#b0f200] transition-colors active:scale-95 transform"
                                     >
-                                        <Flame className="w-5 h-5" /> Review & Confirm
+                                        <Flame className="w-5 h-5" /> Review & Sync
                                     </button>
                                 </motion.div>
                             ))}
@@ -350,7 +350,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                     onClick={() => moveOrder(reviewingOrder.id, 'FIRE')}
                                     className="py-4 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-wider rounded-xl hover:bg-[#b0f200] transition-colors"
                                 >
-                                    Approve & Fire 🔥
+                                    Approve & Sync
                                 </button>
                             </div>
                         </motion.div>

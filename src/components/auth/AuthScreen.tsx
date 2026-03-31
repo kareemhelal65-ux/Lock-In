@@ -59,7 +59,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-12 text-center">
           <h1 className="text-6xl font-display font-bold text-deep-charcoal italic tracking-tighter uppercase transform -skew-x-6 drop-shadow-md">
-            LOCK IN.
+            SAWA.
           </h1>
           <p className="mt-2 text-cool-gray font-bold tracking-widest text-sm">THE HYPE IS REAL.</p>
         </div>

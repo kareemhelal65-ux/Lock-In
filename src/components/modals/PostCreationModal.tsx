@@ -38,7 +38,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
           body: JSON.stringify({
             fromUserId: currentUser.id,
             toUserId: friendId,
-            message: `${currentUser.name || currentUser.username} invited you to join their Lock!`
+            message: `${currentUser.name || currentUser.username} invited you to join their Sawa!`
           })
         });
       } catch { /* silent */ }
@@ -83,7 +83,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-display font-extrabold text-2xl uppercase">Bring the Crew</h2>
-              <p className="text-cool-gray text-sm mt-1">Your Lock is live! Invite friends to join.</p>
+              <p className="text-cool-gray text-sm mt-1">Your Sawa is live! Invite friends to join.</p>
             </div>
             <button onClick={onClose} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
@@ -181,7 +181,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
           </motion.button>
           <motion.button onClick={handleGoToSafe} className="flex-1 brutal-btn-primary py-4 flex items-center justify-center gap-2" whileTap={{ scale: 0.95 }}>
             <Lock className="w-5 h-5" />
-            GO TO YOUR SAFE
+            GO TO YOUR HUB
           </motion.button>
         </div>
       </motion.div>

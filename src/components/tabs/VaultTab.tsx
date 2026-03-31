@@ -530,7 +530,7 @@ export default function VaultTab() {
               )}
               <motion.button className="w-full brutal-card p-4 flex items-center justify-center gap-2 text-cool-gray" whileTap={{ scale: 0.98 }}>
                 <Users className="w-5 h-5" />
-                <span className="font-display font-bold text-sm">Invite Friends to Lock In</span>
+                <span className="font-display font-bold text-sm">Invite Friends to Sawa</span>
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
             </div>

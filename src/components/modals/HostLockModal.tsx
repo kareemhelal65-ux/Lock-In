@@ -135,7 +135,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
             restaurantName,
             hostName,
             senderName: hostName,
-            message: `${hostName} invited you to join their Lock at ${restaurantName}!`
+            message: `${hostName} invited you to join their Sawa at ${restaurantName}!`
           })
         });
       }
@@ -181,14 +181,14 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
         <div className="px-4 pb-4 border-b-2 border-deep-charcoal/10">
           <div className="flex items-center justify-between">
             <h2 className="font-display font-extrabold text-2xl uppercase">
-              {step === 'restaurant' ? 'Host a Lock' : step === 'timer' ? 'Set Timer' : step === 'invite' ? 'Invite Crew' : 'Select Friends'}
+              {step === 'restaurant' ? 'Order Sawa' : step === 'timer' ? 'Set Timer' : step === 'invite' ? 'Invite Crew' : 'Select Friends'}
             </h2>
             <button onClick={onClose} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
               <X className="w-5 h-5" />
             </button>
           </div>
           <p className="text-cool-gray text-sm mt-1">
-            {step === 'restaurant' ? 'Choose where to order from' : step === 'timer' ? 'How long should the safe stay open?' : step === 'invite' ? 'How do you want to invite your friends?' : 'Pick friends to invite to your Lock'}
+            {step === 'restaurant' ? 'Choose where to order from' : step === 'timer' ? 'How long should the hub stay active?' : step === 'invite' ? 'How do you want to invite your friends?' : 'Pick friends to invite to your Sawa'}
           </p>
         </div>
 
@@ -257,7 +257,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                 </div>
 
                 <div className="space-y-3">
-                  <p className="font-display font-black text-xs uppercase text-deep-charcoal/60">Select Lock Duration</p>
+                  <p className="font-display font-black text-xs uppercase text-deep-charcoal/60">Select Sawa Duration</p>
                   {timerOptions.map((option) => (
                     <button
                       key={option.value}
@@ -267,7 +267,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                       <span className="text-2xl">{option.emoji}</span>
                       <div className="flex-1">
                         <h3 className="font-display font-bold">{option.label}</h3>
-                        <p className="text-[10px] font-bold text-cool-gray/80">{option.value === 300 ? 'Quick Lock' : option.value === 600 ? 'Standard Lock' : 'Relaxed Lock'}</p>
+                        <p className="text-[10px] font-bold text-cool-gray/80">{option.value === 300 ? 'Quick Sawa' : option.value === 600 ? 'Standard Sawa' : 'Relaxed Sawa'}</p>
                       </div>
                       {selectedTimer === option.value && <div className="w-5 h-5 bg-deep-charcoal rounded-full flex items-center justify-center"><CheckCircle className="w-3 h-3 text-volt-green" /></div>}
                     </button>
@@ -316,7 +316,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                       <Check className="w-8 h-8 text-deep-charcoal" />
                     </div>
                     <h3 className="font-display font-black text-xl uppercase text-deep-charcoal">Invites Sent!</h3>
-                    <p className="text-cool-gray text-sm font-bold mt-1">Starting your Lock...</p>
+                    <p className="text-cool-gray text-sm font-bold mt-1">Starting your Sawa...</p>
                   </div>
                 ) : loadingFriends ? (
                   <div className="flex flex-col items-center py-10">
@@ -328,7 +328,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                     <Users className="w-12 h-12 text-cool-gray mx-auto mb-3" />
                     <h3 className="font-display font-black text-lg text-deep-charcoal uppercase">No Friends Yet</h3>
                     <p className="text-cool-gray text-sm mt-1">Add friends in the Vault tab first</p>
-                    <button onClick={() => handleHost('app')} className="mt-4 brutal-btn-primary py-3 px-6">Start Lock Anyway</button>
+                    <button onClick={() => handleHost('app')} className="mt-4 brutal-btn-primary py-3 px-6">Start Sawa Anyway</button>
                   </div>
                 ) : (
                   <>
@@ -372,7 +372,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                           `SEND INVITE${selectedFriends.size > 1 ? 'S' : ''} (${selectedFriends.size} friend${selectedFriends.size !== 1 ? 's' : ''})`
                         )}
                       </button>
-                      <button onClick={() => handleHost('app')} className="w-full py-2 text-cool-gray font-display font-bold uppercase text-xs underline">Skip & Start Lock</button>
+                      <button onClick={() => handleHost('app')} className="w-full py-2 text-cool-gray font-display font-bold uppercase text-xs underline">Skip & Start Sawa</button>
                     </div>
                   </>
                 )}

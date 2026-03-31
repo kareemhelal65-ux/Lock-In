@@ -88,7 +88,7 @@ export default function GambleWheel({ isOpen, onClose }: GambleWheelProps) {
 
         <div className="w-full max-w-md text-center">
           <h2 className="font-display font-black text-4xl text-white uppercase tracking-tighter mb-2 italic">
-            SAFE CRACKER
+            THE HUB BREACH
           </h2>
           <p className="text-volt-green font-bold text-sm tracking-widest mb-12 uppercase">
             ESTABLISH DOMINANCE. WIN ARTIFACTS.
@@ -134,7 +134,7 @@ export default function GambleWheel({ isOpen, onClose }: GambleWheelProps) {
               {!hasKeys ? 'NO KEYS — EARN MORE HYPE' : isSpinning ? 'CRACKING...' : 'PULL THE LEVER'}
             </button>
             <p className="mt-4 text-white/50 text-[10px] font-bold uppercase tracking-widest">
-              {hasKeys ? 'Consumption: 1 SAFE KEY per spin' : `${currentUser?.keysAvailable ?? 0} keys available`}
+              {hasKeys ? 'Consumption: 1 HUB KEY per spin' : `${currentUser?.keysAvailable ?? 0} keys available`}
             </p>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function GambleWheel({ isOpen, onClose }: GambleWheelProps) {
                       <AlertTriangle className="w-10 h-10 text-cool-gray" />
                     </div>
                     <h3 className="font-display font-black text-2xl uppercase mb-2">BIG L</h3>
-                    <p className="text-cool-gray font-bold text-lg mb-8 uppercase italic">THE SAFE REMAINS SEALED.</p>
+                    <p className="text-cool-gray font-bold text-lg mb-8 uppercase italic">THE HUB REMAINS SEALED.</p>
                   </>
                 )}
 
@@ -181,7 +181,7 @@ export default function GambleWheel({ isOpen, onClose }: GambleWheelProps) {
                   onClick={() => setShowResult(false)}
                   className="brutal-btn bg-black text-white w-full py-4 font-bold uppercase tracking-widest"
                 >
-                  LOCK IN
+                  GO SAWA
                 </button>
               </div>
             </motion.div>

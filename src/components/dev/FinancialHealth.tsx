@@ -125,7 +125,7 @@ export default function FinancialHealth() {
                     <div>
                         <h3 className="font-display font-black text-xl uppercase mb-4 italic">The North Star</h3>
                         <p className="text-[10px] font-bold uppercase text-gray-500 leading-relaxed mb-6">
-                            Lock In is a high-volume, low-margin play. Revenue scales with group density, as processing fees are flat per transaction.
+                            Sawa is a high-volume, low-margin play. Revenue scales with group density, as processing fees are flat per transaction.
                         </p>
                     </div>
                     <div className="bg-black text-white p-4 rounded border-2 border-black">

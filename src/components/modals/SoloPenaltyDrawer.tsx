@@ -449,7 +449,7 @@ export default function SoloPenaltyDrawer({
           <div className="flex items-center gap-2 text-gray-500 mb-4 animate-pulse">
             <Zap className="w-5 h-5" />
             <p className="font-display font-bold text-sm uppercase">
-              ⚠️ You are leaving {savings} EGP on the table. Host a Lock instead.
+              ⚠️ You are leaving {savings} EGP on the table. Order Sawa instead.
             </p>
           </div>
 
@@ -461,7 +461,7 @@ export default function SoloPenaltyDrawer({
               whileTap={{ scale: 0.95 }}
             >
               <Lock className="w-5 h-5 mr-2" />
-              HOST A LOCK INSTEAD
+              ORDER SAWA INSTEAD
               <span className="block text-xs font-normal mt-1 opacity-80">Save {savings} EGP with friends</span>
             </motion.button>
 

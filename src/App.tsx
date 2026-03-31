@@ -98,10 +98,7 @@ function AppContent() {
         const data = await res.json();
         (data.notifications || []).forEach((invite: any) => {
           addNotification({
-            id: invite.id,
-            type: 'safe_invite',
-            title: `🔒 Lock Invite from ${invite.fromUserName}`,
-            message: invite.message,
+            title: `🔒 Sawa Invite from ${invite.fromUserName}`,
             timestamp: new Date(invite.sentAt),
             read: false,
             safeId: invite.safeId || undefined,
@@ -238,9 +235,8 @@ function AppContent() {
       incrementLocksUntilMysteryCop();
       addNotification({
         id: `lock-start-${Date.now()}`,
-        type: 'safe_invite',
-        title: '🚀 Lock Started!',
-        message: `Your lock for ${restaurant.name} is now live.`,
+        title: '🚀 Sawa Started!',
+        message: `Your Sawa for ${restaurant.name} is now live.`,
         timestamp: new Date(),
         read: false,
       });
@@ -340,8 +336,7 @@ function AppContent() {
 
     addNotification({
       id: `notif-${Date.now()}`,
-      type: 'order_confirmed',
-      title: 'LOCKED IN!',
+      title: 'SYNCED!',
       message: `You saved ${discount}% on your order!`,
       timestamp: new Date(),
       read: false,
@@ -442,7 +437,7 @@ function AppContent() {
       {/* Desktop Side Navigation */}
       <nav className="hidden md:flex flex-col w-64 border-r-4 border-black bg-white sticky top-0 h-screen overflow-y-auto z-40 brutal-shadow-sm pb-safe p-6">
         <div className="mb-10 text-center">
-          <h1 className="font-display font-black text-4xl tracking-tighter uppercase">Lock In.</h1>
+          <h1 className="font-display font-black text-4xl tracking-tighter uppercase">SAWA.</h1>
           <div className="h-1 w-full bg-black mt-2"></div>
         </div>
 
@@ -509,7 +504,7 @@ function AppContent() {
               }`}
           >
             <LockIcon className="w-8 h-8" strokeWidth={activeTab === 'locks' ? 3 : 2} />
-            <span className="font-display font-black text-xl uppercase tracking-wider">Locks</span>
+            <span className="font-display font-black text-xl uppercase tracking-wider">Sawas</span>
           </button>
         </div>
 
@@ -520,7 +515,7 @@ function AppContent() {
             whileTap={{ scale: 0.95 }}
           >
             <Plus className="w-8 h-8" strokeWidth={3} />
-            <span className="font-display font-black text-xl uppercase tracking-wider">Host A Lock</span>
+            <span className="font-display font-black text-xl uppercase tracking-wider">Order Sawa</span>
           </motion.button>
         </div>
       </nav>
@@ -618,7 +613,7 @@ function AppContent() {
             className={`flex flex-col items-center justify-center gap-1 p-2 flex-1 transition-colors duration-200 ${activeTab === 'locks' ? 'text-black scale-110' : 'text-gray-400'}`}
           >
             <LockIcon className="w-6 h-6" strokeWidth={activeTab === 'locks' ? 3 : 2} />
-            <span className="text-[10px] font-display font-black uppercase">Locks</span>
+            <span className="text-[10px] font-display font-black uppercase">Sawas</span>
           </button>
         </div>
       </nav>
