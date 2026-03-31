@@ -98,7 +98,10 @@ function AppContent() {
         const data = await res.json();
         (data.notifications || []).forEach((invite: any) => {
           addNotification({
+            id: `invite-${invite.safeId}-${Date.now()}`,
+            type: 'safe_invite',
             title: `🔒 Sawa Invite from ${invite.fromUserName}`,
+            message: `You've been invited to join a Sawa!`,
             timestamp: new Date(invite.sentAt),
             read: false,
             safeId: invite.safeId || undefined,
@@ -235,6 +238,7 @@ function AppContent() {
       incrementLocksUntilMysteryCop();
       addNotification({
         id: `lock-start-${Date.now()}`,
+        type: 'safe_invite',
         title: '🚀 Sawa Started!',
         message: `Your Sawa for ${restaurant.name} is now live.`,
         timestamp: new Date(),
@@ -336,6 +340,7 @@ function AppContent() {
 
     addNotification({
       id: `notif-${Date.now()}`,
+      type: 'order_confirmed',
       title: 'SYNCED!',
       message: `You saved ${discount}% on your order!`,
       timestamp: new Date(),
