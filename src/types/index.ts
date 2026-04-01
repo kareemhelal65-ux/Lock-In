@@ -35,6 +35,7 @@ export interface Restaurant {
   menu: MenuItem[];
   // Vendor Cult
   onFeedCount: number; // "14.2K ON LOCK"
+  onLockCount?: number; // Server-side equivalent
   isOnFeed: boolean; // User has put this vendor on lock
   status?: 'LIVE' | 'SWAMPED' | 'OFFLINE';
   instapayName?: string;

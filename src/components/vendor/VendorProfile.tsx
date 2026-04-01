@@ -38,7 +38,8 @@ export default function VendorProfile({
   const [cart, setCart] = useState<{ id: string; item: MenuItem; quantity: number; selectedAddOns: any[]; specialNotes: string }[]>([]);
   const [itemWithOptions, setItemWithOptions] = useState<MenuItem | null>(null);
 
-  const formatonFeedCount = (count: number) => {
+  const formatonFeedCount = (count: number | undefined | null) => {
+    if (count === undefined || count === null) return '0';
     if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
     return count.toString();
   };
@@ -175,7 +176,7 @@ export default function VendorProfile({
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-5 h-5 text-volt-green" />
               <span className="font-display font-extrabold text-2xl">
-                {formatonFeedCount(restaurant.onFeedCount)}
+                {formatonFeedCount(restaurant.onLockCount)}
               </span>
             </div>
             <p className="text-xs text-cool-gray uppercase tracking-wider">
