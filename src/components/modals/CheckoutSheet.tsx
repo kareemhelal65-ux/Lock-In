@@ -179,7 +179,7 @@ export default function CheckoutSheet({
         </div>
 
         {showDropzone ? (
-          <div className="p-2 md:p-6 flex-1 flex flex-col items-center justify-center min-h-[60vh] bg-sneaker-white rounded-b-3xl">
+          <div className="p-2 md:p-6 flex-1 flex flex-col items-center justify-center min-h-[60vh] bg-sneaker-white rounded-b-3xl overflow-y-auto">
             <PaymentDropzone
               expectedAmount={finalTotal}
               vendorInstapay={vendorInstapay || "@lockin_vendor"}
