@@ -143,11 +143,11 @@ export default function VaultInventory() {
         <ul className="space-y-4 text-xs text-white/70">
           <li className="flex items-start gap-3">
             <div className="w-5 h-5 bg-volt-green/20 rounded-full flex items-center justify-center shrink-0"><TrendingUp className="w-3 h-3 text-volt-green" /></div>
-            <span>Acquire **1 HUB KEY** for every 250 Hype Points accumulated.</span>
+            <span>Acquire **1 WHEEL SPIN** for every 250 Hype Points accumulated.</span>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-5 h-5 bg-volt-green/20 rounded-full flex items-center justify-center shrink-0"><Sparkles className="w-3 h-3 text-volt-green" /></div>
-            <span>Access Profile via the **Hub Cracker** to win Artifacts.</span>
+            <span>Access Profile via the **Wheel Spinner** to win Artifacts.</span>
           </li>
           <li className="flex items-start gap-3">
             <div className="w-5 h-5 bg-volt-green/20 rounded-full flex items-center justify-center shrink-0"><Lock className="w-3 h-3 text-volt-green" /></div>

@@ -230,7 +230,7 @@ export default function VaultTab() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-electric-red" />
-                  <span className="font-display font-bold text-sm uppercase">Points to Crack the Hub</span>
+                  <span className="font-display font-bold text-sm uppercase">Points to Spin the Wheel</span>
                 </div>
                 <span className="font-display font-extrabold">{pointsUntilGamble}<span className="text-cool-gray">/250</span></span>
               </div>
