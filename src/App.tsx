@@ -29,6 +29,7 @@ import AuthScreen from '@/components/auth/AuthScreen';
 import OnboardingScreen from '@/components/auth/OnboardingScreen';
 import PostCreationModal from '@/components/modals/PostCreationModal';
 import VendorProfile from '@/components/vendor/VendorProfile';
+import PlusActionsMenu from '@/components/navigation/PlusActionsMenu';
 
 // Context
 import { AppProvider, useApp } from '@/context/AppContext';
@@ -51,6 +52,7 @@ function AppContent() {
   const [spinnerType, setSpinnerType] = useState<'standard' | 'squad'>('standard');
   const [showVendorProfile, setShowVendorProfile] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
+  const [showPlusMenu, setShowPlusMenu] = useState(false);
 
 
   const {
@@ -579,7 +581,7 @@ function AppContent() {
           {/* Center Action Button */}
           <div className="flex-1 flex justify-center relative -top-6">
             <motion.button
-              onClick={() => handleTabChange('host')}
+              onClick={() => setShowPlusMenu(true)}
               className="w-16 h-16 bg-electric-red rounded-full border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center transition-all duration-150 z-50 active:translate-y-1 active:shadow-none"
               whileTap={{ scale: 0.95 }}
             >
@@ -611,14 +613,6 @@ function AppContent() {
               )}
             </div>
             <span className="text-[10px] font-display font-black uppercase">Profile</span>
-          </button>
-
-          <button
-            onClick={() => handleTabChange('locks')}
-            className={`flex flex-col items-center justify-center gap-1 p-2 flex-1 transition-colors duration-200 ${activeTab === 'locks' ? 'text-black scale-110' : 'text-gray-400'}`}
-          >
-            <LockIcon className="w-6 h-6" strokeWidth={activeTab === 'locks' ? 3 : 2} />
-            <span className="text-[10px] font-display font-black uppercase">Orders</span>
           </button>
         </div>
       </nav>
@@ -675,6 +669,15 @@ function AppContent() {
       </AnimatePresence>
 
 
+      <AnimatePresence>
+        {showPlusMenu && (
+          <PlusActionsMenu 
+            onClose={() => setShowPlusMenu(false)}
+            onStartSawa={() => setShowHostModal(true)}
+            onViewOrders={() => setActiveTab('locks')}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
