@@ -164,7 +164,7 @@ export default function VaultTab() {
     <div className="min-h-screen bg-sneaker-white pt-4 px-4 pb-24">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display font-extrabold text-3xl text-deep-charcoal uppercase tracking-tight">The Vault</h1>
+          <h1 className="font-display font-extrabold text-3xl text-deep-charcoal uppercase tracking-tight">Profile</h1>
           <p className="text-cool-gray text-sm font-body">Your stats, streaks & glory</p>
         </div>
         <div className="flex gap-3">
@@ -230,7 +230,7 @@ export default function VaultTab() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-electric-red" />
-                  <span className="font-display font-bold text-sm uppercase">Points to Crack the Safe</span>
+                  <span className="font-display font-bold text-sm uppercase">Points to Crack the Hub</span>
                 </div>
                 <span className="font-display font-extrabold">{pointsUntilGamble}<span className="text-cool-gray">/250</span></span>
               </div>

@@ -180,12 +180,12 @@ export default function SoloPenaltyDrawer({
               {orderId}
             </p>
             <p className="text-xs text-gray-500 mt-4 font-bold">
-              Track your order in the Locks tab
+              Track your order in the Orders tab
             </p>
           </div>
 
           <p className="text-sm text-gray-500">
-            Redirecting to locks...
+            Redirecting to orders...
           </p>
         </div>
       </motion.div>
@@ -439,7 +439,7 @@ export default function SoloPenaltyDrawer({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-500 font-display font-bold text-sm flex items-center gap-1">
-                <Users className="w-4 h-4" /> With a Lock
+                <Users className="w-4 h-4" /> With a Sawa
               </span>
               <span className="font-display font-extrabold text-2xl text-gray-400">{data.discountedTotal} EGP</span>
             </div>

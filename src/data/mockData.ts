@@ -7,8 +7,8 @@ export const currentUser: User = {
   hypeScore: 842,
   socialTitle: 'The Plug',
   walletBalance: 450,
-  locksUntilMysteryCop: 7, // 7/10 until next Mystery Cop
-  mysteryCopCards: 2,
+  sawasUntilMysterySawa: 7, // 7/10 until next Mystery Sawa
+  mysterySawaCards: 2,
   squadSpinnerCards: 1,
   streaks: [
     {
@@ -18,7 +18,7 @@ export const currentUser: User = {
       lastOrderedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // 24 hours ago
       hoursRemaining: 24,
       isActive: true,
-      locksTogether: 7, // 7/10 for Squad Spinner
+      sawasTogether: 7, // 7/10 for Squad Spinner
     },
     {
       friendId: 'friend2',
@@ -27,7 +27,7 @@ export const currentUser: User = {
       lastOrderedAt: new Date(Date.now() - 1000 * 60 * 60 * 40), // 40 hours ago
       hoursRemaining: 8,
       isActive: true,
-      locksTogether: 3,
+      sawasTogether: 3,
     },
     {
       friendId: 'friend3',
@@ -36,7 +36,7 @@ export const currentUser: User = {
       lastOrderedAt: new Date(Date.now() - 1000 * 60 * 60 * 50), // 50 hours ago
       hoursRemaining: 0,
       isActive: false,
-      locksTogether: 0,
+      sawasTogether: 0,
     },
   ],
 };
@@ -50,8 +50,8 @@ export const restaurants: Restaurant[] = [
     deliveryTime: '15-25 min',
     activeLocks: 14,
     hypeLevelRequired: 0,
-    onLockCount: 14200,
-    isOnLock: true,
+    onFeedCount: 14200,
+    isOnFeed: true,
     menu: [
       {
         id: 'item1',
@@ -93,8 +93,8 @@ export const restaurants: Restaurant[] = [
     deliveryTime: '10-20 min',
     activeLocks: 8,
     hypeLevelRequired: 0,
-    onLockCount: 8900,
-    isOnLock: false,
+    onFeedCount: 8900,
+    isOnFeed: false,
     menu: [
       {
         id: 'item4',
@@ -126,8 +126,8 @@ export const restaurants: Restaurant[] = [
     deliveryTime: '20-30 min',
     activeLocks: 5,
     hypeLevelRequired: 0,
-    onLockCount: 5600,
-    isOnLock: false,
+    onFeedCount: 5600,
+    isOnFeed: false,
     menu: [
       {
         id: 'item6',
@@ -159,8 +159,8 @@ export const restaurants: Restaurant[] = [
     deliveryTime: '15-25 min',
     activeLocks: 3,
     hypeLevelRequired: 0,
-    onLockCount: 3200,
-    isOnLock: false,
+    onFeedCount: 3200,
+    isOnFeed: false,
     menu: [
       {
         id: 'item8',

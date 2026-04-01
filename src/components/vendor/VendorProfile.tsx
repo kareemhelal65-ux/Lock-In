@@ -34,11 +34,11 @@ export default function VendorProfile({
   onCheckout
 }: VendorProfileProps) {
   const { vendorsOnLock, toggleVendorOnLock } = useApp();
-  const isOnLock = vendorsOnLock.includes(restaurant.id);
+  const isOnFeed = vendorsOnLock.includes(restaurant.id);
   const [cart, setCart] = useState<{ id: string; item: MenuItem; quantity: number; selectedAddOns: any[]; specialNotes: string }[]>([]);
   const [itemWithOptions, setItemWithOptions] = useState<MenuItem | null>(null);
 
-  const formatOnLockCount = (count: number) => {
+  const formatonFeedCount = (count: number) => {
     if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
     return count.toString();
   };
@@ -175,7 +175,7 @@ export default function VendorProfile({
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-5 h-5 text-volt-green" />
               <span className="font-display font-extrabold text-2xl">
-                {formatOnLockCount(restaurant.onLockCount)}
+                {formatonFeedCount(restaurant.onFeedCount)}
               </span>
             </div>
             <p className="text-xs text-cool-gray uppercase tracking-wider">
@@ -185,14 +185,14 @@ export default function VendorProfile({
 
           <motion.button
             onClick={handleToggleOnLock}
-            className={`px-6 py-3 rounded-pill font-display font-bold uppercase text-sm border-2 border-deep-charcoal transition-all ${isOnLock
+            className={`px-6 py-3 rounded-pill font-display font-bold uppercase text-sm border-2 border-deep-charcoal transition-all ${isOnFeed
               ? 'bg-volt-green text-deep-charcoal'
               : 'bg-deep-charcoal text-white shadow-brutal-sm'
               }`}
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait">
-              {isOnLock ? (
+              {isOnFeed ? (
                 <motion.span
                   key="on-lock"
                   initial={{ opacity: 0, y: 10 }}
@@ -201,7 +201,7 @@ export default function VendorProfile({
                   className="flex items-center gap-2"
                 >
                   <Lock className="w-4 h-4" />
-                  ON LOCK
+                  ON FEED
                 </motion.span>
               ) : (
                 <motion.span
@@ -212,14 +212,14 @@ export default function VendorProfile({
                   className="flex items-center gap-2"
                 >
                   <Zap className="w-4 h-4" />
-                  + PUT ON LOCK
+                  + PIN TO FEED
                 </motion.span>
               )}
             </AnimatePresence>
           </motion.button>
         </div>
 
-        {isOnLock && (
+        {isOnFeed && (
           <motion.p
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -237,7 +237,7 @@ export default function VendorProfile({
           <div className="flex items-center gap-2">
             <div className="live-badge text-[10px]">
               <Flame className="w-3 h-3" />
-              {restaurant.activeLocks} ACTIVE LOCKS
+              {restaurant.activeLocks} ACTIVE SAWAs
             </div>
             <span className="text-xs text-cool-gray">
               People are ordering right now

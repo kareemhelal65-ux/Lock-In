@@ -9,7 +9,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     AWAITING_PAYMENT: { label: 'Awaiting Payment', color: 'text-yellow-600', bg: 'bg-yellow-100 border-yellow-300', icon: Clock },
     AWAITING_VERIFICATION: { label: 'Awaiting payment verification by vendor', color: 'text-blue-600', bg: 'bg-blue-100 border-blue-300', icon: Clock },
     PENDING: { label: 'Payment Verified', color: 'text-emerald-600', bg: 'bg-emerald-100 border-emerald-300', icon: CheckCircle2 },
-    FIRE: { label: '🔥 Being Prepared', color: 'text-orange-600', bg: 'bg-orange-100 border-orange-300', icon: Flame },
+    FIRE: { label: '🔥 SYNCING...', color: 'text-orange-600', bg: 'bg-orange-100 border-orange-300', icon: Flame },
     READY: { label: '✅ Ready for Pickup', color: 'text-green-700', bg: 'bg-green-100 border-green-300', icon: CheckCircle2 },
     COMPLETED: { label: 'Completed', color: 'text-gray-500', bg: 'bg-gray-100 border-gray-300', icon: CheckCircle2 },
     REJECTED: { label: 'Rejected', color: 'text-red-600', bg: 'bg-red-100 border-red-300', icon: XCircle },
@@ -129,9 +129,9 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                     <div className="flex items-center justify-between py-4">
                         <div>
                             <h1 className="font-display font-black text-3xl uppercase tracking-tight flex items-center gap-2">
-                                <Lock className="w-7 h-7" /> Locks
+                                <Lock className="w-7 h-7" /> Orders
                             </h1>
-                            <p className="text-cool-gray text-sm font-bold">Your safes, orders & live tracking</p>
+                            <p className="text-cool-gray text-sm font-bold">Your hubs, orders & live tracking</p>
                         </div>
                         <button
                             onClick={() => { fetchOrders(); fetchActiveSafes(); }}
@@ -163,7 +163,7 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                         <div>
                             <h2 className="font-display font-black text-xl uppercase mb-3 flex items-center gap-2">
                                 <span className="w-3 h-3 rounded-full bg-volt-green animate-pulse inline-block" />
-                                Active Safes ({activeSafes.length})
+                                Active Hubs ({activeSafes.length})
                             </h2>
                             <div className="space-y-4">
                                 {activeSafes.map((safe: any) => (
@@ -176,7 +176,7 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                                         <div className="px-4 py-2 border-b-2 border-black/10 bg-volt-green/20 flex items-center gap-2">
                                             <Users className="w-4 h-4 text-deep-charcoal" />
                                             <span className="font-display font-black text-sm uppercase text-deep-charcoal">
-                                                Safe Active — {safe.participants?.length || 0} people
+                                                Hub Active — {safe.participants?.length || 0} people
                                             </span>
                                         </div>
 
@@ -208,7 +208,7 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                                                         onClick={() => onOpenSafe(safe.id)}
                                                         className="flex-1 bg-volt-green border-2 border-black font-display font-black uppercase text-sm py-3 rounded-xl flex items-center justify-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all"
                                                     >
-                                                        Open Safe <ChevronRight className="w-4 h-4" />
+                                                        Open Hub <ChevronRight className="w-4 h-4" />
                                                     </button>
                                                 )}
                                                 <button
@@ -233,7 +233,7 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                                 <Package className="w-10 h-10 text-gray-400" />
                             </div>
                             <h3 className="font-display font-black text-2xl uppercase mb-2">No Orders Yet</h3>
-                            <p className="text-cool-gray font-bold">Your locks will appear here once you order.</p>
+                            <p className="text-cool-gray font-bold">Your orders will appear here once you order.</p>
                         </div>
                     )}
 

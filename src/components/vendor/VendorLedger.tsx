@@ -46,7 +46,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId }: VendorLe
             <div className="flex-1 flex flex-col items-center justify-center bg-deep-charcoal relative">
                 <div className="bg-zinc-900 border-2 border-cool-gray/30 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
                     <LockIcon className="w-12 h-12 text-cool-gray mx-auto mb-4" />
-                    <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white mb-2">Ledger Vault</h2>
+                    <h2 className="font-display font-black text-3xl uppercase tracking-tighter text-white mb-2">Ledger Hub</h2>
                     <p className="text-cool-gray text-sm mb-6">Enter Admin PIN to access financial analytics and calculated service fee balances.</p>
 
                     <input

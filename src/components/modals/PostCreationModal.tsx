@@ -113,7 +113,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
             {loadingFriends ? (
               <p className="text-cool-gray text-sm text-center py-4">Loading friends...</p>
             ) : friends.length === 0 ? (
-              <p className="text-cool-gray text-sm text-center py-4">No friends yet. Add friends in the Vault!</p>
+              <p className="text-cool-gray text-sm text-center py-4">No friends yet. Add friends in your Profile!</p>
             ) : (
               <div className="space-y-2">
                 {friends.slice(0, 5).map((friend: any, index: number) => (

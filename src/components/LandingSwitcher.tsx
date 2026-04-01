@@ -22,7 +22,7 @@ export default function LandingSwitcher({ onSelectMode }: LandingSwitcherProps) 
                         <Lock className="w-12 h-12 text-volt-green" strokeWidth={3} />
                     </div>
                     <h1 className="font-display font-black text-6xl tracking-tighter uppercase leading-none">
-                        LOCK<br />IN
+                        SAWA
                     </h1>
                     <p className="text-cool-gray font-bold mt-4 tracking-widest uppercase text-sm">
                         Select Your Environment
@@ -38,7 +38,7 @@ export default function LandingSwitcher({ onSelectMode }: LandingSwitcherProps) 
                     >
                         <div>
                             <h2 className="font-display font-black text-2xl uppercase mb-1">Consumer App</h2>
-                            <p className="text-sm font-bold opacity-80">Host locks, deploy cards, cop drops.</p>
+                            <p className="text-sm font-bold opacity-80">Host Sawas, deploy cards, Sawa drops.</p>
                         </div>
                         <div className="w-10 h-10 bg-deep-charcoal rounded-full flex items-center justify-center group-hover:bg-white group-hover:text-deep-charcoal transition-colors">
                             <ChevronRight className="w-6 h-6 text-volt-green group-hover:text-deep-charcoal" />

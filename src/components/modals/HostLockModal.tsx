@@ -327,7 +327,7 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                   <div className="text-center py-8">
                     <Users className="w-12 h-12 text-cool-gray mx-auto mb-3" />
                     <h3 className="font-display font-black text-lg text-deep-charcoal uppercase">No Friends Yet</h3>
-                    <p className="text-cool-gray text-sm mt-1">Add friends in the Vault tab first</p>
+                    <p className="text-cool-gray text-sm mt-1">Add friends in the Profile tab first</p>
                     <button onClick={() => handleHost('app')} className="mt-4 brutal-btn-primary py-3 px-6">Start Sawa Anyway</button>
                   </div>
                 ) : (

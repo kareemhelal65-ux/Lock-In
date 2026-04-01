@@ -48,7 +48,7 @@ export default function CopOrderDrawer({ order, onClose, onLockIn }: CopOrderDra
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-extrabold text-2xl uppercase">
-              Cop This Order?
+              Sawa This?
             </h2>
             <button
               onClick={onClose}
@@ -94,7 +94,7 @@ export default function CopOrderDrawer({ order, onClose, onLockIn }: CopOrderDra
               <div className="flex items-center justify-between mt-1">
                 <span className="text-volt-green font-display font-bold text-sm flex items-center gap-1">
                   <Zap className="w-4 h-4" />
-                  With Lock Discount
+                  With Sawa
                 </span>
                 <span className="font-display font-extrabold text-xl text-volt-green">
                   {discountedTotal} EGP
@@ -106,7 +106,7 @@ export default function CopOrderDrawer({ order, onClose, onLockIn }: CopOrderDra
           {/* Savings Badge */}
           <div className="bg-volt-green/20 border-2 border-volt-green rounded-pill px-4 py-2 mb-4 text-center">
             <p className="font-display font-bold text-sm">
-              You'll save {savings} EGP by locking in!
+              You'll save {savings} EGP by going Sawa!
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function CopOrderDrawer({ order, onClose, onLockIn }: CopOrderDra
               whileTap={{ scale: 0.95 }}
             >
               <Lock className="w-5 h-5 mr-2" />
-              LOCK IT IN
+              SYNC IT
             </motion.button>
 
             <motion.button

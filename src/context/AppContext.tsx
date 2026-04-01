@@ -37,7 +37,7 @@ interface AppContextType {
   // Vendor On Lock
   vendorsOnLock: string[];
   toggleVendorOnLock: (vendorId: string) => void;
-  incrementLocksUntilMysteryCop: () => void;
+  incrementSawasUntilMysterySawa: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -217,9 +217,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const incrementLocksUntilMysteryCop = useCallback(() => {
+  const incrementSawasUntilMysterySawa = useCallback(() => {
     // Mock implementation or state update if needed
-    console.log("Incrementing locks until mystery cop...");
+    console.log("Incrementing sawas until mystery sawa...");
   }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -251,7 +251,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setInventory,
         vendorsOnLock,
         toggleVendorOnLock,
-        incrementLocksUntilMysteryCop,
+        incrementSawasUntilMysterySawa,
       }}
     >
       {children}

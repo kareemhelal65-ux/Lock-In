@@ -32,7 +32,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
     }, [vendorId]);
 
     const incomingOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'AWAITING_PAYMENT' || o.status === 'AWAITING_VERIFICATION' || o.status === 'incoming');
-    const activeOrders = orders.filter(o => o.status === 'FIRE' || o.status === 'firing' || o.status === 'READY' || o.status === 'ready');
+    const activeOrders = orders.filter(o => o.status === 'FIRE' || o.status === 'firing' || o.status === 'SYNC' || o.status === 'syncing' || o.status === 'READY' || o.status === 'ready');
 
     const moveOrder = async (orderId: string, newStatus: string) => {
         try {
@@ -105,7 +105,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                     {order.status === 'AWAITING_VERIFICATION' && (
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-blue-400" />
                                     )}
-                                    {(order.status === 'PENDING' || order.status === 'FIRE') && (
+                                    {(order.status === 'PENDING' || order.status === 'FIRE' || order.status === 'SYNC') && (
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-volt-green" />
                                     )}
 

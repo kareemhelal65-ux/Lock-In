@@ -9,8 +9,8 @@ export interface User {
   walletBalance: number;
   streaks: Streak[];
   // Vault Inventory
-  locksUntilMysteryCop: number;
-  mysteryCopCards: number;
+  sawasUntilMysterySawa: number;
+  mysterySawaCards: number;
   squadSpinnerCards: number;
 }
 
@@ -21,7 +21,7 @@ export interface Streak {
   lastOrderedAt: Date;
   hoursRemaining: number;
   isActive: boolean;
-  locksTogether: number; // 0-10 counter for Squad Spinner
+  sawasTogether: number; // 0-10 counter for Squad Spinner
 }
 
 export interface Restaurant {
@@ -34,8 +34,8 @@ export interface Restaurant {
   hypeLevelRequired: number;
   menu: MenuItem[];
   // Vendor Cult
-  onLockCount: number; // "14.2K ON LOCK"
-  isOnLock: boolean; // User has put this vendor on lock
+  onFeedCount: number; // "14.2K ON LOCK"
+  isOnFeed: boolean; // User has put this vendor on lock
   status?: 'LIVE' | 'SWAMPED' | 'OFFLINE';
   instapayName?: string;
   instapayAddress?: string;
@@ -120,7 +120,7 @@ export interface SafeOrder {
 }
 
 export interface DeployedCard {
-  type: 'mystery-cop' | 'squad-spinner';
+  type: 'mystery-cop' | 'squad-spinner' | 'mystery-sawa';
   deployedBy: string;
   deployedByName: string;
   deployedAt: Date;
@@ -178,6 +178,6 @@ export interface GiftOrder {
   qrCode: string;
 }
 
-export type TabType = 'feed' | 'explore' | 'host' | 'radar' | 'vault' | 'locks';
-export type CardType = 'mystery-cop' | 'squad-spinner';
+export type TabType = 'feed' | 'explore' | 'host' | 'radar' | 'profile' | 'orders' | 'vault' | 'locks';
+export type CardType = 'mystery-cop' | 'squad-spinner' | 'mystery-sawa';
 

@@ -62,7 +62,7 @@ export default function CheckoutSheet({
 
   // Calculate discounts
   const baseTotal = isHostCover && safeTotal ? safeTotal : myTotal;
-  const hasMysteryCop = deployedCards.some(c => c.type === 'mystery-cop');
+  const hasMysteryCop = deployedCards.some(c => c.type === 'mystery-cop' || c.type === 'mystery-sawa');
   const hasSquadSpinner = deployedCards.some(c => c.type === 'squad-spinner');
 
   // Apply discounts (mock calculations)
@@ -130,7 +130,7 @@ export default function CheckoutSheet({
             BAG SECURED
           </h2>
           <p className="text-deep-charcoal/70 mb-6">
-            Your order is locked in!
+            Your order is synced!
           </p>
 
           {/* Order ID */}
@@ -225,7 +225,7 @@ export default function CheckoutSheet({
                   </div>
                   <div>
                     <p className="font-display font-black text-sm text-deep-charcoal uppercase">💡 Save 5 EGP or more!</p>
-                    <p className="text-xs text-deep-charcoal/70 mt-0.5">Ordering solo costs 10 EGP service fee. Start a Lock with friends — only 5 EGP per member!</p>
+                    <p className="text-xs text-deep-charcoal/70 mt-0.5">Ordering solo costs 10 EGP service fee. Start a Sawa with friends — only 5 EGP per member!</p>
                   </div>
                 </div>
               )}
@@ -291,7 +291,7 @@ export default function CheckoutSheet({
                       <div className="flex items-center justify-between text-sm text-electric-red">
                         <span className="flex items-center gap-1">
                           <Zap className="w-3 h-3" />
-                          Mystery Cop
+                          Mystery Sawa
                         </span>
                         <span className="font-display font-bold">-{mysteryCopDiscount} EGP</span>
                       </div>

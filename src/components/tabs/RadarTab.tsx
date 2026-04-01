@@ -100,14 +100,14 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
         <h1 className="font-display font-extrabold text-3xl text-deep-charcoal uppercase tracking-tight">
           Radar
         </h1>
-        <p className="text-cool-gray text-sm font-body">Stay on top of your locks</p>
+        <p className="text-cool-gray text-sm font-body">Stay on top of your Sawas</p>
       </div>
 
       {/* Live Friend Invites */}
       <div className="space-y-3 mb-6">
         <div className="flex items-center justify-between">
           <h2 className="font-display font-bold text-sm uppercase text-deep-charcoal/60 tracking-wider">
-            Live Safe Invites
+            Live Sawa Invites
           </h2>
           {isLoading && <Loader2 className="w-4 h-4 animate-spin text-cool-gray" />}
         </div>
@@ -115,7 +115,7 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
         {invites.length === 0 ? (
           <div className="brutal-card p-6 text-center text-cool-gray bg-white">
             <UserPlus className="w-8 h-8 mx-auto mb-2 opacity-30" />
-            <p className="text-sm font-display font-bold">No live invites to join Safes right now.</p>
+            <p className="text-sm font-display font-bold">No live invites to join Sawas right now.</p>
           </div>
         ) : (
           invites.map((invite: any, index: number) => (
@@ -202,7 +202,7 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
                       whileTap={{ scale: 0.95 }}
                     >
                       <UserPlus className="w-4 h-4" />
-                      Join Safe
+                      Join Sawa
                     </motion.button>
                   )}
                 </div>

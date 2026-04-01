@@ -125,13 +125,13 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
                   {restaurant.activeLocks > 5 && (
                     <div className="absolute top-2 left-2 live-badge text-[10px] py-0.5">
                       <Flame className="w-3 h-3" />
-                      {restaurant.activeLocks} Active
+                      {restaurant.activeLocks} Active Sawas
                     </div>
                   )}
                   {/* On Lock Badge */}
                   {restaurant.isOnLock && (
                     <div className="absolute top-2 right-2 px-2 py-0.5 bg-volt-green text-deep-charcoal rounded-pill text-[10px] font-display font-bold border border-deep-charcoal">
-                      ON LOCK
+                      ON SAWA
                     </div>
                   )}
                 </div>
@@ -191,6 +191,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
 
         <button
           onClick={() => setSelectedRestaurant(null)}
+          title="Back to Explore"
           className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full border-2 border-deep-charcoal flex items-center justify-center"
         >
           <X className="w-5 h-5" />
@@ -266,7 +267,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
                           Requires Hype Level {item.requiredHypeLevel}
                         </p>
                         <p className="text-[10px] text-cool-gray">
-                          Host {item.requiredHypeLevel - Math.floor(500 / 200)} more Locks to unlock
+                          Host {item.requiredHypeLevel - Math.floor(500 / 200)} more Sawas to unlock
                         </p>
                       </div>
                     ) : (
@@ -275,6 +276,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
                           <div className="flex items-center gap-2 bg-volt-green rounded-pill border-2 border-deep-charcoal px-2 py-1">
                             <button
                               onClick={() => removeFromCart(item.id)}
+                              title="Remove from cart"
                               className="w-6 h-6 flex items-center justify-center"
                             >
                               <Minus className="w-4 h-4" />
@@ -284,6 +286,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
                             </span>
                             <button
                               onClick={() => addToCart(item)}
+                              title="Add to cart"
                               className="w-6 h-6 flex items-center justify-center"
                             >
                               <Plus className="w-4 h-4" />
@@ -292,6 +295,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
                         ) : (
                           <motion.button
                             onClick={() => addToCart(item)}
+                            title="Add to cart"
                             className="w-10 h-10 bg-volt-green rounded-full border-2 border-deep-charcoal flex items-center justify-center"
                             whileTap={{ scale: 0.9 }}
                           >

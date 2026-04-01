@@ -59,7 +59,7 @@ function AppContent() {
     addNotification,
     addSafe,
 
-    incrementLocksUntilMysteryCop,
+    incrementSawasUntilMysterySawa,
     activeSafes
   } = useApp();
 
@@ -235,7 +235,7 @@ function AppContent() {
       }
 
       setShowPostCreation(true);
-      incrementLocksUntilMysteryCop();
+      incrementSawasUntilMysterySawa();
       addNotification({
         id: `lock-start-${Date.now()}`,
         type: 'safe_invite',
@@ -498,7 +498,7 @@ function AppContent() {
                 <Crown className="absolute -top-2 -right-2 w-5 h-5 text-volt-green drop-shadow-md" fill="#CCFF00" />
               )}
             </div>
-            <span className="font-display font-black text-xl uppercase tracking-wider">Vault</span>
+            <span className="font-display font-black text-xl uppercase tracking-wider">Profile</span>
           </button>
 
           <button
@@ -509,7 +509,7 @@ function AppContent() {
               }`}
           >
             <LockIcon className="w-8 h-8" strokeWidth={activeTab === 'locks' ? 3 : 2} />
-            <span className="font-display font-black text-xl uppercase tracking-wider">Sawas</span>
+            <span className="font-display font-black text-xl uppercase tracking-wider">Orders</span>
           </button>
         </div>
 
@@ -610,7 +610,7 @@ function AppContent() {
                 <Crown className="absolute -top-2 -right-1 w-4 h-4 text-volt-green" fill="#CCFF00" />
               )}
             </div>
-            <span className="text-[10px] font-display font-black uppercase">Vault</span>
+            <span className="text-[10px] font-display font-black uppercase">Profile</span>
           </button>
 
           <button
@@ -618,7 +618,7 @@ function AppContent() {
             className={`flex flex-col items-center justify-center gap-1 p-2 flex-1 transition-colors duration-200 ${activeTab === 'locks' ? 'text-black scale-110' : 'text-gray-400'}`}
           >
             <LockIcon className="w-6 h-6" strokeWidth={activeTab === 'locks' ? 3 : 2} />
-            <span className="text-[10px] font-display font-black uppercase">Sawas</span>
+            <span className="text-[10px] font-display font-black uppercase">Orders</span>
           </button>
         </div>
       </nav>

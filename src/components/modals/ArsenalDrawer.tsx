@@ -2,14 +2,14 @@ import { motion } from 'framer-motion';
 import { X, Sparkles, Users, Zap, Info } from 'lucide-react';
 
 interface ArsenalDrawerProps {
-  mysteryCopCards: number;
+  mysterySawaCards: number;
   squadSpinnerCards: number;
-  onDeploy: (cardType: 'mystery-cop' | 'squad-spinner') => void;
+  onDeploy: (cardType: 'mystery-sawa' | 'squad-spinner') => void;
   onClose: () => void;
 }
 
 export default function ArsenalDrawer({
-  mysteryCopCards,
+  mysterySawaCards,
   squadSpinnerCards,
   onDeploy,
   onClose
@@ -64,22 +64,22 @@ export default function ArsenalDrawer({
         <div className="p-4 space-y-4">
           {/* Mystery Cop Card */}
           <motion.button
-            onClick={() => mysteryCopCards > 0 && onDeploy('mystery-cop')}
-            disabled={mysteryCopCards === 0}
-            className={`w-full brutal-card p-4 flex items-center gap-4 text-left ${mysteryCopCards > 0
+            onClick={() => mysterySawaCards > 0 && onDeploy('mystery-sawa')}
+            disabled={mysterySawaCards === 0}
+            className={`w-full brutal-card p-4 flex items-center gap-4 text-left ${mysterySawaCards > 0
                 ? 'brutal-card-hover border-electric-red'
                 : 'opacity-50 border-gray-300'
               }`}
-            whileTap={mysteryCopCards > 0 ? { scale: 0.98 } : {}}
+            whileTap={mysterySawaCards > 0 ? { scale: 0.98 } : {}}
           >
             <div className="w-16 h-16 bg-gradient-to-br from-electric-red to-red-600 rounded-xl border-2 border-deep-charcoal flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-display font-bold text-lg">Mystery Cop</h3>
+                <h3 className="font-display font-bold text-lg">Mystery Sawa</h3>
                 <span className="px-2 py-0.5 bg-electric-red text-white rounded-pill text-xs font-display font-bold">
-                  {mysteryCopCards} available
+                  {mysterySawaCards} available
                 </span>
               </div>
               <p className="text-sm text-cool-gray mt-1">
@@ -90,7 +90,7 @@ export default function ArsenalDrawer({
                 <span>All squad members benefit</span>
               </div>
             </div>
-            {mysteryCopCards > 0 && (
+            {mysterySawaCards > 0 && (
               <div className="w-10 h-10 bg-electric-red rounded-full border-2 border-deep-charcoal flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
@@ -118,7 +118,7 @@ export default function ArsenalDrawer({
                 </span>
               </div>
               <p className="text-sm text-cool-gray mt-1">
-                Up to 10% off the entire lock total
+                Up to 10% off the entire Sawa total
               </p>
               <div className="flex items-center gap-1 mt-2 text-xs text-volt-green">
                 <Info className="w-3 h-3" />
