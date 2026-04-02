@@ -89,7 +89,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
 
   const handleScreenshotSuccess = () => {
     setStep('success');
-    setTimeout(() => onComplete(createdOrderId), 3000);
+    setTimeout(() => onComplete(createdOrderId), 2500);
   };
 
   // ── CHOOSE STEP ──────────────────────────────────────

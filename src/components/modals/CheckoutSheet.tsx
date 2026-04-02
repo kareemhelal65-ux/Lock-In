@@ -105,7 +105,7 @@ export default function CheckoutSheet({
     setShowSuccess(true);
     setTimeout(() => {
       onComplete();
-    }, isHostCover ? 2500 : 5000);
+    }, 2500);
   };
 
   if (showSuccess) {
@@ -140,12 +140,12 @@ export default function CheckoutSheet({
               {localOrderId}
             </p>
             <p className="text-xs text-cool-gray mt-4 font-bold">
-              Track your order in the Locks tab
+              Track your order in the Orders tab
             </p>
           </div>
 
           <p className="text-sm text-deep-charcoal/60">
-            Redirecting to locks...
+            Redirecting to Orders...
           </p>
         </div>
       </motion.div>

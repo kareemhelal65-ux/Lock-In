@@ -131,13 +131,13 @@ export default function SoloPenaltyDrawer({
 
       setTimeout(() => {
         onCheckoutSolo(result.order);
-      }, 5000);
+      }, 2500);
 
     } catch (err) {
       console.error('Failed to create solo order', err);
       setOrderId('SOLO-ERR');
       setShowSuccess(true);
-      setTimeout(() => onCheckoutSolo(), 5000);
+      setTimeout(() => onCheckoutSolo(), 2500);
     } finally {
       setIsProcessing(false);
     }
@@ -146,7 +146,7 @@ export default function SoloPenaltyDrawer({
   const handleInstapaySuccess = () => {
     setShowDropzone(false);
     setShowSuccess(true);
-    setTimeout(() => onCheckoutSolo(), 5000);
+    setTimeout(() => onCheckoutSolo(), 2500);
   };
 
   if (showSuccess) {
@@ -185,7 +185,7 @@ export default function SoloPenaltyDrawer({
           </div>
 
           <p className="text-sm text-gray-500">
-            Redirecting to orders...
+            Redirecting to Orders...
           </p>
         </div>
       </motion.div>

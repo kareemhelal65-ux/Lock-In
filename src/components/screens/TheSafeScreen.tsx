@@ -276,7 +276,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     if (showOwedScreen) {
       timer = setTimeout(() => {
         onClose();
-      }, 5000);
+      }, 2500);
     }
     return () => {
       if (timer) clearTimeout(timer);
@@ -290,7 +290,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     if (showHostSuccess) {
       timer = setTimeout(() => {
         onClose();
-      }, 5000);
+      }, 2500);
     }
     return () => {
       if (timer) clearTimeout(timer);
@@ -939,7 +939,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             </motion.div>
             <h1 className="font-display font-black text-6xl uppercase mb-4 leading-tight">BAG SECURED</h1>
             <p className="font-bold text-2xl opacity-80 uppercase tracking-widest">You covered the entire Sawa!</p>
-            <p className="mt-8 text-sm font-bold opacity-60">Redirecting to Orders tab...</p>
+            <p className="mt-8 text-sm font-bold opacity-60 uppercase tracking-widest">Redirecting to Orders...</p>
           </div>
         )}
       </AnimatePresence>
@@ -970,7 +970,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                 />
               ))}
             </div>
-            <p className="mt-8 text-xs font-bold opacity-70 uppercase tracking-widest">Redirecting to Orders Tab</p>
+            <p className="mt-8 text-xs font-bold opacity-70 uppercase tracking-widest">Redirecting to Orders...</p>
           </div>
         )}
       </AnimatePresence>
