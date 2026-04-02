@@ -23,7 +23,6 @@ import LocksTab from '@/components/tabs/LocksTab';
 // Modals & Flows
 import HostLockModal from '@/components/modals/HostLockModal';
 import TheSafeScreen from '@/components/screens/TheSafeScreen';
-import MysterySpinner from '@/components/modals/MysterySpinner';
 import SoloPenaltyDrawer from '@/components/modals/SoloPenaltyDrawer';
 import AuthScreen from '@/components/auth/AuthScreen';
 import OnboardingScreen from '@/components/auth/OnboardingScreen';
@@ -45,11 +44,9 @@ function AppContent() {
   const [showSafe, setShowSafe] = useState(false);
   const [currentSafeId, setCurrentSafeId] = useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = useState<'host' | 'guest'>('guest');
-  const [showSpinner, setShowSpinner] = useState(false);
   const [showPostCreation, setShowPostCreation] = useState(false);
   const [showSoloPenalty, setShowSoloPenalty] = useState(false);
   const [soloPenaltyData, setSoloPenaltyData] = useState<any>(null);
-  const [spinnerType, setSpinnerType] = useState<'standard' | 'squad'>('standard');
   const [showVendorProfile, setShowVendorProfile] = useState(false);
   const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
   const [showPlusMenu, setShowPlusMenu] = useState(false);
@@ -60,8 +57,6 @@ function AppContent() {
     setCurrentUser,
     addNotification,
     addSafe,
-
-    incrementSawasUntilMysterySawa,
     activeSafes
   } = useApp();
 
@@ -237,7 +232,7 @@ function AppContent() {
       }
 
       setShowPostCreation(true);
-      incrementSawasUntilMysterySawa();
+      // Removed incrementSawasUntilMysterySawa
       addNotification({
         id: `lock-start-${Date.now()}`,
         type: 'safe_invite',
@@ -331,26 +326,7 @@ function AppContent() {
   // Handle confirming lock (show spinner)
   const handleConfirmLock = () => {
     setShowSafe(false);
-    setSpinnerType('standard');
-    setShowSpinner(true);
-  };
-
-  // Handle spinner complete
-  const handleSpinnerComplete = async (discount: number) => {
-    setShowSpinner(false);
-    setShowSafe(false);
     setActiveTab('locks');
-
-    addNotification({
-      id: `notif-${Date.now()}`,
-      type: 'order_confirmed',
-      title: 'SYNCED!',
-      message: `You saved ${discount}% on your order!`,
-      timestamp: new Date(),
-      read: false,
-    });
-
-    // Streaks logic has been moved entirely to the backend upon vendor validation (FIRE)
   };
 
   // Handle solo order attempt
@@ -624,15 +600,6 @@ function AppContent() {
           <HostLockModal
             onClose={() => setShowHostModal(false)}
             onHost={handleHostLock}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showSpinner && (
-          <MysterySpinner
-            onComplete={handleSpinnerComplete}
-            isSquadSpinner={spinnerType === 'squad'}
           />
         )}
       </AnimatePresence>

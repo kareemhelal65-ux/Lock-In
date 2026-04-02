@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import type { Safe, Notification, Order, CardType } from '@/types';
 
 interface AppContextType {
@@ -29,7 +29,6 @@ interface AppContextType {
   // User Stats
   hypeScore: number;
   addHypeScore: (points: number) => void;
-  pointsUntilGamble: number;
   keysAvailable: number;
   inventory: any[];
   setInventory: (inventory: any[]) => void;
@@ -37,7 +36,6 @@ interface AppContextType {
   // Vendor On Lock
   vendorsOnLock: string[];
   toggleVendorOnLock: (vendorId: string) => void;
-  incrementSawasUntilMysterySawa: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -112,9 +110,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
   }, [currentUser?.id]);
 
-  const pointsUntilGamble = useMemo(() => {
-    return 250 - (hypeScore % 250);
-  }, [hypeScore]);
 
   const addSafe = useCallback((safe: Safe) => {
     setActiveSafes(prev => [...prev, safe]);
@@ -217,10 +212,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const incrementSawasUntilMysterySawa = useCallback(() => {
-    // Mock implementation or state update if needed
-    console.log("Incrementing sawas until mystery sawa...");
-  }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -245,13 +236,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
         hypeScore,
         addHypeScore,
-        pointsUntilGamble,
         keysAvailable,
         inventory,
         setInventory,
         vendorsOnLock,
         toggleVendorOnLock,
-        incrementSawasUntilMysterySawa,
       }}
     >
       {children}
