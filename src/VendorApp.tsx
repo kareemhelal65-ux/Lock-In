@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Zap, Activity } from 'lucide-react';
+import { ArrowLeft, Zap, Activity, Globe } from 'lucide-react';
 import VendorDashboard from '@/components/vendor/VendorDashboard';
 import VendorRoster from '@/components/vendor/VendorRoster';
 import DropStudio from '@/components/vendor/DropStudio';
@@ -22,6 +22,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
         return (saved as any) || 'terminal';
     });
     const [showProfileEditor, setShowProfileEditor] = useState(false);
+    const [lang, setLang] = useState<'en' | 'ar'>('en');
 
     // Vendor data
     const [ledgerPin, setLedgerPin] = useState('1234');
@@ -474,6 +475,13 @@ export default function VendorApp({ onBack }: VendorAppProps) {
 
                     <div className="flex items-center gap-2 shrink-0">
                         <button
+                            onClick={() => setLang(l => l === 'en' ? 'ar' : 'en')}
+                            className="text-[10px] md:text-xs font-bold uppercase text-white border-2 border-cool-gray/30 px-2 md:px-3 py-1.5 md:py-2 rounded-lg hover:border-volt-green transition-colors flex items-center gap-2"
+                        >
+                            <Globe className="w-3 h-3 md:w-4 md:h-4 text-volt-green" />
+                            {lang === 'en' ? 'عربي' : 'EN'}
+                        </button>
+                        <button
                             onClick={() => setShowProfileEditor(true)}
                             className="text-[10px] md:text-xs font-bold uppercase text-volt-green border-2 border-volt-green/30 px-2 md:px-3 py-1.5 md:py-2 rounded-lg hover:bg-volt-green/10"
                         >
@@ -495,8 +503,8 @@ export default function VendorApp({ onBack }: VendorAppProps) {
             </header>
 
             {/* Main Vendor Content */}
-            <div className="flex-1 overflow-hidden flex flex-col relative w-full bg-deep-charcoal">
-                {activeTab === 'terminal' && <VendorDashboard vendorId={currentVendorId} />}
+            <div className="flex-1 overflow-hidden flex flex-col relative w-full bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+                {activeTab === 'terminal' && <VendorDashboard vendorId={currentVendorId} lang={lang} />}
                 {activeTab === 'roster' && <VendorRoster vendorId={currentVendorId} />}
                 {activeTab === 'drop' && <DropStudio vendorId={currentVendorId} />}
                 {activeTab === 'ledger' && <VendorLedger correctPin={ledgerPin} vendorId={currentVendorId} />}

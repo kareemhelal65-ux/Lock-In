@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle2, Flame, Users, ArrowRight, Activity, Image as ImageIcon, Globe } from 'lucide-react';
+import { Clock, CheckCircle2, Flame, Users, ArrowRight, Activity, Image as ImageIcon } from 'lucide-react';
 
 interface VendorDashboardProps {
-    vendorId: string;
+    vendorId: string | null;
+    lang: 'en' | 'ar';
 }
 
 const translations = {
@@ -63,11 +64,10 @@ const translations = {
     }
 };
 
-export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
+export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps) {
     const [orders, setOrders] = useState<any[]>([]);
     const [mobileView, setMobileView] = useState<'incoming' | 'active'>('incoming');
     const [reviewingOrder, setReviewingOrder] = useState<any | null>(null);
-    const [lang, setLang] = useState<'en' | 'ar'>('en');
 
     const fetchDashboard = async () => {
         if (!vendorId) return;
@@ -119,18 +119,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
     const t = translations[lang];
 
     return (
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Header / Language Toggle */}
-            <div className={`bg-deep-charcoal border-b-2 border-cool-gray/20 p-2 flex shrink-0 ${lang === 'ar' ? 'justify-start' : 'justify-end'} px-4`}>
-                <button
-                    onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
-                    className="flex items-center gap-2 bg-zinc-900 border border-cool-gray/30 px-3 py-1.5 rounded-full text-white text-xs font-bold uppercase hover:bg-zinc-800 transition-colors"
-                >
-                    <Globe className="w-4 h-4 text-volt-green" />
-                    {lang === 'en' ? 'عربي' : 'EN'}
-                </button>
-            </div>
-
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-deep-charcoal">
             {/* Mobile View Toggle */}
             <div className="md:hidden flex border-b-2 border-cool-gray/20 bg-deep-charcoal shrink-0">
                 <button
