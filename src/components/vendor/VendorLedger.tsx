@@ -18,7 +18,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
         totalVolume: 0,
         commissionOwed: 0,
         totalOrders: 0,
-        peakHours: [0, 0, 0, 0, 0, 0, 0],
+        peakHours: new Array(16).fill(0),
         itemPopularity: [],
         volumeChange: 0,
         ordersChange: 0
@@ -147,7 +147,9 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                                         animate={{ height: `${height}%` }}
                                         className={`w-full rounded-t-sm ${height === 100 ? 'bg-volt-green' : 'bg-cool-gray/40'}`}
                                     />
-                                    <span className="text-[10px] text-cool-gray font-bold">{11 + i}am</span>
+                                    <span className="text-[10px] text-cool-gray font-bold">
+                                        {8 + i < 12 ? `${8 + i}am` : 8 + i === 12 ? '12pm' : `${8 + i - 12}pm`}
+                                    </span>
                                 </div>
                             ))}
                         </div>

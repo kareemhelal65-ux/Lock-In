@@ -320,13 +320,13 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         const totalVolume = currentVolume;
         const totalOrders = currentOrdersCount;
 
-        // 1. Calculate Peak Hours (11am to 5pm)
-        const hourCounts = new Array(7).fill(0);
+        // 1. Calculate Peak Hours (8am to 11pm)
+        const hourCounts = new Array(16).fill(0);
         let maxCount = 0;
         currentOrders.forEach(order => {
             const hour = new Date(order.createdAt).getHours();
-            if (hour >= 11 && hour <= 17) {
-                const index = hour - 11;
+            if (hour >= 8 && hour <= 23) {
+                const index = hour - 8;
                 hourCounts[index]++;
                 if (hourCounts[index] > maxCount) maxCount = hourCounts[index];
             }
