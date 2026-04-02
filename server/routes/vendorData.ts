@@ -549,6 +549,8 @@ vendorDataRouter.post('/:id/announcement', async (req, res) => {
     }
 });
 
+// Clear Vendor Announcement
+vendorDataRouter.delete('/:id/announcement', async (req, res) => {
     try {
         await prisma.vendor.update({ 
             where: { id: req.params.id }, 
