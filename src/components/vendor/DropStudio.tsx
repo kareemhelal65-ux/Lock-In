@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Send, Clock, Tag, Flame, CheckCircle2, Megaphone, X } from 'lucide-react';
+import { translations } from './translations';
 
 interface DropStudioProps {
     vendorId: string;
+    lang: 'en' | 'ar';
 }
 
-export default function DropStudio({ vendorId }: DropStudioProps) {
+export default function DropStudio({ vendorId, lang }: DropStudioProps) {
+    const t = translations[lang];
+
     // Announcement state
     const [announcement, setAnnouncement] = useState('');
     const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
@@ -73,7 +77,7 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar pb-24 items-center flex justify-center bg-deep-charcoal relative">
+        <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar pb-24 items-center flex justify-center bg-deep-charcoal relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-electric-red/10 rounded-full blur-[100px]" />
             </div>
@@ -83,8 +87,8 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                     <div className="w-20 h-20 bg-electric-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-brutal-sm">
                         <Zap className="w-10 h-10 text-white" />
                     </div>
-                    <h2 className="font-display font-black text-5xl uppercase tracking-tighter mb-2">Drop Studio</h2>
-                    <p className="text-cool-gray">Launch flash sales or broadcast announcements to everyone tracking your radar.</p>
+                    <h2 className="font-display font-black text-5xl uppercase tracking-tighter mb-2">{t.dropStudio}</h2>
+                    <p className="text-cool-gray">{t.studioSub}</p>
                 </div>
 
                 {/* Announcements Section */}
@@ -94,13 +98,13 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                             <Megaphone className="w-5 h-5 text-deep-charcoal" />
                         </div>
                         <div>
-                            <h3 className="font-display font-black text-xl uppercase tracking-tight">Announcements</h3>
-                            <p className="text-xs text-cool-gray">Pinned message shown to all your followers in the Feed</p>
+                            <h3 className="font-display font-black text-xl uppercase tracking-tight">{t.announcements}</h3>
+                            <p className="text-xs text-cool-gray">{t.announcementsSub}</p>
                         </div>
                     </div>
                     <textarea
                         className="w-full bg-black border-2 border-cool-gray/30 rounded-xl p-4 text-white text-base font-display font-bold focus:border-volt-green focus:outline-none transition-colors resize-none"
-                        placeholder="e.g. We're running low on burgers today — order fast!"
+                        placeholder={t.announcementPlace}
                         rows={3}
                         value={announcement}
                         onChange={e => setAnnouncement(e.target.value)}
@@ -110,7 +114,7 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                         <span className="text-xs text-cool-gray">{announcement.length}/200</span>
                         {announcementSuccess && (
                             <span className="text-xs text-volt-green font-bold flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> Announcement live!
+                                <CheckCircle2 className="w-3 h-3" /> {t.announcementLive}
                             </span>
                         )}
                     </div>
@@ -120,13 +124,13 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                             disabled={!announcement.trim() || isPostingAnnouncement}
                             className="flex-1 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-widest py-3 rounded-xl hover:bg-[#b0f200] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            <Send className="w-4 h-4" /> {isPostingAnnouncement ? 'Posting...' : 'Post Announcement'}
+                            <Send className="w-4 h-4" /> {isPostingAnnouncement ? t.posting : t.postAnnouncement}
                         </button>
                         <button
                             onClick={handleClearAnnouncement}
                             className="px-4 py-3 bg-zinc-800 text-cool-gray font-display font-bold uppercase rounded-xl hover:bg-zinc-700 transition-colors flex items-center gap-2"
                         >
-                            <X className="w-4 h-4" /> Clear
+                            <X className="w-4 h-4" /> {t.clear}
                         </button>
                     </div>
                 </div>
@@ -147,8 +151,8 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                                 >
                                     <CheckCircle2 className="w-20 h-20 mb-4" />
                                 </motion.div>
-                                <h3 className="font-display font-black text-4xl uppercase tracking-tighter mb-2">Drop is Live</h3>
-                                <p className="font-bold">Broadcasted to 4,208 students.</p>
+                                <h3 className="font-display font-black text-4xl uppercase tracking-tighter mb-2">{t.dropLive}</h3>
+                                <p className="font-bold">{t.broadcastedTo.replace('{count}', '4,208')}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -156,11 +160,11 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                     <div className="space-y-6 relative z-10">
                         {/* Title */}
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">Drop Title</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.dropTitle}</label>
                             <input
                                 type="text"
                                 className="w-full bg-black border-2 border-cool-gray/30 rounded-xl p-4 text-white text-xl font-display font-bold focus:border-electric-red focus:outline-none transition-colors"
-                                placeholder="e.g. Mid-term Madness Burger Combo"
+                                placeholder={t.dropTitlePlace}
                                 value={form.title}
                                 onChange={e => setForm({ ...form, title: e.target.value })}
                             />
@@ -169,12 +173,12 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                         {/* Pricing */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">Drop Price (EGP)</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.dropPrice}</label>
                                 <div className="relative">
-                                    <Flame className="w-5 h-5 text-electric-red absolute left-4 top-1/2 -translate-y-1/2" />
+                                    <Flame className={`w-5 h-5 text-electric-red absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2`} />
                                     <input
                                         type="number"
-                                        className="w-full bg-black border-2 border-electric-red/50 rounded-xl py-4 pl-12 pr-4 text-white text-xl font-display font-extrabold focus:border-electric-red focus:outline-none transition-colors"
+                                        className={`w-full bg-black border-2 border-electric-red/50 rounded-xl py-4 ${lang === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-white text-xl font-display font-extrabold focus:border-electric-red focus:outline-none transition-colors`}
                                         placeholder="e.g. 99"
                                         value={form.dropPrice}
                                         onChange={e => setForm({ ...form, dropPrice: e.target.value })}
@@ -182,12 +186,12 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">Original Price (opt)</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.origPrice}</label>
                                 <div className="relative">
-                                    <Tag className="w-5 h-5 text-cool-gray absolute left-4 top-1/2 -translate-y-1/2" />
+                                    <Tag className={`w-5 h-5 text-cool-gray absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2`} />
                                     <input
                                         type="number"
-                                        className="w-full bg-black border-2 border-cool-gray/30 rounded-xl py-4 pl-12 pr-4 text-cool-gray text-xl font-display font-bold focus:border-cool-gray focus:outline-none transition-colors"
+                                        className={`w-full bg-black border-2 border-cool-gray/30 rounded-xl py-4 ${lang === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-cool-gray text-xl font-display font-bold focus:border-cool-gray focus:outline-none transition-colors`}
                                         placeholder="e.g. 150"
                                         value={form.originalPrice}
                                         onChange={e => setForm({ ...form, originalPrice: e.target.value })}
@@ -199,28 +203,28 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                         {/* Scarcity Settings */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">Drop Quantity</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.dropQuantity}</label>
                                 <input
                                     type="number"
                                     className="w-full bg-black border-2 border-cool-gray/30 rounded-xl p-4 text-white text-lg font-bold focus:border-electric-red focus:outline-none transition-colors"
-                                    placeholder="e.g. 50 (Leave max for unlimited)"
+                                    placeholder={t.dropQuantPlace}
                                     value={form.quantity}
                                     onChange={e => setForm({ ...form, quantity: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">Duration (Minutes)</label>
+                                <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.durationMin}</label>
                                 <div className="relative">
-                                    <Clock className="w-5 h-5 text-volt-green absolute left-4 top-1/2 -translate-y-1/2" />
+                                    <Clock className={`w-5 h-5 text-volt-green absolute ${lang === 'ar' ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2`} />
                                     <select
-                                        className="w-full bg-black border-2 border-cool-gray/30 rounded-xl py-4 pl-12 pr-4 text-white text-lg font-bold focus:border-electric-red focus:outline-none transition-colors appearance-none"
+                                        className={`w-full bg-black border-2 border-cool-gray/30 rounded-xl py-4 ${lang === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-white text-lg font-bold focus:border-electric-red focus:outline-none transition-colors appearance-none`}
                                         value={form.duration}
                                         onChange={e => setForm({ ...form, duration: e.target.value })}
                                     >
-                                        <option value="15">15 Minutes</option>
-                                        <option value="30">30 Minutes</option>
-                                        <option value="60">1 Hour</option>
-                                        <option value="120">2 Hours</option>
+                                        <option value="15">{t.min15}</option>
+                                        <option value="30">{t.min30}</option>
+                                        <option value="60">{t.hour1}</option>
+                                        <option value="120">{t.hour2}</option>
                                     </select>
                                 </div>
                             </div>
@@ -244,12 +248,12 @@ export default function DropStudio({ vendorId }: DropStudioProps) {
                                 </motion.div>
                             ) : (
                                 <>
-                                    <Send className="w-6 h-6" /> Publish Drop
+                                    <Send className="w-6 h-6" /> {t.publishDrop}
                                 </>
                             )}
                         </button>
                         <p className="text-center text-xs text-cool-gray mt-4 font-bold uppercase tracking-widest">
-                            Action is irreversible. Pings sent instantly.
+                            {t.irreversible}
                         </p>
                     </div>
                 </div>

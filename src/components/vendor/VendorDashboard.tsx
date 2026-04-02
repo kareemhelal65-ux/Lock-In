@@ -1,73 +1,27 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle2, Flame, Users, ArrowRight, Activity, Image as ImageIcon } from 'lucide-react';
+import { 
+    Clock, 
+    CheckCircle2, 
+    Flame, 
+    Users, 
+    ArrowRight, 
+    Activity, 
+    Image as ImageIcon 
+} from 'lucide-react';
+import { translations } from './translations';
 
 interface VendorDashboardProps {
     vendorId: string | null;
     lang: 'en' | 'ar';
 }
 
-const translations = {
-    en: {
-        incoming: "Incoming",
-        active: "Active",
-        quietKitchen: "Quiet in the kitchen",
-        noActiveOrders: "No active orders",
-        awaitingPayment: "Awaiting Payment",
-        awaitingVerification: "Awaiting Verification",
-        paymentReceived: "Payment Received",
-        group: "GROUP",
-        solo: "SOLO",
-        receiptAttached: "Receipt(s) Attached",
-        reviewSync: "Review & Sync",
-        markReady: "Mark Ready",
-        strikeHandoff: "Strike (Handoff)",
-        reviewOrder: "Review Order",
-        total: "Total",
-        itemsOrdered: "Items Ordered",
-        note: "Note",
-        share: "Share",
-        paid: "Paid",
-        noReceipt: "No receipt uploaded yet.",
-        noParticipantData: "No participant data found.",
-        rejectOrder: "Reject Order",
-        approveSync: "Approve & Sync",
-        customer: "Customer",
-        unknownItem: "Unknown Item"
-    },
-    ar: {
-        incoming: "الطلبات الواردة",
-        active: "نشط",
-        quietKitchen: "المطبخ هادئ",
-        noActiveOrders: "لا يوجد طلبات نشطة",
-        awaitingPayment: "في انتظار الدفع",
-        awaitingVerification: "في انتظار التحقق",
-        paymentReceived: "تم استلام الدفع",
-        group: "مجموعة",
-        solo: "فردي",
-        receiptAttached: "إيصال(ات) مرفقة",
-        reviewSync: "مراجعة ومزامنة",
-        markReady: "تحديد كجاهز",
-        strikeHandoff: "تسليم الطلب",
-        reviewOrder: "مراجعة الطلب",
-        total: "المجموع",
-        itemsOrdered: "العناصر المطلوبة",
-        note: "ملاحظة",
-        share: "الحصة",
-        paid: "تم الدفع",
-        noReceipt: "لم يتم رفع إيصال بعد.",
-        noParticipantData: "لم يتم العثور على بيانات مشارك.",
-        rejectOrder: "إلغاء الطلب",
-        approveSync: "موافقة ومزامنة",
-        customer: "عميل",
-        unknownItem: "عنصر غير معروف"
-    }
-};
-
 export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps) {
     const [orders, setOrders] = useState<any[]>([]);
     const [mobileView, setMobileView] = useState<'incoming' | 'active'>('incoming');
     const [reviewingOrder, setReviewingOrder] = useState<any | null>(null);
+
+    const t = translations[lang];
 
     const fetchDashboard = async () => {
         if (!vendorId) return;
@@ -116,8 +70,6 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
         try { return JSON.parse(modifiers || '[]'); } catch { return []; }
     };
 
-    const t = translations[lang];
-
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-deep-charcoal">
             {/* Mobile View Toggle */}
@@ -126,14 +78,14 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                     onClick={() => setMobileView('incoming')}
                     className={`flex-1 py-3 font-display font-bold uppercase transition-colors text-sm ${mobileView === 'incoming' ? 'bg-volt-green text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
                 >
-                    {t.incoming} ({incomingOrders.length})
+                    {t.incomingOrders} ({incomingOrders.length})
                 </button>
                 <div className="w-0.5 bg-cool-gray/20" />
                 <button
                     onClick={() => setMobileView('active')}
                     className={`flex-1 py-3 font-display font-bold uppercase transition-colors text-sm ${mobileView === 'active' ? 'bg-volt-green text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
                 >
-                    {t.active} ({activeOrders.length})
+                    {t.activeOrders} ({activeOrders.length})
                 </button>
             </div>
 
@@ -142,7 +94,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                 <div className={`w-full md:w-1/2 flex-col border-r-2 border-cool-gray/20 ${mobileView === 'incoming' ? 'flex' : 'hidden md:flex'}`}>
                     <div className="p-4 bg-deep-charcoal border-b-2 border-cool-gray/20 sticky top-0 z-10 flex justify-between items-center">
                         <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
-                            {t.incoming} <span className="text-cool-gray text-lg mx-2">({incomingOrders.length})</span>
+                            {t.incomingOrders} <span className="text-cool-gray text-lg mx-2">({incomingOrders.length})</span>
                         </h2>
                         <div className="w-3 h-3 rounded-full bg-electric-red animate-pulse" />
                     </div>
@@ -216,7 +168,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                                 )}
                                                 {item.specialNotes && (
                                                     <p className="mt-1 text-xs text-electric-red font-bold italic">
-                                                        {t.note}: {item.specialNotes}
+                                                        {t.specialNotes} {item.specialNotes}
                                                     </p>
                                                 )}
                                             </div>
@@ -242,7 +194,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                             ))}
                             {incomingOrders.length === 0 && (
                                 <div className="h-40 flex items-center justify-center border-2 border-dashed border-cool-gray/20 rounded-xl">
-                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">{t.quietKitchen}</p>
+                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">{t.noIncomingOrders}</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -253,7 +205,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                 <div className={`w-full md:w-1/2 flex-col bg-deep-charcoal/90 ${mobileView === 'active' ? 'flex' : 'hidden md:flex'}`}>
                     <div className="p-4 bg-deep-charcoal border-b-2 border-cool-gray/20 sticky top-0 z-10">
                         <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
-                            {t.active} <span className="text-cool-gray text-lg mx-2">({activeOrders.length})</span>
+                            {t.activeOrders} <span className="text-cool-gray text-lg mx-2">({activeOrders.length})</span>
                         </h2>
                     </div>
 
@@ -295,7 +247,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             onClick={() => removeOrder(order.id)}
                                             className="w-full bg-electric-red text-white font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-red-600 transition-colors group"
                                         >
-                                            <ArrowRight className={`w-5 h-5 transition-transform ${lang === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} /> {t.strikeHandoff}
+                                            <ArrowRight className={`w-5 h-5 transition-transform ${lang === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} /> {t.orderDelivered}
                                         </button>
                                     )}
                                 </motion.div>
@@ -340,7 +292,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                             <div className="flex-1 overflow-y-auto p-6 space-y-6">
                                 {/* Order items */}
                                 <div className="bg-zinc-900 rounded-xl p-4 border border-cool-gray/20">
-                                    <p className="font-bold text-cool-gray text-xs uppercase tracking-widest mb-3">{t.itemsOrdered}</p>
+                                    <p className="font-bold text-cool-gray text-xs uppercase tracking-widest mb-3">{t.itemsInOrder}</p>
                                     {reviewingOrder.items?.map((item: any, i: number) => (
                                         <div key={i} className="border-b border-cool-gray/20 py-2 last:border-0">
                                             <div className="flex justify-between text-white">
@@ -358,7 +310,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             )}
                                             {item?.specialNotes && (
                                                 <p className="text-[10px] text-electric-red font-bold uppercase mt-1">
-                                                    {t.note}: {item.specialNotes}
+                                                    {t.specialNotes} {item.specialNotes}
                                                 </p>
                                             )}
                                         </div>

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Zap, Activity, Globe } from 'lucide-react';
+import { ArrowLeft, Zap, Activity, Globe, Edit2, LogOut } from 'lucide-react';
 import VendorDashboard from '@/components/vendor/VendorDashboard';
 import VendorRoster from '@/components/vendor/VendorRoster';
 import DropStudio from '@/components/vendor/DropStudio';
 import VendorLedger from '@/components/vendor/VendorLedger';
 import VendorProfileEditor from '@/components/vendor/VendorProfileEditor';
+import { translations } from '@/components/vendor/translations';
 
 interface VendorAppProps {
     onBack: () => void;
@@ -17,12 +18,13 @@ export default function VendorApp({ onBack }: VendorAppProps) {
         return (saved as any) || 'login';
     });
     const [vendorStatus, setVendorStatus] = useState<'live' | 'swamped' | 'offline'>('live');
-    const [activeTab, setActiveTab] = useState<'terminal' | 'roster' | 'drop' | 'ledger'>(() => {
+    const [activeTab, setActiveTab] = useState<'terminal' | 'roster' | 'studio' | 'ledger'>(() => {
         const saved = localStorage.getItem('vendorActiveTab');
         return (saved as any) || 'terminal';
     });
     const [showProfileEditor, setShowProfileEditor] = useState(false);
     const [lang, setLang] = useState<'en' | 'ar'>('en');
+    const t = translations[lang];
 
     // Vendor data
     const [ledgerPin, setLedgerPin] = useState('1234');
@@ -425,25 +427,25 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                             onClick={() => setActiveTab('terminal')}
                             className={`font-display font-bold uppercase text-xs md:text-sm tracking-widest transition-colors whitespace-nowrap ${activeTab === 'terminal' ? 'text-white' : 'text-cool-gray hover:text-white'}`}
                         >
-                            Terminal
+                            {t.terminal}
                         </button>
                         <button
                             onClick={() => setActiveTab('roster')}
                             className={`font-display font-bold uppercase text-xs md:text-sm tracking-widest transition-colors whitespace-nowrap ${activeTab === 'roster' ? 'text-white' : 'text-cool-gray hover:text-white'}`}
                         >
-                            Roster
+                            {t.roster}
                         </button>
                         <button
-                            onClick={() => setActiveTab('drop')}
-                            className={`font-display font-bold uppercase text-xs md:text-sm tracking-widest transition-colors flex items-center gap-1 whitespace-nowrap ${activeTab === 'drop' ? 'text-white' : 'text-cool-gray hover:text-white'}`}
+                            onClick={() => setActiveTab('studio')}
+                            className={`font-display font-bold uppercase text-xs md:text-sm tracking-widest transition-colors flex items-center gap-1 whitespace-nowrap ${activeTab === 'studio' ? 'text-white' : 'text-cool-gray hover:text-white'}`}
                         >
-                            <Zap className="w-3 h-3 md:w-4 md:h-4" /> Studio
+                            <Zap className="w-3 h-3 md:w-4 md:h-4" /> {t.studio}
                         </button>
                         <button
                             onClick={() => setActiveTab('ledger')}
                             className={`font-display font-bold uppercase text-xs md:text-sm tracking-widest transition-colors flex items-center gap-1 whitespace-nowrap ${activeTab === 'ledger' ? 'text-white' : 'text-cool-gray hover:text-white'}`}
                         >
-                            <Activity className="w-3 h-3 md:w-4 md:h-4" /> Ledger
+                            <Activity className="w-3 h-3 md:w-4 md:h-4" /> {t.ledger}
                         </button>
                     </nav>
                 </div>
@@ -462,15 +464,15 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                         <button
                             onClick={() => handleStatusChange('live')}
                             className={`px-3 md:px-4 py-1.5 rounded text-[10px] md:text-xs font-black uppercase ${vendorStatus === 'live' ? 'bg-volt-green text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
-                        >Live</button>
+                        >{t.live}</button>
                         <button
                             onClick={() => handleStatusChange('swamped')}
                             className={`px-3 md:px-4 py-1.5 rounded text-[10px] md:text-xs font-black uppercase ${vendorStatus === 'swamped' ? 'bg-yellow-400 text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
-                        >Swamped</button>
+                        >{t.swamped}</button>
                         <button
                             onClick={() => handleStatusChange('offline')}
                             className={`px-3 md:px-4 py-1.5 rounded text-[10px] md:text-xs font-black uppercase ${vendorStatus === 'offline' ? 'bg-electric-red text-white' : 'text-cool-gray hover:text-white'}`}
-                        >Offline</button>
+                        >{t.offline}</button>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
@@ -483,9 +485,10 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                         </button>
                         <button
                             onClick={() => setShowProfileEditor(true)}
-                            className="text-[10px] md:text-xs font-bold uppercase text-volt-green border-2 border-volt-green/30 px-2 md:px-3 py-1.5 md:py-2 rounded-lg hover:bg-volt-green/10"
+                            className="p-2 border-2 border-cool-gray/30 rounded hover:bg-white/5 text-cool-gray hover:text-white transition-all flex items-center gap-2"
                         >
-                            Edit
+                            <Edit2 className="w-4 h-4" />
+                            <span className="hidden md:inline font-display font-bold uppercase text-[10px] tracking-widest">{t.edit}</span>
                         </button>
                         <button
                             onClick={() => {
@@ -493,11 +496,11 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                                 setAppState('login');
                                 onBack();
                             }}
-                            className="text-[10px] md:text-xs font-bold uppercase text-cool-gray border-2 border-cool-gray/30 px-2 md:px-3 py-1.5 md:py-2 rounded-lg hover:text-white"
+                            className="p-2 border-2 border-cool-gray/30 rounded hover:bg-electric-red/10 text-cool-gray hover:text-electric-red transition-all flex items-center gap-2"
                         >
-                            Out
+                            <LogOut className="w-4 h-4" />
+                            <span className="hidden md:inline font-display font-bold uppercase text-[10px] tracking-widest">{t.out}</span>
                         </button>
-
                     </div>
                 </div>
             </header>
@@ -505,9 +508,9 @@ export default function VendorApp({ onBack }: VendorAppProps) {
             {/* Main Vendor Content */}
             <div className="flex-1 overflow-hidden flex flex-col relative w-full bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                 {activeTab === 'terminal' && <VendorDashboard vendorId={currentVendorId} lang={lang} />}
-                {activeTab === 'roster' && <VendorRoster vendorId={currentVendorId} />}
-                {activeTab === 'drop' && <DropStudio vendorId={currentVendorId} />}
-                {activeTab === 'ledger' && <VendorLedger correctPin={ledgerPin} vendorId={currentVendorId} />}
+                {activeTab === 'roster' && <VendorRoster vendorId={currentVendorId} lang={lang} />}
+                {activeTab === 'studio' && <DropStudio vendorId={currentVendorId} lang={lang} />}
+                {activeTab === 'ledger' && <VendorLedger correctPin={ledgerPin} vendorId={currentVendorId} lang={lang} />}
             </div>
 
             {/* Profile Editor Modal */}
@@ -515,6 +518,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                 {showProfileEditor && (
                     <VendorProfileEditor
                         vendorId={currentVendorId}
+                        lang={lang}
                         onClose={() => {
                             setShowProfileEditor(false);
                             fetchVendorProfile(currentVendorId);
