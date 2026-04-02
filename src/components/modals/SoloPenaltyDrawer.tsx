@@ -207,14 +207,14 @@ export default function SoloPenaltyDrawer({
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           className="bottom-sheet bg-gray-100 relative z-10"
-          style={{ maxHeight: '95vh', overflowY: 'auto' }}
+          style={{ maxHeight: '95vh' }}
         >
           <div className="w-full flex justify-center pt-3 pb-2">
             <div className="w-12 h-1.5 bg-gray-400 rounded-full" />
           </div>
 
           {showDropzone ? (
-            <div className="flex flex-col overflow-y-auto" style={{ minHeight: '60vh' }}>
+            <div className="flex-1 flex flex-col justify-start overflow-y-auto">
               <PaymentDropzone
                 expectedAmount={finalTotal}
                 vendorInstapay={data.restaurant.instapayAddress || '@lockin_vendor'}

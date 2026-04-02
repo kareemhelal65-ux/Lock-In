@@ -198,6 +198,7 @@
   .bottom-sheet {
     @apply w-full mt-auto mb-0 bg-sneaker-white rounded-t-sticker border-t-2 border-x-2 border-deep-charcoal shadow-brutal-lg z-50;
     @apply md:my-auto md:max-w-[480px] md:rounded-3xl md:border-2 md:shadow-brutal-lg;
+    @apply flex flex-col overflow-hidden;
     max-height: 85vh;
   }
 

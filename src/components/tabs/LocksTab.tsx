@@ -425,18 +425,18 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="relative w-full bg-sneaker-white rounded-t-3xl border-t-4 border-black overflow-hidden max-h-[90vh] overflow-y-auto"
+                            className="relative w-full bg-sneaker-white rounded-t-3xl border-t-4 border-black flex flex-col max-h-[90vh] overflow-hidden"
                         >
-                            <div className="w-full flex justify-center pt-3 pb-2">
+                            <div className="w-full flex justify-center pt-3 pb-2 shrink-0">
                                 <div className="w-12 h-1.5 bg-deep-charcoal/20 rounded-full" />
                             </div>
-                            <div className="px-4 pb-2 border-b-2 border-black/10">
+                            <div className="px-4 pb-2 border-b-2 border-black/10 shrink-0">
                                 <h2 className="font-display font-extrabold text-2xl uppercase">Complete Payment</h2>
                                 <p className="text-cool-gray text-sm mt-1">
                                     Order {payingOrder.orderNumber || `#${payingOrder.id.slice(-6).toUpperCase()}`} · {payingOrder.totalAmount} EGP
                                 </p>
                             </div>
-                            <div className="p-4">
+                            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                                 <PaymentDropzone
                                     orderId={payingOrder.id}
                                     userId={currentUser?.id || ''}

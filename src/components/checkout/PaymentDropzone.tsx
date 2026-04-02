@@ -111,7 +111,7 @@ export default function PaymentDropzone({
     }
 
     return (
-        <div className="bg-white rounded-xl border-2 border-deep-charcoal flex flex-col w-full h-full min-h-[500px] md:min-h-0 overflow-y-auto">
+        <div className="bg-white rounded-xl border-2 border-deep-charcoal flex flex-col w-full h-full min-h-[400px] md:min-h-0 overflow-y-auto text-black">
             {/* Header */}
             <div className="p-5 border-b-2 border-deep-charcoal/10">
                 <h3 className="font-display font-extrabold text-2xl uppercase text-deep-charcoal text-center">
