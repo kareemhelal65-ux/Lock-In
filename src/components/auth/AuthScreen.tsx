@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface AuthScreenProps {
   onLogin: (user: any) => void;
@@ -106,10 +107,17 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
 
           <button
             type="submit"
-            className="brutal-btn-primary w-full mt-4 py-4 text-lg disabled:opacity-50"
+            className="brutal-btn-primary w-full mt-4 py-4 text-lg disabled:opacity-50 flex items-center justify-center gap-3"
             disabled={loading}
           >
-            {loading ? 'PROCESSING...' : (isLogin ? 'LOG IN' : 'SIGN UP')}
+            {loading ? (
+              <>
+                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                  <div className="w-6 h-6 border-4 border-t-deep-charcoal border-deep-charcoal/20 rounded-full" />
+                </motion.div>
+                PROCESSING...
+              </>
+            ) : (isLogin ? 'LOG IN' : 'SIGN UP')}
           </button>
         </form>
 

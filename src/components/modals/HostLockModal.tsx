@@ -364,10 +364,15 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
                       <button
                         onClick={handleSendInvites}
                         disabled={selectedFriends.size === 0 || sendingInvites}
-                        className={`w-full brutal-btn-primary py-4 text-lg ${(selectedFriends.size === 0 || sendingInvites) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full brutal-btn-primary py-4 text-lg flex items-center justify-center ${(selectedFriends.size === 0 || sendingInvites) ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {sendingInvites ? (
-                          <><Loader2 className="w-5 h-5 inline mr-2 animate-spin" />Sending Invites...</>
+                          <>
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className="mr-3">
+                              <div className="w-5 h-5 border-4 border-t-deep-charcoal border-deep-charcoal/20 rounded-full" />
+                            </motion.div>
+                            Sending Invites...
+                          </>
                         ) : (
                           `SEND INVITE${selectedFriends.size > 1 ? 'S' : ''} (${selectedFriends.size} friend${selectedFriends.size !== 1 ? 's' : ''})`
                         )}

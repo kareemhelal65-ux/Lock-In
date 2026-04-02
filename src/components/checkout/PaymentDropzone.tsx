@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, AlertTriangle, Loader2, X, CheckCircle2 } from 'lucide-react';
+import { Upload, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
 
 interface PaymentDropzoneProps {
     expectedAmount: number;
@@ -245,7 +245,9 @@ export default function PaymentDropzone({
                 >
                     {isVerifying ? (
                         <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                              <div className="w-5 h-5 border-4 border-t-deep-charcoal border-deep-charcoal/20 rounded-full" />
+                            </motion.div>
                             Uploading...
                         </>
                     ) : (

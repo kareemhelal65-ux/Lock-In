@@ -106,6 +106,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const [isHostCoverMode, setIsHostCoverMode] = useState(false);
   const [showHostSuccess, setShowHostSuccess] = useState(false);
   const [hasCheckedOut, setHasCheckedOut] = useState(false);
+  const [isLockingIn, setIsLockingIn] = useState(false);
+  const [isAbandoning, setIsAbandoning] = useState(false);
 
   // Local countdown as a smooth fallback (server is authoritative via polling)
   useEffect(() => {
@@ -308,8 +310,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const canLockIn = myOrder.length > 0 || sharedItems.length > 0 || myServerSharedTotal > 0;
 
   const handleLockIn = async () => {
-    if (!canLockIn) return;
-    setHasLockedIn(true);
+    if (!canLockIn || isLockingIn) return;
+    setIsLockingIn(true);
     if (currentUser?.id) {
       lockInUser(safeId, currentUser.id);
     } else {
@@ -352,6 +354,10 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
       }
     } catch (e) {
       console.error("Failed to sync lock in to server", e);
+      setHasLockedIn(false);
+    } finally {
+      setIsLockingIn(false);
+      setHasLockedIn(true);
     }
 
     // Explicit Host Checkout Rules: Do NOT trigger checkout for guests here. Wait for Host trigger.
@@ -420,6 +426,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
         <button
           onClick={async () => {
             if (window.confirm("Are you sure you want to abandon this session? Your shared items will be deleted.")) {
+              setIsAbandoning(true);
               try {
                 if (currentUser?.id) {
                   await fetch(`/api/consumer/safes/${safeId}/abandon`, {
@@ -430,13 +437,22 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                 }
               } catch (e) {
                 console.error('Abandon failed', e);
+              } finally {
+                setIsAbandoning(false);
               }
               onClose();
             }
           }}
-          className="w-12 h-12 bg-white rounded-full border-4 border-black flex items-center justify-center brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all"
+          disabled={isAbandoning}
+          className={`w-12 h-12 bg-white rounded-full border-4 border-black flex items-center justify-center brutal-shadow-sm transition-all ${isAbandoning ? 'opacity-50 cursor-not-allowed' : 'active:translate-y-1 active:shadow-none'}`}
         >
-          <X className="w-6 h-6 text-black" />
+          {isAbandoning ? (
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+              <div className="w-5 h-5 border-4 border-t-black border-black/20 rounded-full" />
+            </motion.div>
+          ) : (
+            <X className="w-6 h-6 text-black" />
+          )}
         </button>
         <div className="flex bg-volt-green/20 border-2 border-volt-green rounded-full px-4 py-1.5 items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-volt-green animate-pulse" />
@@ -889,14 +905,23 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             </div>
           ) : (
             <button
-              disabled={!canLockIn}
+              disabled={!canLockIn || isLockingIn}
               onClick={handleLockIn}
-              className={`px-8 py-4 rounded-xl font-display font-black text-xl uppercase border-4 border-black flex items-center transition-all ${canLockIn
+              className={`px-8 py-4 rounded-xl font-display font-black text-xl uppercase border-4 border-black flex items-center transition-all ${canLockIn && !isLockingIn
                 ? 'bg-electric-red text-white brutal-shadow-sm active:translate-y-1 active:shadow-none'
-                : 'bg-gray-200 text-gray-400 opacity-50'
+                : 'bg-gray-200 text-gray-400 opacity-50 cursor-not-allowed'
                 }`}
             >
-              Go Sawa <ChevronRight className="w-6 h-6 ml-2 -mr-2" />
+              {isLockingIn ? (
+                <>
+                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className="mr-3">
+                    <div className="w-6 h-6 border-4 border-t-white border-white/20 rounded-full" />
+                  </motion.div>
+                  LOCKING IN...
+                </>
+              ) : (
+                <>Go Sawa <ChevronRight className="w-6 h-6 ml-2 -mr-2" /></>
+              )}
             </button>
           )}
         </div>
