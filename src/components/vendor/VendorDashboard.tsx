@@ -1,15 +1,73 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, CheckCircle2, Flame, Users, ArrowRight, Activity, Image as ImageIcon } from 'lucide-react';
+import { Clock, CheckCircle2, Flame, Users, ArrowRight, Activity, Image as ImageIcon, Globe } from 'lucide-react';
 
 interface VendorDashboardProps {
     vendorId: string;
 }
 
+const translations = {
+    en: {
+        incoming: "Incoming",
+        active: "Active",
+        quietKitchen: "Quiet in the kitchen",
+        noActiveOrders: "No active orders",
+        awaitingPayment: "Awaiting Payment",
+        awaitingVerification: "Awaiting Verification",
+        paymentReceived: "Payment Received",
+        group: "GROUP",
+        solo: "SOLO",
+        receiptAttached: "Receipt(s) Attached",
+        reviewSync: "Review & Sync",
+        markReady: "Mark Ready",
+        strikeHandoff: "Strike (Handoff)",
+        reviewOrder: "Review Order",
+        total: "Total",
+        itemsOrdered: "Items Ordered",
+        note: "Note",
+        share: "Share",
+        paid: "Paid",
+        noReceipt: "No receipt uploaded yet.",
+        noParticipantData: "No participant data found.",
+        rejectOrder: "Reject Order",
+        approveSync: "Approve & Sync",
+        customer: "Customer",
+        unknownItem: "Unknown Item"
+    },
+    ar: {
+        incoming: "الطلبات الواردة",
+        active: "نشط",
+        quietKitchen: "المطبخ هادئ",
+        noActiveOrders: "لا يوجد طلبات نشطة",
+        awaitingPayment: "في انتظار الدفع",
+        awaitingVerification: "في انتظار التحقق",
+        paymentReceived: "تم استلام الدفع",
+        group: "مجموعة",
+        solo: "فردي",
+        receiptAttached: "إيصال(ات) مرفقة",
+        reviewSync: "مراجعة ومزامنة",
+        markReady: "تحديد كجاهز",
+        strikeHandoff: "تسليم الطلب",
+        reviewOrder: "مراجعة الطلب",
+        total: "المجموع",
+        itemsOrdered: "العناصر المطلوبة",
+        note: "ملاحظة",
+        share: "الحصة",
+        paid: "تم الدفع",
+        noReceipt: "لم يتم رفع إيصال بعد.",
+        noParticipantData: "لم يتم العثور على بيانات مشارك.",
+        rejectOrder: "إلغاء الطلب",
+        approveSync: "موافقة ومزامنة",
+        customer: "عميل",
+        unknownItem: "عنصر غير معروف"
+    }
+};
+
 export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
     const [orders, setOrders] = useState<any[]>([]);
     const [mobileView, setMobileView] = useState<'incoming' | 'active'>('incoming');
     const [reviewingOrder, setReviewingOrder] = useState<any | null>(null);
+    const [lang, setLang] = useState<'en' | 'ar'>('en');
 
     const fetchDashboard = async () => {
         if (!vendorId) return;
@@ -58,22 +116,35 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
         try { return JSON.parse(modifiers || '[]'); } catch { return []; }
     };
 
+    const t = translations[lang];
+
     return (
-        <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-deep-charcoal">
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0 bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            {/* Header / Language Toggle */}
+            <div className={`bg-deep-charcoal border-b-2 border-cool-gray/20 p-2 flex shrink-0 ${lang === 'ar' ? 'justify-start' : 'justify-end'} px-4`}>
+                <button
+                    onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}
+                    className="flex items-center gap-2 bg-zinc-900 border border-cool-gray/30 px-3 py-1.5 rounded-full text-white text-xs font-bold uppercase hover:bg-zinc-800 transition-colors"
+                >
+                    <Globe className="w-4 h-4 text-volt-green" />
+                    {lang === 'en' ? 'عربي' : 'EN'}
+                </button>
+            </div>
+
             {/* Mobile View Toggle */}
             <div className="md:hidden flex border-b-2 border-cool-gray/20 bg-deep-charcoal shrink-0">
                 <button
                     onClick={() => setMobileView('incoming')}
                     className={`flex-1 py-3 font-display font-bold uppercase transition-colors text-sm ${mobileView === 'incoming' ? 'bg-volt-green text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
                 >
-                    Incoming ({incomingOrders.length})
+                    {t.incoming} ({incomingOrders.length})
                 </button>
                 <div className="w-0.5 bg-cool-gray/20" />
                 <button
                     onClick={() => setMobileView('active')}
                     className={`flex-1 py-3 font-display font-bold uppercase transition-colors text-sm ${mobileView === 'active' ? 'bg-volt-green text-deep-charcoal' : 'text-cool-gray hover:text-white'}`}
                 >
-                    Active ({activeOrders.length})
+                    {t.active} ({activeOrders.length})
                 </button>
             </div>
 
@@ -82,7 +153,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                 <div className={`w-full md:w-1/2 flex-col border-r-2 border-cool-gray/20 ${mobileView === 'incoming' ? 'flex' : 'hidden md:flex'}`}>
                     <div className="p-4 bg-deep-charcoal border-b-2 border-cool-gray/20 sticky top-0 z-10 flex justify-between items-center">
                         <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
-                            Incoming <span className="text-cool-gray text-lg ml-2">({incomingOrders.length})</span>
+                            {t.incoming} <span className="text-cool-gray text-lg mx-2">({incomingOrders.length})</span>
                         </h2>
                         <div className="w-3 h-3 rounded-full bg-electric-red animate-pulse" />
                     </div>
@@ -118,8 +189,8 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                                 <Clock className="w-3 h-3" />
                                                 {new Date(order.createdAt).toLocaleTimeString()}
                                                 {order.participants?.length > 1 && (
-                                                    <span className="text-volt-green flex items-center gap-1">
-                                                        • <Users className="w-3 h-3" /> GROUP ({order.participants.length})
+                                                    <span className="text-volt-green flex items-center gap-1 mx-2">
+                                                        • <Users className="w-3 h-3" /> {t.group} ({order.participants.length})
                                                     </span>
                                                 )}
                                             </p>
@@ -127,21 +198,22 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                                 order.status === 'AWAITING_PAYMENT' ? 'bg-yellow-400/20 text-yellow-400' : 
                                                 order.status === 'AWAITING_VERIFICATION' ? 'bg-blue-400/20 text-blue-400' :
                                                 'bg-volt-green/20 text-volt-green'}`}>
-                                                {order.status === 'AWAITING_PAYMENT' ? 'Awaiting Payment' : 
-                                                 order.status === 'AWAITING_VERIFICATION' ? 'Awaiting Verification' :
-                                                 'Payment Received'}
+                                                {order.status === 'AWAITING_PAYMENT' ? t.awaitingPayment : 
+                                                 order.status === 'AWAITING_VERIFICATION' ? t.awaitingVerification :
+                                                 t.paymentReceived}
                                             </span>
                                         </div>
-                                        <div className="text-right">
+                                        <div className={`text-${lang === 'ar' ? 'left' : 'right'}`}>
                                             <span className="font-display font-bold text-lg text-white">{order.totalAmount} EGP</span>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-3 mb-6">                                        {order.items?.map((item: any, idx: number) => (
-                                            <div key={idx} className="border-l-2 border-cool-gray/30 pl-3">
+                                    <div className="space-y-3 mb-6">                                        
+                                    {order.items?.map((item: any, idx: number) => (
+                                            <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
                                                 <p className="font-bold text-white text-lg">
-                                                    <span className="text-cool-gray mr-2">{item?.quantity || 1}x</span>
-                                                    {item?.name || 'Unknown Item'}
+                                                    <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
+                                                    {item?.name || t.unknownItem}
                                                 </p>
                                                 
                                                 {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
@@ -155,7 +227,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                                 )}
                                                 {item.specialNotes && (
                                                     <p className="mt-1 text-xs text-electric-red font-bold italic">
-                                                        Note: {item.specialNotes}
+                                                        {t.note}: {item.specialNotes}
                                                     </p>
                                                 )}
                                             </div>
@@ -166,7 +238,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                     {order.participants?.some((p: any) => p.paymentScreenshotUrl) && (
                                         <div className="flex items-center gap-2 mb-3 text-volt-green text-xs font-bold uppercase">
                                             <ImageIcon className="w-4 h-4" />
-                                            {order.participants.filter((p: any) => p.paymentScreenshotUrl).length} Receipt(s) Attached
+                                            {order.participants.filter((p: any) => p.paymentScreenshotUrl).length} {t.receiptAttached}
                                         </div>
                                     )}
 
@@ -175,13 +247,13 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                         onClick={() => setReviewingOrder(order)}
                                         className="w-full bg-volt-green text-deep-charcoal font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#b0f200] transition-colors active:scale-95 transform"
                                     >
-                                        <Flame className="w-5 h-5" /> Review & Sync
+                                        <Flame className="w-5 h-5" /> {t.reviewSync}
                                     </button>
                                 </motion.div>
                             ))}
                             {incomingOrders.length === 0 && (
                                 <div className="h-40 flex items-center justify-center border-2 border-dashed border-cool-gray/20 rounded-xl">
-                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">Quiet in the kitchen</p>
+                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">{t.quietKitchen}</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -192,7 +264,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                 <div className={`w-full md:w-1/2 flex-col bg-deep-charcoal/90 ${mobileView === 'active' ? 'flex' : 'hidden md:flex'}`}>
                     <div className="p-4 bg-deep-charcoal border-b-2 border-cool-gray/20 sticky top-0 z-10">
                         <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
-                            Active <span className="text-cool-gray text-lg ml-2">({activeOrders.length})</span>
+                            {t.active} <span className="text-cool-gray text-lg mx-2">({activeOrders.length})</span>
                         </h2>
                     </div>
 
@@ -219,7 +291,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                                 {order.status}
                                             </span>
                                         </div>
-                                        <p className="text-cool-gray text-xs font-bold">{order.participants?.length > 1 ? 'GROUP' : 'SOLO'}</p>
+                                        <p className="text-cool-gray text-xs font-bold">{order.participants?.length > 1 ? t.group : t.solo}</p>
                                     </div>
 
                                     {(order.status === 'FIRE' || order.status === 'firing') ? (
@@ -227,21 +299,21 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                             onClick={() => moveOrder(order.id, 'READY')}
                                             className="w-full bg-white text-deep-charcoal font-display font-black uppercase py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
                                         >
-                                            <CheckCircle2 className="w-5 h-5" /> Mark Ready
+                                            <CheckCircle2 className="w-5 h-5" /> {t.markReady}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => removeOrder(order.id)}
                                             className="w-full bg-electric-red text-white font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-red-600 transition-colors group"
                                         >
-                                            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /> Strike (Handoff)
+                                            <ArrowRight className={`w-5 h-5 transition-transform ${lang === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} /> {t.strikeHandoff}
                                         </button>
                                     )}
                                 </motion.div>
                             ))}
                             {activeOrders.length === 0 && (
                                 <div className="h-40 flex items-center justify-center border-2 border-dashed border-cool-gray/20 rounded-xl">
-                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">No active orders</p>
+                                    <p className="text-cool-gray font-display font-bold uppercase tracking-widest text-sm">{t.noActiveOrders}</p>
                                 </div>
                             )}
                         </AnimatePresence>
@@ -265,24 +337,25 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                             exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
                             className="bg-deep-charcoal border-2 border-cool-gray/30 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+                            dir={lang === 'ar' ? 'rtl' : 'ltr'}
                         >
                             <div className="p-6 border-b border-cool-gray/20">
                                 <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
-                                    Review Order {reviewingOrder.orderNumber || reviewingOrder.id.slice(-6).toUpperCase()}
+                                    {t.reviewOrder} {reviewingOrder.orderNumber || reviewingOrder.id.slice(-6).toUpperCase()}
                                 </h2>
                                 <p className="text-cool-gray mt-1 text-sm font-bold uppercase tracking-widest">
-                                    Total: {reviewingOrder.totalAmount} EGP
+                                    {t.total}: {reviewingOrder.totalAmount} EGP
                                 </p>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-6">
                                 {/* Order items */}
                                 <div className="bg-zinc-900 rounded-xl p-4 border border-cool-gray/20">
-                                    <p className="font-bold text-cool-gray text-xs uppercase tracking-widest mb-3">Items Ordered</p>
+                                    <p className="font-bold text-cool-gray text-xs uppercase tracking-widest mb-3">{t.itemsOrdered}</p>
                                     {reviewingOrder.items?.map((item: any, i: number) => (
                                         <div key={i} className="border-b border-cool-gray/20 py-2 last:border-0">
                                             <div className="flex justify-between text-white">
-                                                <span className="font-bold">{item?.quantity || 1}x {item?.name || 'Unknown Item'}</span>
+                                                <span className="font-bold">{item?.quantity || 1}x {item?.name || t.unknownItem}</span>
                                                 <span className="font-display">{(item?.price || 0) * (item?.quantity || 1)} EGP</span>
                                             </div>
                                             {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
@@ -296,7 +369,7 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                             )}
                                             {item?.specialNotes && (
                                                 <p className="text-[10px] text-electric-red font-bold uppercase mt-1">
-                                                    Note: {item.specialNotes}
+                                                    {t.note}: {item.specialNotes}
                                                 </p>
                                             )}
                                         </div>
@@ -308,11 +381,11 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                     <div key={idx} className="bg-zinc-900 rounded-xl p-4 border border-cool-gray/20">
                                         <div className="flex justify-between items-center mb-4">
                                             <div>
-                                                <p className="font-bold text-white text-lg">{participant.user?.name || participant.user?.username || 'Customer'}</p>
-                                                <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">Share: {participant.shareAmount} EGP</p>
+                                                <p className="font-bold text-white text-lg">{participant.user?.name || participant.user?.username || t.customer}</p>
+                                                <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">{t.share}: {participant.shareAmount} EGP</p>
                                             </div>
                                             <div className={`px-3 py-1 rounded text-xs font-black uppercase ${participant.hasPaid ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400'}`}>
-                                                {participant.hasPaid ? 'Paid' : 'Awaiting Payment'}
+                                                {participant.hasPaid ? t.paid : t.awaitingPayment}
                                             </div>
                                         </div>
 
@@ -327,14 +400,14 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                         ) : (
                                             <div className="text-center py-8 border-2 border-dashed border-cool-gray/20 rounded-xl">
                                                 <Activity className="w-8 h-8 text-cool-gray mx-auto mb-2" />
-                                                <p className="text-cool-gray font-bold italic">No receipt uploaded yet.</p>
+                                                <p className="text-cool-gray font-bold italic">{t.noReceipt}</p>
                                             </div>
                                         )}
                                     </div>
                                 ))}
                                 {(!reviewingOrder.participants || reviewingOrder.participants.length === 0) && (
                                     <div className="text-center py-8">
-                                        <p className="text-cool-gray font-bold">No participant data found.</p>
+                                        <p className="text-cool-gray font-bold">{t.noParticipantData}</p>
                                     </div>
                                 )}
                             </div>
@@ -344,13 +417,13 @@ export default function VendorDashboard({ vendorId }: VendorDashboardProps) {
                                     onClick={() => moveOrder(reviewingOrder.id, 'REJECTED')}
                                     className="py-4 font-display font-black uppercase tracking-wider rounded-xl border-2 border-electric-red text-electric-red hover:bg-electric-red hover:text-white transition-colors"
                                 >
-                                    Reject Order
+                                    {t.rejectOrder}
                                 </button>
                                 <button
                                     onClick={() => moveOrder(reviewingOrder.id, 'FIRE')}
                                     className="py-4 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-wider rounded-xl hover:bg-[#b0f200] transition-colors"
                                 >
-                                    Approve & Sync
+                                    {t.approveSync}
                                 </button>
                             </div>
                         </motion.div>
