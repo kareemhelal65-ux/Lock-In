@@ -25,10 +25,11 @@ export default function PaymentDropzone({
     const [preview, setPreview] = useState<string | null>(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [errorStatus, setErrorStatus] = useState<string | null>(null);
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
     const [uploadDone, setUploadDone] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selected = e.target.files?.[0];
         if (selected) {
             if (selected.size > 10 * 1024 * 1024) {
@@ -39,31 +40,39 @@ export default function PaymentDropzone({
             const objectUrl = URL.createObjectURL(selected);
             setPreview(objectUrl);
             setErrorStatus(null);
+            
+            // Auto-upload
+            setIsVerifying(true);
+            try {
+                const formData = new FormData();
+                formData.append('receipt', selected);
+
+                const uploadRes = await fetch('/api/consumer/upload-receipt', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!uploadRes.ok) throw new Error('Upload failed');
+                
+                const { url } = await uploadRes.json();
+                setUploadedUrl(url);
+            } catch (err) {
+                setErrorStatus('Upload failed. Please try again.');
+                setFile(null);
+                setPreview(null);
+            } finally {
+                setIsVerifying(false);
+            }
         }
     };
 
     const handleVerify = async () => {
-        if (!file) return;
+        if (!uploadedUrl) return;
 
         setIsVerifying(true);
         setErrorStatus(null);
 
         try {
-            // Step 1: Upload file to server
-            const formData = new FormData();
-            formData.append('receipt', file);
-
-            const uploadRes = await fetch('/api/consumer/upload-receipt', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!uploadRes.ok) {
-                throw new Error('Failed to upload screenshot to server.');
-            }
-
-            const { url } = await uploadRes.json();
-
             // Step 2: Mark payment as submitted with screenshot URL
             const verifyRes = await fetch('/api/consumer/payment-verification', {
                 method: 'POST',
@@ -72,7 +81,7 @@ export default function PaymentDropzone({
                     orderId,
                     userId,
                     amountExpected: expectedAmount,
-                    receiptData: url
+                    receiptData: uploadedUrl
                 }),
             });
 
@@ -87,9 +96,9 @@ export default function PaymentDropzone({
             }, 400);
 
         } catch (error: any) {
-            console.error('Upload Error:', error);
+            console.error('Submission Error:', error);
             setIsVerifying(false);
-            setErrorStatus(error.message || 'Failed to upload receipt. Try a clearer screenshot.');
+            setErrorStatus(error.message || 'Failed to submit verification. Try again.');
         }
     };
 
@@ -155,8 +164,13 @@ export default function PaymentDropzone({
                     />
 
                     {preview ? (
-                        <div className="relative w-full h-full min-h-[240px] rounded-lg overflow-hidden">
-                            <img src={preview} alt="Receipt preview" className="w-full h-full object-contain" />
+                        <div className="relative w-full h-[240px] flex flex-col items-center justify-center p-6 text-center bg-volt-green/10 rounded-lg">
+                            <div className="w-16 h-16 bg-white rounded-full border-2 border-deep-charcoal flex items-center justify-center mb-4 shadow-brutal-sm">
+                                <CheckCircle2 className="w-10 h-10 text-volt-green" />
+                            </div>
+                            <p className="font-display font-black text-xl text-deep-charcoal uppercase">UPLOAD SUCCESSFUL!</p>
+                            <p className="text-sm font-bold text-cool-gray mt-1">Click below to complete verification</p>
+                            
                             {!isVerifying && (
                                 <button
                                     onClick={(e) => {
@@ -177,7 +191,7 @@ export default function PaymentDropzone({
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        className="absolute inset-0 bg-deep-charcoal/85 flex flex-col items-center justify-center text-volt-green backdrop-blur-sm"
+                                        className="absolute inset-0 bg-deep-charcoal/85 flex flex-col items-center justify-center text-volt-green backdrop-blur-sm rounded-lg"
                                     >
                                         <motion.div
                                             animate={{ y: [-5, 5, -5] }}
@@ -185,7 +199,7 @@ export default function PaymentDropzone({
                                         >
                                             <Upload className="w-14 h-14 mb-3" />
                                         </motion.div>
-                                        <p className="font-display font-bold uppercase tracking-wider animate-pulse text-lg">Uploading Receipt...</p>
+                                        <p className="font-display font-bold uppercase tracking-wider animate-pulse text-lg">Submitting...</p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
