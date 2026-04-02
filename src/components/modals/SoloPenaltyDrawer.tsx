@@ -206,12 +206,14 @@ export default function SoloPenaltyDrawer({
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
-          className="bottom-sheet bg-gray-100 relative z-10"
+          className="bottom-sheet bg-gray-100 relative z-10 flex flex-col"
           style={{ maxHeight: '95vh' }}
         >
-          <div className="w-full flex justify-center pt-3 pb-2">
+          <div className="w-full flex justify-center pt-3 pb-2 shrink-0">
             <div className="w-12 h-1.5 bg-gray-400 rounded-full" />
           </div>
+
+          <div className="overflow-y-auto shrink">
 
           {showDropzone ? (
             <div className="flex-1 flex flex-col justify-start overflow-y-auto">
@@ -369,7 +371,7 @@ export default function SoloPenaltyDrawer({
                 </div>
               </div>
 
-              <div className="p-4 border-t-2 border-gray-300">
+              <div className="p-4 border-t-2 border-gray-300 shrink-0">
                 <motion.button
                   onClick={handlePayment}
                   disabled={!selectedPayment || isProcessing}
@@ -381,6 +383,7 @@ export default function SoloPenaltyDrawer({
               </div>
             </>
           )}
+          </div>
         </motion.div>
       </motion.div>
     );
@@ -402,13 +405,15 @@ export default function SoloPenaltyDrawer({
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="bottom-sheet bg-gray-100 relative z-10"
+        className="bottom-sheet bg-gray-100 relative z-10 flex flex-col"
+        style={{ maxHeight: '95vh' }}
       >
         {/* Handle */}
-        <div className="w-full flex justify-center pt-3 pb-2">
+        <div className="w-full flex justify-center pt-3 pb-2 shrink-0">
           <div className="w-12 h-1.5 bg-gray-400 rounded-full" />
         </div>
 
+        <div className="overflow-y-auto shrink">
         {/* Warning Header */}
         <div className="px-4 pb-4">
           <div className="flex items-center justify-between mb-4">
@@ -467,12 +472,13 @@ export default function SoloPenaltyDrawer({
 
             <motion.button
               onClick={handleSoloCheckout}
-              className="w-full py-4 rounded-pill font-display font-bold uppercase text-sm border-2 border-gray-300 bg-gray-200 text-gray-500"
+              className="w-full py-4 rounded-pill font-display font-bold uppercase text-sm border-2 border-gray-600 bg-white text-gray-700"
               whileTap={{ scale: 0.95 }}
             >
               Pay Full Price ({data.total} EGP)
             </motion.button>
           </div>
+        </div>
         </div>
       </motion.div>
     </motion.div>
