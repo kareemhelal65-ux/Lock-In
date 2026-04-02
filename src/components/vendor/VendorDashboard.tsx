@@ -7,7 +7,9 @@ import {
     Users, 
     ArrowRight, 
     Activity, 
-    Image as ImageIcon 
+    Image as ImageIcon,
+    Loader2,
+    X
 } from 'lucide-react';
 import { translations } from './translations';
 
@@ -20,6 +22,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
     const [orders, setOrders] = useState<any[]>([]);
     const [mobileView, setMobileView] = useState<'incoming' | 'active'>('incoming');
     const [reviewingOrder, setReviewingOrder] = useState<any | null>(null);
+    const [processingOrder, setProcessingOrder] = useState<{ id: string, action: string } | null>(null);
 
     const t = translations[lang];
 
@@ -63,6 +66,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
     const activeOrders = orders.filter(o => o.status === 'FIRE' || o.status === 'firing' || o.status === 'SYNC' || o.status === 'syncing' || o.status === 'READY' || o.status === 'ready');
 
     const moveOrder = async (orderId: string, newStatus: string) => {
+        setProcessingOrder({ id: orderId, action: newStatus });
         try {
             const res = await fetch(`/api/vendorData/${vendorId}/order/${orderId}/status`, {
                 method: 'PATCH',
@@ -75,6 +79,8 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
             }
         } catch (err) {
             console.error("Failed to update order status", err);
+        } finally {
+            setProcessingOrder(null);
         }
     };
 
@@ -284,16 +290,30 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     {(order.status === 'FIRE' || order.status === 'firing') ? (
                                         <button
                                             onClick={() => moveOrder(order.id, 'READY')}
-                                            className="w-full bg-white text-deep-charcoal font-display font-black uppercase py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
+                                            disabled={processingOrder?.id === order.id}
+                                            className="w-full bg-white text-deep-charcoal font-display font-black uppercase py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors disabled:opacity-50"
                                         >
-                                            <CheckCircle2 className="w-5 h-5" /> {t.markReady}
+                                            {processingOrder?.id === order.id && processingOrder?.action === 'READY' ? (
+                                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                </motion.div>
+                                            ) : (
+                                                <CheckCircle2 className="w-5 h-5" />
+                                            )} {t.markReady}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => removeOrder(order.id)}
-                                            className="w-full bg-electric-red text-white font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-red-600 transition-colors group"
+                                            disabled={processingOrder?.id === order.id}
+                                            className="w-full bg-electric-red text-white font-display font-black uppercase py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-red-600 transition-colors group disabled:opacity-50"
                                         >
-                                            <ArrowRight className={`w-5 h-5 transition-transform ${lang === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} /> {t.orderDelivered}
+                                            {processingOrder?.id === order.id && processingOrder?.action === 'COMPLETED' ? (
+                                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                                    <Loader2 className="w-5 h-5" />
+                                                </motion.div>
+                                            ) : (
+                                                <ArrowRight className={`w-5 h-5 transition-transform ${lang === 'ar' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
+                                            )} {t.orderDelivered}
                                         </button>
                                     )}
                                 </motion.div>
@@ -402,14 +422,26 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                             <div className="p-6 border-t border-cool-gray/20 bg-zinc-900 grid grid-cols-2 gap-4">
                                 <button
                                     onClick={() => moveOrder(reviewingOrder.id, 'REJECTED')}
-                                    className="py-4 font-display font-black uppercase tracking-wider rounded-xl border-2 border-electric-red text-electric-red hover:bg-electric-red hover:text-white transition-colors"
+                                    disabled={processingOrder?.id === reviewingOrder.id}
+                                    className="py-4 font-display font-black uppercase tracking-wider rounded-xl border-2 border-electric-red text-electric-red hover:bg-electric-red hover:text-white transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
+                                    {processingOrder?.id === reviewingOrder.id && processingOrder?.action === 'REJECTED' ? (
+                                        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                            <X className="w-5 h-5" />
+                                        </motion.div>
+                                    ) : null}
                                     {t.rejectOrder}
                                 </button>
                                 <button
                                     onClick={() => moveOrder(reviewingOrder.id, 'FIRE')}
-                                    className="py-4 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-wider rounded-xl hover:bg-[#b0f200] transition-colors"
+                                    disabled={processingOrder?.id === reviewingOrder.id}
+                                    className="py-4 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-wider rounded-xl hover:bg-[#b0f200] transition-colors flex justify-center items-center gap-2 disabled:opacity-50"
                                 >
+                                    {processingOrder?.id === reviewingOrder.id && processingOrder?.action === 'FIRE' ? (
+                                        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                            <Flame className="w-5 h-5" />
+                                        </motion.div>
+                                    ) : null}
                                     {t.approveSync}
                                 </button>
                             </div>

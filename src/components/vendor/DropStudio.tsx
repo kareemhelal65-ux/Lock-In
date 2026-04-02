@@ -14,6 +14,7 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
     // Announcement state
     const [announcement, setAnnouncement] = useState('');
     const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
+    const [isClearingAnnouncement, setIsClearingAnnouncement] = useState(false);
     const [announcementSuccess, setAnnouncementSuccess] = useState(false);
 
     const handlePostAnnouncement = async () => {
@@ -34,10 +35,12 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
     };
 
     const handleClearAnnouncement = async () => {
+        setIsClearingAnnouncement(true);
         try {
             await fetch(`/api/vendorData/${vendorId}/announcement`, { method: 'DELETE' });
             setAnnouncement('');
         } catch (err) { console.error('Clear announcement error', err); }
+        finally { setIsClearingAnnouncement(false); }
     };
 
     const [form, setForm] = useState({
@@ -124,13 +127,26 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
                             disabled={!announcement.trim() || isPostingAnnouncement}
                             className="flex-1 bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-widest py-3 rounded-xl hover:bg-[#b0f200] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            <Send className="w-4 h-4" /> {isPostingAnnouncement ? t.posting : t.postAnnouncement}
+                            {isPostingAnnouncement ? (
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                    <Send className="w-4 h-4" />
+                                </motion.div>
+                            ) : (
+                                <Send className="w-4 h-4" />
+                            )} {isPostingAnnouncement ? t.posting : t.postAnnouncement}
                         </button>
                         <button
                             onClick={handleClearAnnouncement}
-                            className="px-4 py-3 bg-zinc-800 text-cool-gray font-display font-bold uppercase rounded-xl hover:bg-zinc-700 transition-colors flex items-center gap-2"
+                            disabled={isClearingAnnouncement}
+                            className="px-4 py-3 bg-zinc-800 text-cool-gray font-display font-bold uppercase rounded-xl hover:bg-zinc-700 transition-colors flex items-center gap-2 disabled:opacity-50"
                         >
-                            <X className="w-4 h-4" /> {t.clear}
+                            {isClearingAnnouncement ? (
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                    <X className="w-4 h-4" />
+                                </motion.div>
+                            ) : (
+                                <X className="w-4 h-4" />
+                            )} {t.clear}
                         </button>
                     </div>
                 </div>

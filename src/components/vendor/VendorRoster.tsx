@@ -15,6 +15,9 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     const [editForm, setEditForm] = useState<any>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [stockTogglingId, setStockTogglingId] = useState<string | null>(null);
+    const [savingId, setSavingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -32,6 +35,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     }, [vendorId]);
 
     const toggleStock = async (id: string, currentStatus: boolean) => {
+        setStockTogglingId(id);
         try {
             const res = await fetch(`/api/vendorData/${vendorId}/menu/${id}/stock`, {
                 method: 'PATCH',
@@ -45,6 +49,8 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
             }
         } catch (err) {
             console.error("Failed to toggle stock", err);
+        } finally {
+            setStockTogglingId(null);
         }
     };
 
@@ -65,6 +71,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     };
 
     const saveEdit = async (id: string) => {
+        setSavingId(id);
         const formData = new FormData();
         formData.append('name', editForm.name);
         formData.append('category', editForm.category);
@@ -90,12 +97,15 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
             }
         } catch (err) {
             console.error("Failed to save item", err);
+        } finally {
+            setSavingId(null);
+            setEditingId(null);
         }
-        setEditingId(null);
     };
 
     const deleteItem = async (id: string) => {
         if (!confirm(lang === 'ar' ? 'هل أنت متأكد من حذف هذا الصنف؟' : 'Are you sure you want to delete this item?')) return;
+        setDeletingId(id);
         try {
             const res = await fetch(`/api/vendorData/${vendorId}/menu/${id}`, { method: 'DELETE' });
             if (res.ok) {
@@ -103,6 +113,8 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
             }
         } catch (err) {
             console.error("Failed to delete item", err);
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -268,13 +280,19 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         <div className="col-span-2">
                                             <button
                                                 onClick={() => !isEditing && toggleStock(item.id, item.inStock)}
-                                                disabled={isEditing}
-                                                className={`px-3 py-1.5 rounded text-xs font-black uppercase w-24 text-center border-2 transition-colors ${item.inStock
+                                                disabled={isEditing || stockTogglingId === item.id}
+                                                className={`px-3 py-1.5 rounded text-xs font-black uppercase w-24 flex items-center justify-center text-center border-2 transition-colors disabled:opacity-50 ${item.inStock
                                                     ? 'bg-volt-green/20 border-volt-green text-volt-green hover:bg-volt-green hover:text-deep-charcoal'
                                                     : 'bg-electric-red/20 border-electric-red text-electric-red hover:bg-electric-red hover:text-white'
                                                     }`}
                                             >
-                                                {item.inStock ? t.inStock : t.soldOut}
+                                                {stockTogglingId === item.id ? (
+                                                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                                        <Sparkles className="w-3 h-3" />
+                                                    </motion.div>
+                                                ) : (
+                                                    item.inStock ? t.inStock : t.soldOut
+                                                )}
                                             </button>
                                         </div>
 
@@ -284,11 +302,18 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => saveEdit(item.id)}
-                                                        className="p-2 bg-volt-green text-deep-charcoal rounded hover:bg-[#b0f200] transition-colors"
+                                                        disabled={savingId === item.id}
+                                                        className="p-2 bg-volt-green text-deep-charcoal rounded hover:bg-[#b0f200] transition-colors disabled:opacity-50"
                                                         aria-label={lang === 'ar' ? "حفظ" : "Save"}
                                                         title={lang === 'ar' ? "حفظ" : "Save"}
                                                     >
-                                                        <Save className="w-5 h-5" />
+                                                        {savingId === item.id ? (
+                                                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                                                <Save className="w-5 h-5" />
+                                                            </motion.div>
+                                                        ) : (
+                                                            <Save className="w-5 h-5" />
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingId(null)}
@@ -311,11 +336,18 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                     </button>
                                                     <button
                                                         onClick={() => deleteItem(item.id)}
-                                                        className="p-2 text-cool-gray hover:text-electric-red rounded border-2 border-transparent hover:border-electric-red/30 transition-colors"
+                                                        disabled={deletingId === item.id}
+                                                        className="p-2 text-cool-gray hover:text-electric-red rounded border-2 border-transparent hover:border-electric-red/30 transition-colors disabled:opacity-50"
                                                         aria-label={lang === 'ar' ? "حذف" : "Delete"}
                                                         title={lang === 'ar' ? "حذف" : "Delete"}
                                                     >
-                                                        <X className="w-5 h-5" />
+                                                        {deletingId === item.id ? (
+                                                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                                                <X className="w-5 h-5" />
+                                                            </motion.div>
+                                                        ) : (
+                                                            <X className="w-5 h-5" />
+                                                        )}
                                                     </button>
                                                 </div>
                                             )}

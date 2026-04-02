@@ -210,7 +210,9 @@ export default function VendorProfileEditor({ vendorId, onClose, lang, onProfile
                     >
                         {isLoading ? (
                             <span className="flex items-center gap-2">
-                                <div className="w-5 h-5 border-4 border-deep-charcoal border-t-transparent rounded-full animate-spin" />
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                                    <CheckCircle2 className="w-5 h-5" />
+                                </motion.div>
                                 {t.savingChanges}
                             </span>
                         ) : status === 'success' ? (
