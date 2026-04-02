@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Plus,
   Minus,
-  Share2,
   Zap,
   Lock,
   ChevronRight,
@@ -98,7 +97,6 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     }
     fetchMenu();
   }, [safe.restaurantId]);
-  const [showCopied, setShowCopied] = useState(false);
   const [hasLockedIn, setHasLockedIn] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showOwedScreen, setShowOwedScreen] = useState(false);
@@ -301,12 +299,6 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHostSuccess]);
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(`https://lockin.app/safe/${safeId}`);
-    setShowCopied(true);
-    setTimeout(() => setShowCopied(false), 2000);
-  };
-
   const canLockIn = myOrder.length > 0 || sharedItems.length > 0 || myServerSharedTotal > 0;
 
   const handleLockIn = async () => {
@@ -460,24 +452,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             Hub Connection
           </span>
         </div>
-        <button
-          onClick={copyLink}
-          className="w-12 h-12 bg-electric-red text-white rounded-full border-4 border-black flex items-center justify-center brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all relative"
-        >
-          <Share2 className="w-5 h-5" />
-          <AnimatePresence>
-            {showCopied && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="absolute top-14 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-display font-black px-3 py-1.5 rounded-md brutal-shadow-sm whitespace-nowrap"
-              >
-                LINK COPIED
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </button>
+
+        <div className="w-12" /> {/* Spacer for visual symmetry with the X button */}
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-48 scroll-smooth w-full max-w-2xl mx-auto custom-scrollbar">

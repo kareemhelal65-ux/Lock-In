@@ -1,19 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Share2, Copy, Check, Bell, MessageCircle, Lock } from 'lucide-react';
+import { X, Bell, Lock } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 interface PostCreationModalProps {
-  safeId: string;
   onClose: () => void;
   onInviteSent: () => void;
   onGoToSafe?: () => void;
 }
 
-export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoToSafe }: PostCreationModalProps) {
+export default function PostCreationModal({ onClose, onInviteSent, onGoToSafe }: PostCreationModalProps) {
   const { currentUser } = useApp();
   const [pingedFriends, setPingedFriends] = useState<string[]>([]);
-  const [copied, setCopied] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(true);
   const [friendsLoaded, setFriendsLoaded] = useState(false);
@@ -43,12 +41,6 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
         });
       } catch { /* silent */ }
     }
-  };
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(`https://lockin.app/safe/${safeId}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleGoToSafe = () => {
@@ -92,20 +84,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
         </div>
 
         <div className="p-4 overflow-y-auto max-h-[60vh]">
-          {/* Copy Viral Link */}
-          <div className="mb-6">
-            <p className="font-display font-bold text-sm uppercase text-deep-charcoal/60 mb-2">Share Link</p>
-            <motion.button onClick={copyLink} className="w-full brutal-card p-4 flex items-center gap-3 brutal-card-hover" whileTap={{ scale: 0.98 }}>
-              <div className="w-12 h-12 bg-volt-green rounded-full border-2 border-deep-charcoal flex items-center justify-center">
-                {copied ? <Check className="w-6 h-6" /> : <Copy className="w-6 h-6" />}
-              </div>
-              <div className="flex-1 text-left">
-                <h3 className="font-display font-bold">{copied ? 'Copied!' : 'Copy Viral Link'}</h3>
-                <p className="text-xs text-cool-gray">Drop it in WhatsApp, Telegram, anywhere</p>
-              </div>
-              <Share2 className="w-5 h-5 text-cool-gray" />
-            </motion.button>
-          </div>
+          <div className="mb-2" />
 
           {/* Ping Real Friends */}
           <div className="mb-6">
@@ -154,24 +133,7 @@ export default function PostCreationModal({ safeId, onClose, onInviteSent, onGoT
             )}
           </div>
 
-          {/* Share Options */}
-          <div className="mb-6">
-            <p className="font-display font-bold text-sm uppercase text-deep-charcoal/60 mb-2">Share To</p>
-            <div className="flex gap-3">
-              {[
-                { label: 'WhatsApp', color: 'bg-green-500' },
-                { label: 'Telegram', color: 'bg-blue-500' },
-                { label: 'More', color: 'bg-black' },
-              ].map(({ label, color }) => (
-                <motion.button key={label} className="flex-1 brutal-card p-3 flex flex-col items-center gap-2 brutal-card-hover" whileTap={{ scale: 0.95 }}>
-                  <div className={`w-12 h-12 ${color} rounded-full border-2 border-deep-charcoal flex items-center justify-center`}>
-                    {label === 'More' ? <Share2 className="w-6 h-6 text-white" /> : <MessageCircle className="w-6 h-6 text-white" />}
-                  </div>
-                  <span className="font-display font-bold text-xs">{label}</span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
+          <div className="mb-2" />
         </div>
 
         {/* Footer */}

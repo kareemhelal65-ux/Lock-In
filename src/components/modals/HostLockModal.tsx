@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Link2, Users, Search, Loader2, Check } from 'lucide-react';
+import { X, ChevronRight, Users, Search, Loader2, Check } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 // Helper to fix relative image URLs from backend
@@ -279,23 +279,13 @@ export default function HostLockModal({ onClose, onHost }: HostLockModalProps) {
             ) : step === 'invite' ? (
               <motion.div key="invite" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                 <div className="grid grid-cols-1 gap-4">
-                  <button onClick={handleInviteViaApp} className="brutal-card brutal-card-hover p-6 flex flex-col items-center text-center gap-4">
-                    <div className="w-16 h-16 bg-volt-green rounded-2xl border-2 border-deep-charcoal flex items-center justify-center">
-                      <Users className="w-8 h-8" />
+                  <button onClick={handleInviteViaApp} className="brutal-card brutal-card-hover p-8 flex flex-col items-center text-center gap-4">
+                    <div className="w-20 h-20 bg-volt-green rounded-2xl border-2 border-deep-charcoal flex items-center justify-center">
+                      <Users className="w-10 h-10" />
                     </div>
                     <div>
-                      <h3 className="font-display font-black text-xl uppercase">Invite Friends</h3>
-                      <p className="text-xs text-cool-gray font-bold mt-1">Select friends already on the app</p>
-                    </div>
-                  </button>
-
-                  <button onClick={() => handleHost('link')} className="brutal-card brutal-card-hover p-6 flex flex-col items-center text-center gap-4">
-                    <div className="w-16 h-16 bg-deep-charcoal rounded-2xl border-2 border-deep-charcoal flex items-center justify-center">
-                      <Link2 className="w-8 h-8 text-volt-green" />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-black text-xl uppercase">Share Invite Link</h3>
-                      <p className="text-xs text-cool-gray font-bold mt-1">Invite friends outside the app via WhatsApp or link</p>
+                      <h3 className="font-display font-black text-2xl uppercase">Invite Friends</h3>
+                      <p className="text-sm text-cool-gray font-bold mt-1">Select friends already on the app</p>
                     </div>
                   </button>
                 </div>

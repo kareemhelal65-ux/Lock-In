@@ -608,7 +608,6 @@ function AppContent() {
       <AnimatePresence>
         {showPostCreation && currentSafeId && (
           <PostCreationModal
-            safeId={currentSafeId}
             onClose={() => setShowPostCreation(false)}
             onInviteSent={handleInviteSent}
             onGoToSafe={() => {
