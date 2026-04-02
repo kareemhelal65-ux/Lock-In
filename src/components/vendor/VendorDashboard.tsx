@@ -252,29 +252,33 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     </div>
 
                                     <div className="space-y-3 mb-6">                                        
-                                        {order.items?.map((item: any, idx: number) => (
-                                            <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
-                                                <p className="font-bold text-white text-lg">
-                                                    <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
-                                                    {item?.name || t.unknownItem}
-                                                </p>
-                                                
-                                                {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                                                        {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => (
-                                                            <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
-                                                                +{mod.name}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {item.specialNotes && (
-                                                    <p className="mt-1 text-xs text-electric-red font-bold italic">
-                                                        {t.specialNotes} {item.specialNotes}
+                                        {Array.isArray(order.items) && order.items.length > 0 ? (
+                                            order.items.map((item: any, idx: number) => (
+                                                <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
+                                                    <p className="font-bold text-white text-lg">
+                                                        <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
+                                                        {item?.name || t.unknownItem}
                                                     </p>
-                                                )}
-                                            </div>
-                                        ))}
+                                                    
+                                                    {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                                                            {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => (
+                                                                <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
+                                                                    +{mod.name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {item.specialNotes && (
+                                                        <p className="mt-1 text-xs text-electric-red font-bold italic">
+                                                            {t.specialNotes} {item.specialNotes}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-cool-gray text-xs italic">{t.unknownItem}</p>
+                                        )}
                                     </div>
 
                                     {(order.status === 'FIRE' || order.status === 'firing') ? (
