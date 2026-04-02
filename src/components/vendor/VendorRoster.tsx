@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, ShieldAlert, Sparkles, Upload, Plus, X, Save } from 'lucide-react';
+import { Edit2, ShieldAlert, Sparkles, Upload, Plus, X, Save, ImageIcon } from 'lucide-react';
 import { translations } from './translations';
 
 interface VendorRosterProps {
@@ -219,10 +219,13 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                             ) : (
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 bg-black rounded shrink-0 overflow-hidden">
-                                                        {item.image ? (
+                                                        {item.image && item.image !== '/placeholder-item.jpg' ? (
                                                             <img src={item.image.startsWith('/') ? `${item.image}` : item.image} className="w-full h-full object-cover" alt="" />
                                                         ) : (
-                                                            <div className="w-full h-full bg-cool-gray/20" />
+                                                            <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-800 text-cool-gray/50">
+                                                                <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest opacity-50">No Image</span>
+                                                            </div>
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">

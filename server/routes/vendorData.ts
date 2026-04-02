@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { updateHypeScore } from './consumer.js';
+import { supabase } from '../lib/supabase.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
@@ -15,17 +16,40 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 // Multer Setup
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, UPLOADS_DIR);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+const uploadFileToSupabase = async (file: Express.Multer.File, pathPrefix: string): Promise<string | null> => {
+    if (supabase) {
+        const fileName = `${pathPrefix}-${Date.now()}-${file.originalname}`;
+        const { data, error } = await supabase.storage
+            .from('receipts') // Reuse receipts bucket for all assets
+            .upload(fileName, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true
+            });
+        
+        if (error) {
+            console.error('Supabase upload error:', error);
+            // Will fallback to local if not on VERCEL, or just fail to upload image
+        } else {
+            const { data: { publicUrl } } = supabase.storage
+                .from('receipts')
+                .getPublicUrl(fileName);
+            return publicUrl;
+        }
+    }
+    
+    // Defaults / Fallback: Local Storage (Works for localhost/dev)
+    if (process.env.VERCEL) {
+        console.warn('Supabase missing on Vercel.');
+        return null;
+    }
+    const fileName = `${pathPrefix}-${Date.now()}${path.extname(file.originalname)}`;
+    const filePath = path.join(UPLOADS_DIR, fileName);
+    fs.writeFileSync(filePath, file.buffer);
+    return `/uploads/${fileName}`;
+};
 
 // 1. Get Vendor Dashboard (Terminal)
 vendorDataRouter.get('/:id/dashboard', async (req, res) => {
@@ -385,10 +409,12 @@ vendorDataRouter.put('/:id/profile', upload.fields([{ name: 'image', maxCount: 1
         if (instapayAddress) updateData.instapayAddress = instapayAddress;
 
         if (files?.image?.[0]) {
-            updateData.image = `/uploads/${files.image[0].filename}`;
+            const url = await uploadFileToSupabase(files.image[0], 'profile');
+            if (url) updateData.image = url;
         }
         if (files?.bannerImage?.[0]) {
-            updateData.bannerImage = `/uploads/${files.bannerImage[0].filename}`;
+            const url = await uploadFileToSupabase(files.bannerImage[0], 'banner');
+            if (url) updateData.bannerImage = url;
         }
 
         const updatedVendor = await prisma.vendor.update({
@@ -424,7 +450,11 @@ vendorDataRouter.post('/:id/menu', upload.single('image'), async (req, res) => {
         const { id } = req.params;
         const { name, description, price, category, requiredHypeLevel, inStock, addOns } = req.body;
 
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : '/placeholder-item.jpg';
+        let imagePath = 'https://placehold.co/400x400/1a1a1a/4d4d4d?text=NO+IMAGE';
+        if (req.file) {
+            const url = await uploadFileToSupabase(req.file, 'menu');
+            if (url) imagePath = url;
+        }
 
         const newItem = await prisma.menuItem.create({
             data: {
@@ -463,7 +493,8 @@ vendorDataRouter.put('/:id/menu/:itemId', upload.single('image'), async (req, re
         if (addOns !== undefined) updateData.addOns = addOns;
 
         if (req.file) {
-            updateData.image = `/uploads/${req.file.filename}`;
+            const url = await uploadFileToSupabase(req.file, 'menu');
+            if (url) updateData.image = url;
         }
 
         const updatedItem = await prisma.menuItem.update({
