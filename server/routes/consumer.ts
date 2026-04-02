@@ -656,8 +656,14 @@ consumerRouter.post('/payment-verification', async (req, res) => {
             where: { id: participantOrder.id },
             data: {
                 hasPaid: true,
-                paymentScreenshotUrl: receiptData // Store the receipt data/url for the vendor to review manually
+                paymentScreenshotUrl: receiptData
             }
+        });
+
+        // 2b. Always touch the Order to update its timestamp (for sorting in Vendor Dashboard)
+        await prisma.order.update({
+            where: { id: orderId },
+            data: { updatedAt: new Date() }
         });
 
         // 3. Check if all participants have paid
@@ -668,7 +674,7 @@ consumerRouter.post('/payment-verification', async (req, res) => {
         const allPaid = allParticipants.every(p => p.hasPaid);
 
         if (allPaid) {
-            // Update Order status to AWAITING_VERIFICATION (ready for vendor to review manually)
+            // Update Order status to AWAITING_VERIFICATION
             await prisma.order.update({
                 where: { id: orderId },
                 data: { status: 'AWAITING_VERIFICATION' }

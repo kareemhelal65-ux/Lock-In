@@ -43,7 +43,23 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
         return () => clearInterval(interval);
     }, [vendorId]);
 
-    const incomingOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'AWAITING_PAYMENT' || o.status === 'AWAITING_VERIFICATION' || o.status === 'incoming');
+    const incomingOrders = orders
+        .filter(o => o.status === 'PENDING' || o.status === 'AWAITING_PAYMENT' || o.status === 'AWAITING_VERIFICATION' || o.status === 'incoming')
+        .sort((a, b) => {
+            // 1. Prioritize AWAITING_VERIFICATION (Full sync ready)
+            if (a.status === 'AWAITING_VERIFICATION' && b.status !== 'AWAITING_VERIFICATION') return -1;
+            if (a.status !== 'AWAITING_VERIFICATION' && b.status === 'AWAITING_VERIFICATION') return 1;
+
+            // 2. Prioritize Any New Receipts (by updatedAt)
+            const aHasReceipt = a.participants?.some((p: any) => p.paymentScreenshotUrl);
+            const bHasReceipt = b.participants?.some((p: any) => p.paymentScreenshotUrl);
+            
+            if (aHasReceipt && !bHasReceipt) return -1;
+            if (!aHasReceipt && bHasReceipt) return 1;
+            
+            // 3. Fallback to updatedAt desc
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+        });
     const activeOrders = orders.filter(o => o.status === 'FIRE' || o.status === 'firing' || o.status === 'SYNC' || o.status === 'syncing' || o.status === 'READY' || o.status === 'ready');
 
     const moveOrder = async (orderId: string, newStatus: string) => {
@@ -218,9 +234,9 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
-                                    className={`border-2 rounded-xl p-4 transition-colors ${order.status === 'READY' || order.status === 'ready'
-                                        ? 'bg-volt-green/10 border-volt-green/50'
-                                        : 'bg-zinc-900 border-cool-gray/30'
+                                    className={`bg-zinc-900 border-2 rounded-xl p-5 transition-colors ${order.status === 'READY' || order.status === 'ready'
+                                        ? 'border-volt-green/50 bg-volt-green/5'
+                                        : 'border-cool-gray/30'
                                         }`}
                                 >
                                     <div className="flex justify-between items-center mb-4">
@@ -233,6 +249,32 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             </span>
                                         </div>
                                         <p className="text-cool-gray text-xs font-bold">{order.participants?.length > 1 ? t.group : t.solo}</p>
+                                    </div>
+
+                                    <div className="space-y-3 mb-6">                                        
+                                        {order.items?.map((item: any, idx: number) => (
+                                            <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
+                                                <p className="font-bold text-white text-lg">
+                                                    <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
+                                                    {item?.name || t.unknownItem}
+                                                </p>
+                                                
+                                                {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                                                        {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => (
+                                                            <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
+                                                                +{mod.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {item.specialNotes && (
+                                                    <p className="mt-1 text-xs text-electric-red font-bold italic">
+                                                        {t.specialNotes} {item.specialNotes}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
 
                                     {(order.status === 'FIRE' || order.status === 'firing') ? (
