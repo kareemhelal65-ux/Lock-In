@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, AlertTriangle, Users, Zap, Lock, CreditCard, Smartphone, Banknote, CheckCircle2 } from 'lucide-react';
+import { X, AlertTriangle, Zap, Lock, CreditCard, Smartphone, Banknote, CheckCircle2 } from 'lucide-react';
 import PaymentDropzone from '../checkout/PaymentDropzone';
 import { useApp } from '@/context/AppContext';
 
@@ -25,7 +25,6 @@ export default function SoloPenaltyDrawer({
   const { currentUser } = useApp();
   const isZeroFee = currentUser?.activeCard?.perkCode === 'THE01';
   const standardFee = 10;
-  const savings = data.total - data.discountedTotal;
 
   const [showCheckout, setShowCheckout] = useState(false);
   const [useActivePerk, setUseActivePerk] = useState(isZeroFee);
@@ -438,25 +437,12 @@ export default function SoloPenaltyDrawer({
 
           {/* Price Comparison */}
           <div className="brutal-card p-4 mb-4 bg-white border-gray-400">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between">
               <span className="text-gray-500 text-sm">Solo Checkout</span>
               <span className="font-display font-bold text-xl text-gray-600">{data.total} EGP</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-500 font-display font-bold text-sm flex items-center gap-1">
-                <Users className="w-4 h-4" /> With a Sawa
-              </span>
-              <span className="font-display font-extrabold text-2xl text-gray-400">{data.discountedTotal} EGP</span>
-            </div>
           </div>
 
-          {/* Flashing Warning */}
-          <div className="flex items-center gap-2 text-gray-500 mb-4 animate-pulse">
-            <Zap className="w-5 h-5" />
-            <p className="font-display font-bold text-sm uppercase">
-              ⚠️ You are leaving {savings} EGP on the table. Order Sawa instead.
-            </p>
-          </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -467,12 +453,11 @@ export default function SoloPenaltyDrawer({
             >
               <Lock className="w-5 h-5 mr-2" />
               ORDER SAWA INSTEAD
-              <span className="block text-xs font-normal mt-1 opacity-80">Save {savings} EGP with friends</span>
             </motion.button>
 
             <motion.button
               onClick={handleSoloCheckout}
-              className="w-full py-4 rounded-pill font-display font-bold uppercase text-sm border-2 border-gray-600 bg-white text-gray-700"
+              className="w-full brutal-btn-primary py-4 text-lg border-electric-red bg-electric-red"
               whileTap={{ scale: 0.95 }}
             >
               Pay Full Price ({data.total} EGP)
