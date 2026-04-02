@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { X, Sparkles, Users, Zap, Info } from 'lucide-react';
+import { X, Users, Zap, Info } from 'lucide-react';
 
 interface ArsenalDrawerProps {
   squadSpinnerCards: number;

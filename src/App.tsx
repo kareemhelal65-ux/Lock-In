@@ -58,8 +58,6 @@ function AppContent() {
     addNotification,
     addSafe,
     activeSafes,
-    vendorsOnLock,
-    toggleVendorOnLock,
   } = useApp();
 
   const [searchParams, setSearchParams] = useSearchParams();
