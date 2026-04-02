@@ -105,6 +105,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const [showHostFlex, setShowHostFlex] = useState(false);
   const [isHostCoverMode, setIsHostCoverMode] = useState(false);
   const [showHostSuccess, setShowHostSuccess] = useState(false);
+  const [hasCheckedOut, setHasCheckedOut] = useState(false);
 
   // Local countdown as a smooth fallback (server is authoritative via polling)
   useEffect(() => {
@@ -261,14 +262,14 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
 
   // Watch for server checkout trigger for guests
   useEffect(() => {
-    if (safe.status === 'CHECKOUT_READY' && !showCheckout && !isHost && !showOwedScreen) {
+    if (safe.status === 'CHECKOUT_READY' && !showCheckout && !isHost && !showOwedScreen && !hasCheckedOut) {
       if (safe.isCoveredByHost) {
         setShowOwedScreen(true);
       } else {
         setShowCheckout(true);
       }
     }
-  }, [safe.status, safe.isCoveredByHost, showCheckout, isHost, showOwedScreen]);
+  }, [safe.status, safe.isCoveredByHost, showCheckout, isHost, showOwedScreen, hasCheckedOut]);
 
   // Guest Owed Screen Redirection (Stable timer)
   useEffect(() => {
@@ -916,6 +917,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             participantCount={safe.participants.length}
             onClose={() => setShowCheckout(false)}
             onComplete={() => {
+              setHasCheckedOut(true);
               setShowCheckout(false); // Close modal before showing success screen
               if (isHost && isHostCoverMode) {
                 setShowHostSuccess(true);

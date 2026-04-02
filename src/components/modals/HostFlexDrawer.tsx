@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Crown, Wallet, Gift, Users, Sparkles } from 'lucide-react';
 
@@ -5,8 +6,8 @@ interface HostFlexDrawerProps {
   userShare: number;
   safeTotal: number;
   participantCount: number;
-  onPayShare: () => void;
-  onCoverLock: () => void;
+  onPayShare: () => Promise<void> | void;
+  onCoverLock: () => Promise<void> | void;
   onClose: () => void;
 }
 
@@ -19,6 +20,7 @@ export default function HostFlexDrawer({
   onClose
 }: HostFlexDrawerProps) {
   const coverAmount = safeTotal;
+  const [isLoading, setIsLoading] = useState<'cover' | 'share' | null>(null);
 
   return (
     <motion.div
@@ -91,17 +93,28 @@ export default function HostFlexDrawer({
 
           {/* The Flex Option */}
           <motion.button
-            onClick={onCoverLock}
-            className="w-full brutal-card p-5 mb-3 border-electric-red bg-gradient-to-r from-electric-red to-red-600 text-white brutal-card-hover"
-            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (isLoading) return;
+              setIsLoading('cover');
+              await onCoverLock();
+            }}
+            disabled={!!isLoading}
+            className={`w-full brutal-card p-5 mb-3 border-electric-red text-white brutal-card-hover transition-all ${isLoading === 'cover' ? 'bg-electric-red opacity-80' : 'bg-gradient-to-r from-electric-red to-red-600'} ${isLoading && isLoading !== 'cover' ? 'opacity-50 grayscale' : ''}`}
+            whileTap={!isLoading ? { scale: 0.98 } : {}}
           >
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-full border-2 border-white flex items-center justify-center flex-shrink-0">
-                <Gift className="w-8 h-8" />
+                {isLoading === 'cover' ? (
+                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                    <div className="w-6 h-6 border-4 border-t-white border-white/20 rounded-full" />
+                  </motion.div>
+                ) : (
+                  <Gift className="w-8 h-8" />
+                )}
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-display font-extrabold text-xl uppercase">
-                  COVER THE LOCK
+                  {isLoading === 'cover' ? 'PROCESSING...' : 'COVER THE LOCK'}
                 </h3>
                 <p className="text-white/80 text-sm mt-1">
                   Pay {coverAmount} EGP for everyone
@@ -116,15 +129,28 @@ export default function HostFlexDrawer({
 
           {/* Standard Option */}
           <motion.button
-            onClick={onPayShare}
-            className="w-full brutal-card p-4 flex items-center gap-4 brutal-card-hover"
-            whileTap={{ scale: 0.98 }}
+            onClick={async () => {
+              if (isLoading) return;
+              setIsLoading('share');
+              await onPayShare();
+            }}
+            disabled={!!isLoading}
+            className={`w-full brutal-card p-4 flex items-center gap-4 brutal-card-hover ${isLoading === 'share' ? 'bg-gray-100' : ''} ${isLoading && isLoading !== 'share' ? 'opacity-50 grayscale' : ''}`}
+            whileTap={!isLoading ? { scale: 0.98 } : {}}
           >
             <div className="w-12 h-12 bg-deep-charcoal rounded-full border-2 border-deep-charcoal flex items-center justify-center flex-shrink-0">
-              <Wallet className="w-6 h-6 text-white" />
+              {isLoading === 'share' ? (
+                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
+                  <div className="w-5 h-5 border-4 border-t-volt-green border-white/20 rounded-full" />
+                </motion.div>
+              ) : (
+                <Wallet className="w-6 h-6 text-white" />
+              )}
             </div>
             <div className="flex-1 text-left">
-              <h3 className="font-display font-bold">PAY MY SHARE</h3>
+              <h3 className="font-display font-bold">
+                {isLoading === 'share' ? 'PROCESSING...' : 'PAY MY SHARE'}
+              </h3>
               <p className="text-cool-gray text-sm">
                 Just pay for your own order
               </p>
