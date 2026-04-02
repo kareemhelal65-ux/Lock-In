@@ -207,7 +207,7 @@ export default function MysterySpinner({
                 </div>
               )}
               <p className="text-white/60 text-sm">
-                Redirecting to checkout...
+                Redirecting to Orders...
               </p>
             </motion.div>
           )}

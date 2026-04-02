@@ -330,6 +330,7 @@ function AppContent() {
 
   // Handle confirming lock (show spinner)
   const handleConfirmLock = () => {
+    setShowSafe(false);
     setSpinnerType('standard');
     setShowSpinner(true);
   };
