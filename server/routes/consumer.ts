@@ -427,19 +427,39 @@ consumerRouter.get('/explore', async (req, res) => {
             }
         });
 
-        const mappedVendors = vendors.map(v => ({
-            id: v.id,
-            name: v.name,
-            image: v.image || `https://api.dicebear.com/7.x/initials/svg?seed=${v.name}`,
-            bannerImage: v.bannerImage,
-            rating: v.rating.toFixed(1),
-            deliveryTime: '15-25 min',
-            activeLocks: 0,
-            isOnLock: false,
-            onLockCount: 0,
-            status: v.status || 'LIVE',
-            instapayAddress: v.instapayAddress,
-            instapayName: v.instapayName,
+        const mappedVendors = await Promise.all(vendors.map(async v => {
+            // Calculate real avg delivery time from last 50 completed orders
+            const recentOrders = await prisma.order.findMany({
+                where: { vendorId: v.id, status: 'COMPLETED' },
+                orderBy: { updatedAt: 'desc' },
+                take: 50,
+                select: { createdAt: true, updatedAt: true }
+            });
+
+            let deliveryTime = '25 min';
+            if (recentOrders.length > 0) {
+                const totalMs = recentOrders.reduce((sum, o) => {
+                    return sum + (o.updatedAt.getTime() - o.createdAt.getTime());
+                }, 0);
+                const avgMins = Math.round((totalMs / recentOrders.length) / 60000);
+                // Ensure it feels realistic (min 5 mins)
+                deliveryTime = `${Math.max(avgMins, 5)} min`;
+            }
+
+            return {
+                id: v.id,
+                name: v.name,
+                image: v.image || `https://api.dicebear.com/7.x/initials/svg?seed=${v.name}`,
+                bannerImage: v.bannerImage,
+                rating: v.rating.toFixed(1),
+                deliveryTime,
+                activeLocks: 0,
+                isOnLock: false,
+                onLockCount: 0,
+                status: v.status || 'LIVE',
+                instapayAddress: v.instapayAddress,
+                instapayName: v.instapayName,
+            };
         }));
 
         res.json({ vendors: mappedVendors });
