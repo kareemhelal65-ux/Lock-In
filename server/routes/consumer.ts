@@ -1421,9 +1421,12 @@ consumerRouter.get('/feed/:userId', async (req, res) => {
             orderBy: { expiresAt: 'asc' }, take: 10
         });
         const announcements = await prisma.vendor.findMany({
-            where: { announcementBanner: { not: null } },
-            select: { id: true, name: true, image: true, announcementBanner: true, updatedAt: true },
-            orderBy: { updatedAt: 'desc' }, take: 10
+            where: { 
+                announcementBanner: { not: null },
+                announcementUpdatedAt: { gte: since }
+            },
+            select: { id: true, name: true, image: true, announcementBanner: true, announcementUpdatedAt: true },
+            orderBy: { announcementUpdatedAt: 'desc' }, take: 10
         });
 
         const globalSafes = await (prisma as any).safeSession.findMany({

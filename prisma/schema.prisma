@@ -85,6 +85,7 @@ model Vendor {
   ratingCount           Int         @default(0)
   status                String      @default("LIVE")
   announcementBanner    String?
+  announcementUpdatedAt DateTime?
   instapayAddress       String?
   instapayName          String?
   commissionOwedBalance Float       @default(0.0)

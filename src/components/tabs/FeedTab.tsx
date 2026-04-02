@@ -195,7 +195,7 @@ export default function FeedTab({ onStartLock, onSuccess }: FeedTabProps) {
                 <div className="flex-1">
                   <p className="font-display font-bold text-sm">{a.name}</p>
                   <p className="text-sm text-deep-charcoal">{a.announcementBanner}</p>
-                  <p className="text-xs text-cool-gray">{new Date(a.updatedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                  <p className="text-xs text-cool-gray">{a.announcementUpdatedAt ? new Date(a.announcementUpdatedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : ''}</p>
                 </div>
               </motion.div>
             ))}

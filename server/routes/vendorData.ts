@@ -537,7 +537,10 @@ vendorDataRouter.post('/:id/announcement', async (req, res) => {
 
         const vendor = await prisma.vendor.update({
             where: { id },
-            data: { announcementBanner: message.trim() }
+            data: { 
+                announcementBanner: message.trim(),
+                announcementUpdatedAt: new Date()
+            }
         });
         res.json({ message: 'Announcement posted', announcementBanner: vendor.announcementBanner });
     } catch (error) {
@@ -546,10 +549,14 @@ vendorDataRouter.post('/:id/announcement', async (req, res) => {
     }
 });
 
-// 10. Clear Vendor Announcement
-vendorDataRouter.delete('/:id/announcement', async (req, res) => {
     try {
-        await prisma.vendor.update({ where: { id: req.params.id }, data: { announcementBanner: null } });
+        await prisma.vendor.update({ 
+            where: { id: req.params.id }, 
+            data: { 
+                announcementBanner: null,
+                announcementUpdatedAt: null
+            } 
+        });
         res.json({ message: 'Announcement cleared' });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
