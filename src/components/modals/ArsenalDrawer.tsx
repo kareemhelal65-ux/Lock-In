@@ -1,11 +1,15 @@
 import { motion } from 'framer-motion';
-import { X, Zap } from 'lucide-react';
+import { X, Sparkles, Users, Zap, Info } from 'lucide-react';
 
 interface ArsenalDrawerProps {
+  squadSpinnerCards: number;
+  onDeploy: (cardType: 'squad-spinner') => void;
   onClose: () => void;
 }
 
 export default function ArsenalDrawer({
+  squadSpinnerCards,
+  onDeploy,
   onClose
 }: ArsenalDrawerProps) {
   return (
@@ -56,11 +60,41 @@ export default function ArsenalDrawer({
 
         {/* Cards */}
         <div className="p-4 space-y-4">
-          <div className="brutal-card p-8 bg-gray-50 border-gray-200 text-center">
-            <Zap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="font-display font-bold text-gray-400 uppercase">No active perks available</p>
-            <p className="text-xs text-gray-400 mt-1">Unlock perks by increasing your Hype Score!</p>
-          </div>
+
+          {/* Squad Spinner Card */}
+          <motion.button
+            onClick={() => squadSpinnerCards > 0 && onDeploy('squad-spinner')}
+            disabled={squadSpinnerCards === 0}
+            className={`w-full brutal-card p-4 flex items-center gap-4 text-left ${squadSpinnerCards > 0
+                ? 'brutal-card-hover border-volt-green'
+                : 'opacity-50 border-gray-300'
+              }`}
+            whileTap={squadSpinnerCards > 0 ? { scale: 0.98 } : {}}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-volt-green to-lime-500 rounded-xl border-2 border-deep-charcoal flex items-center justify-center flex-shrink-0">
+              <Users className="w-8 h-8 text-deep-charcoal" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-display font-bold text-lg">Squad Spinner</h3>
+                <span className="px-2 py-0.5 bg-volt-green text-deep-charcoal rounded-pill text-xs font-display font-bold">
+                  {squadSpinnerCards} available
+                </span>
+              </div>
+              <p className="text-sm text-cool-gray mt-1">
+                Up to 10% off the entire Sawa total
+              </p>
+              <div className="flex items-center gap-1 mt-2 text-xs text-volt-green">
+                <Info className="w-3 h-3" />
+                <span>All squad members benefit</span>
+              </div>
+            </div>
+            {squadSpinnerCards > 0 && (
+              <div className="w-10 h-10 bg-volt-green rounded-full border-2 border-deep-charcoal flex items-center justify-center">
+                <Zap className="w-5 h-5 text-deep-charcoal" />
+              </div>
+            )}
+          </motion.button>
         </div>
 
         {/* Info */}

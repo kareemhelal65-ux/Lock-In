@@ -7,8 +7,6 @@ export const currentUser: User = {
   hypeScore: 842,
   socialTitle: 'The Plug',
   walletBalance: 450,
-  sawasUntilMysterySawa: 7, // 7/10 until next Mystery Sawa
-  mysterySawaCards: 2,
   squadSpinnerCards: 1,
   streaks: [
     {

@@ -57,7 +57,9 @@ function AppContent() {
     setCurrentUser,
     addNotification,
     addSafe,
-    activeSafes
+    activeSafes,
+    vendorsOnLock,
+    toggleVendorOnLock,
   } = useApp();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -232,8 +234,7 @@ function AppContent() {
       }
 
       setShowPostCreation(true);
-      // Removed incrementSawasUntilMysterySawa
-      addNotification({
+        addNotification({
         id: `lock-start-${Date.now()}`,
         type: 'safe_invite',
         title: '🚀 Sawa Started!',
@@ -328,6 +329,7 @@ function AppContent() {
     setShowSafe(false);
     setActiveTab('locks');
   };
+
 
   // Handle solo order attempt
   const handleSoloOrder = (data: any) => {
@@ -603,6 +605,7 @@ function AppContent() {
           />
         )}
       </AnimatePresence>
+
 
       <AnimatePresence>
         {showPostCreation && currentSafeId && (

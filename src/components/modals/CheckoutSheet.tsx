@@ -62,13 +62,11 @@ export default function CheckoutSheet({
 
   // Calculate discounts
   const baseTotal = isHostCover && safeTotal ? safeTotal : myTotal;
-  const hasMysteryCop = deployedCards.some(c => c.type === 'mystery-cop' || c.type === 'mystery-sawa');
   const hasSquadSpinner = deployedCards.some(c => c.type === 'squad-spinner');
 
   // Apply discounts (mock calculations)
-  const mysteryCopDiscount = hasMysteryCop ? Math.round(baseTotal * 0.15) : 0; // 15% for demo
   const squadSpinnerDiscount = hasSquadSpinner ? Math.round(baseTotal * 0.10) : 0; // 10% for demo
-  const totalDiscount = mysteryCopDiscount + squadSpinnerDiscount;
+  const totalDiscount = squadSpinnerDiscount;
   const standardFee = isHostCover ? (participantCount || 1) * 5 : (isSolo ? 10 : 5);
   const serviceFee = isZeroFee ? 0 : standardFee;
   const finalTotal = baseTotal - totalDiscount + serviceFee;
@@ -284,27 +282,16 @@ export default function CheckoutSheet({
                 </div>
 
                 {/* Discounts */}
-                {(hasMysteryCop || hasSquadSpinner) && (
+                {hasSquadSpinner && (
                   <div className="border-t-2 border-dashed border-deep-charcoal/20 pt-3 mt-3">
                     <p className="text-xs text-cool-gray mb-2">Power-Up Discounts</p>
-                    {hasMysteryCop && (
-                      <div className="flex items-center justify-between text-sm text-electric-red">
-                        <span className="flex items-center gap-1">
-                          <Zap className="w-3 h-3" />
-                          Mystery Sawa
-                        </span>
-                        <span className="font-display font-bold">-{mysteryCopDiscount} EGP</span>
-                      </div>
-                    )}
-                    {hasSquadSpinner && (
-                      <div className="flex items-center justify-between text-sm text-volt-green">
-                        <span className="flex items-center gap-1">
-                          <Zap className="w-3 h-3" />
-                          Squad Spinner
-                        </span>
-                        <span className="font-display font-bold">-{squadSpinnerDiscount} EGP</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between text-sm text-volt-green">
+                      <span className="flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        Squad Spinner
+                      </span>
+                      <span className="font-display font-bold">-{squadSpinnerDiscount} EGP</span>
+                    </div>
                   </div>
                 )}
 

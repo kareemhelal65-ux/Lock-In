@@ -9,8 +9,6 @@ export interface User {
   walletBalance: number;
   streaks: Streak[];
   // Vault Inventory
-  sawasUntilMysterySawa: number;
-  mysterySawaCards: number;
   squadSpinnerCards: number;
 }
 
@@ -121,7 +119,7 @@ export interface SafeOrder {
 }
 
 export interface DeployedCard {
-  type: 'mystery-cop' | 'squad-spinner' | 'mystery-sawa';
+  type: 'squad-spinner';
   deployedBy: string;
   deployedByName: string;
   deployedAt: Date;
@@ -180,5 +178,5 @@ export interface GiftOrder {
 }
 
 export type TabType = 'feed' | 'explore' | 'host' | 'radar' | 'profile' | 'orders' | 'vault' | 'locks';
-export type CardType = 'mystery-cop' | 'squad-spinner' | 'mystery-sawa';
+export type CardType = 'squad-spinner';
 
