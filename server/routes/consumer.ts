@@ -427,22 +427,31 @@ consumerRouter.get('/explore', async (req, res) => {
             }
         });
 
-        const mappedVendors = await Promise.all(vendors.map(async v => {
-            // Calculate real avg delivery time from last 50 completed orders
-            const recentOrders = await prisma.order.findMany({
-                where: { vendorId: v.id, status: 'COMPLETED' },
-                orderBy: { updatedAt: 'desc' },
-                take: 50,
-                select: { createdAt: true, updatedAt: true }
-            });
+        // N+1 Fix: Fetch latest completed orders in bulk
+        const recentOrders = await prisma.order.findMany({
+            where: { status: 'COMPLETED' },
+            orderBy: { updatedAt: 'desc' },
+            take: 1000,
+            select: { vendorId: true, createdAt: true, updatedAt: true }
+        });
 
+        const deliveryTimesByVendor: Record<string, number[]> = {};
+        for (const order of recentOrders) {
+            if (!deliveryTimesByVendor[order.vendorId]) {
+                deliveryTimesByVendor[order.vendorId] = [];
+            }
+            if (deliveryTimesByVendor[order.vendorId].length < 50) {
+                deliveryTimesByVendor[order.vendorId].push(order.updatedAt.getTime() - order.createdAt.getTime());
+            }
+        }
+
+        const mappedVendors = vendors.map(v => {
             let deliveryTime = '25 min';
-            if (recentOrders.length > 0) {
-                const totalMs = recentOrders.reduce((sum, o) => {
-                    return sum + (o.updatedAt.getTime() - o.createdAt.getTime());
-                }, 0);
-                const avgMins = Math.round((totalMs / recentOrders.length) / 60000);
-                // Ensure it feels realistic (min 5 mins)
+            const times = deliveryTimesByVendor[v.id];
+            
+            if (times && times.length > 0) {
+                const totalMs = times.reduce((sum, ms) => sum + ms, 0);
+                const avgMins = Math.round((totalMs / times.length) / 60000);
                 deliveryTime = `${Math.max(avgMins, 5)} min`;
             }
 
@@ -460,7 +469,7 @@ consumerRouter.get('/explore', async (req, res) => {
                 instapayAddress: v.instapayAddress,
                 instapayName: v.instapayName,
             };
-        }));
+        });
 
         res.json({ vendors: mappedVendors });
     } catch (error) {

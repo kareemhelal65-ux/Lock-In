@@ -115,10 +115,10 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     return () => clearInterval(interval);
   }, []);
 
-  // Polling mechanism to keep the safe in sync
+  // Realtime mechanism to keep the safe in sync (Replaces aggressive polling)
   useEffect(() => {
     let isMounted = true;
-    const pollSafe = async () => {
+    const fetchSafeData = async () => {
       if (!safeId) return;
       try {
         const url = `/api/consumer/safes/${safeId}` + (currentUser?.id ? `?userId=${currentUser.id}` : '');
@@ -141,15 +141,42 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
           }
         }
       } catch (e) {
-        console.error("Polling safe failed", e);
+        console.error("Fetching safe failed", e);
       }
     };
 
-    pollSafe(); // Fire immediately
-    const interval = setInterval(pollSafe, 800);
+    fetchSafeData(); // Fire immediately
+
+    // We dynamically import supabase so it works gracefully if they forget env vars
+    import('@/lib/supabase').then(({ supabase }) => {
+      if (!isMounted) return;
+      
+      if (supabase) {
+        // Use Realtime WebSockets
+        const channel = supabase
+          .channel(`safe_${safeId}`)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'SafeSession', filter: `id=eq.${safeId}` },
+            () => {
+              // Trigger a fetch only when an actual database change occurs instead of polling
+              fetchSafeData(); 
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
+      } else {
+        // Fallback for local development without Supabase keys (Reduced frequency)
+        const interval = setInterval(fetchSafeData, 3000);
+        return () => clearInterval(interval);
+      }
+    }).catch(e => console.error("Error setting up realtime:", e));
+
     return () => {
       isMounted = false;
-      clearInterval(interval);
     };
   }, [safeId, currentUser?.id, updateSafe]);
 

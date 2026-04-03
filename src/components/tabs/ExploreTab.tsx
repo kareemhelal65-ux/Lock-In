@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Lock, Star, Clock, ChevronRight, Plus, Minus, ShoppingCart, X } from 'lucide-react';
 import type { MenuItem } from '@/types';
+import { useSWR } from '@/hooks/useSWR';
 
 // Helper to fix relative image URLs from backend
 const getImageUrl = (url?: string) => {
@@ -22,20 +23,20 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [cart, setCart] = useState<{ item: MenuItem; quantity: number }[]>([]);
 
+  const { data: swrData, error, isValidating } = useSWR<{vendors: any[]}>('/api/consumer/explore', async () => {
+    const res = await fetch('/api/consumer/explore');
+    if (!res.ok) throw new Error('Fetch failed');
+    return res.json();
+  }, { dedupingInterval: 60000 });
+
   useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        const res = await fetch('/api/consumer/explore');
-        const data = await res.json();
-        if (res.ok) setVendors(data.vendors || []);
-      } catch (err) {
-        console.error('Error fetching vendors', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVendors();
-  }, []);
+    if (swrData?.vendors) {
+      setVendors(swrData.vendors);
+      setLoading(false);
+    } else if (error) {
+      setLoading(false);
+    }
+  }, [swrData, error]);
 
   const restaurant = selectedRestaurant
     ? (vendors || []).find(r => r.id === selectedRestaurant)

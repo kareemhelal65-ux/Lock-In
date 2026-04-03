@@ -214,20 +214,6 @@ export default function VendorProfile({
         )}
       </div>
 
-      {/* Active Locks Badge */}
-      {restaurant.activeLocks > 0 && (
-        <div className="px-4 py-2 bg-volt-green/10 border-b border-volt-green/30">
-          <div className="flex items-center gap-2">
-            <div className="live-badge text-[10px]">
-              <Flame className="w-3 h-3" />
-              {restaurant.activeLocks} ACTIVE SAWAs
-            </div>
-            <span className="text-xs text-cool-gray">
-              People are ordering right now
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Menu */}
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
