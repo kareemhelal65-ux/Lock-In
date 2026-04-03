@@ -23,7 +23,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [cart, setCart] = useState<{ item: MenuItem; quantity: number }[]>([]);
 
-  const { data: swrData, error, isValidating } = useSWR<{vendors: any[]}>('/api/consumer/explore', async () => {
+  const { data: swrData, error } = useSWR<{vendors: any[]}>('/api/consumer/explore', async () => {
     const res = await fetch('/api/consumer/explore');
     if (!res.ok) throw new Error('Fetch failed');
     return res.json();
