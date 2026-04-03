@@ -387,21 +387,24 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                 setEditForm({ ...editForm, addOns: updated });
                                                             }}
                                                         />
-                                                        <button
-                                                            onClick={() => {
-                                                                const updated = [...editForm.addOns];
-                                                                updated[idx] = { ...updated[idx], inStock: !addon.hasOwnProperty('inStock') ? false : !addon.inStock };
-                                                                setEditForm({ ...editForm, addOns: updated });
-                                                            }}
-                                                            title={lang === 'ar' ? "تغيير حالة المخزون" : "Toggle Stock"}
-                                                            className={`px-2 py-1 rounded text-[10px] font-black uppercase border-2 transition-all ${
-                                                                (addon.inStock !== false)
-                                                                    ? 'bg-volt-green/10 border-volt-green/50 text-volt-green'
-                                                                    : 'bg-electric-red/10 border-electric-red/50 text-electric-red'
-                                                            }`}
-                                                        >
-                                                            {(addon.inStock !== false) ? t.inStock : t.soldOut}
-                                                        </button>
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="text-[9px] text-cool-gray font-bold uppercase mb-0.5">{t.tableStock}</span>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = [...editForm.addOns];
+                                                                    updated[idx] = { ...updated[idx], inStock: !addon.hasOwnProperty('inStock') ? false : !addon.inStock };
+                                                                    setEditForm({ ...editForm, addOns: updated });
+                                                                }}
+                                                                title={lang === 'ar' ? "تغيير حالة المخزون" : "Toggle Stock"}
+                                                                className={`px-3 py-1 rounded-pill text-[10px] font-black uppercase border-2 transition-all ${
+                                                                    (addon.inStock !== false)
+                                                                        ? 'bg-volt-green/10 border-volt-green/50 text-volt-green'
+                                                                        : 'bg-electric-red/10 border-electric-red/50 text-electric-red'
+                                                                }`}
+                                                            >
+                                                                {(addon.inStock !== false) ? t.inStock : t.soldOut}
+                                                            </button>
+                                                        </div>
                                                         <button
                                                             onClick={() => setEditForm({ ...editForm, addOns: editForm.addOns.filter((_: any, i: number) => i !== idx) })}
                                                             className="text-electric-red text-xs font-bold hover:underline"
