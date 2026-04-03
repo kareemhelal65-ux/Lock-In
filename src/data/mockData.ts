@@ -59,6 +59,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Burgers',
       },
       {
@@ -69,6 +70,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=200&h=200&fit=crop',
         isLocked: true,
         requiredHypeLevel: 4,
+        inStock: true,
         category: 'Burgers',
       },
       {
@@ -79,6 +81,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Sides',
       },
     ],
@@ -102,6 +105,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1644365584070-723349893169?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Wraps',
       },
       {
@@ -112,6 +116,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Plates',
       },
     ],
@@ -135,6 +140,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=200&h=200&fit=crop',
         isLocked: true,
         requiredHypeLevel: 3,
+        inStock: true,
         category: 'Pasta',
       },
       {
@@ -145,6 +151,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Pasta',
       },
     ],
@@ -168,6 +175,7 @@ export const restaurants: Restaurant[] = [
         image: 'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=200&h=200&fit=crop',
         isLocked: false,
         requiredHypeLevel: 0,
+        inStock: true,
         category: 'Boxes',
       },
     ],
