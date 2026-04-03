@@ -7,8 +7,8 @@ async function purgeStorageAndDatabase() {
     console.log('🧹 Starting Daily Data Purge...');
     
     const now = new Date();
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    const thirtyDaysAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);      // AGGRESSIVE PURGE: 24h
+    const sevenDaysAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);        // AGGRESSIVE PURGE: 6h
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
     try {
@@ -54,20 +54,20 @@ async function purgeStorageAndDatabase() {
             }
         }
 
-        // 2. DELETE SafeSession records older than 6 hours (if not completed)
+        // 2. DELETE SafeSession records older than 7 days (if not completed)
         const deletedSafesResult = await prisma.safeSession.deleteMany({
             where: {
                 status: { not: 'COMPLETED' },
-                createdAt: { lt: sixHoursAgo }
+                createdAt: { lt: sevenDaysAgo }
             }
         });
         console.log(`🗑️ Deleted ${deletedSafesResult.count} abandoned SafeSession records.`);
 
-        // 3. DELETE Order records older than 24 hours.
+        // 3. DELETE Order records older than 30 days.
         // Prisma cascade delete requires us to find them and delete related ParticipantOrders and OrderItems first if not configured in DB.
         // Assuming schema has NO SET NULL / CASCADE, we delete children first:
         const oldOrders = await prisma.order.findMany({
-            where: { createdAt: { lt: twentyFourHoursAgo } },
+            where: { createdAt: { lt: thirtyDaysAgo } },
             select: { id: true }
         });
         
@@ -80,7 +80,7 @@ async function purgeStorageAndDatabase() {
             const deletedOrdersResult = await prisma.order.deleteMany({
                 where: { id: { in: oldOrderIds } }
             });
-            console.log(`🗑️ Deleted ${deletedOrdersResult.count} Order records older than 24 hours.`);
+            console.log(`🗑️ Deleted ${deletedOrdersResult.count} Order records older than 30 days.`);
         } else {
             console.log(`🗑️ No Orders older than 24 hours to delete.`);
         }

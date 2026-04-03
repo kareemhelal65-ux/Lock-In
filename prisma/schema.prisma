@@ -24,10 +24,10 @@ model User {
   updatedAt            DateTime           @updatedAt
   streaksAsFriend      FriendshipStreak[] @relation("FriendStreak")
   streaksAsUser        FriendshipStreak[] @relation("UserStreak")
+  hypeLogs             HypeLog[]
   hostedOrders         Order[]            @relation("HostRelation")
   participantOrders    ParticipantOrder[]
   inventory            UserCard[]
-  hypeLogs             HypeLog[]
 }
 
 model HypeLog {
@@ -85,14 +85,16 @@ model Vendor {
   ratingCount           Int         @default(0)
   status                String      @default("LIVE")
   announcementBanner    String?
-  announcementUpdatedAt DateTime?
   instapayAddress       String?
   instapayName          String?
   commissionOwedBalance Float       @default(0.0)
+  lifetimeSales         Float       @default(0.0)
+  lifetimeOrders        Int         @default(0)
   ledgerPinHash         String?
   hypeMultiplier        Float       @default(1.0)
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
+  announcementUpdatedAt DateTime?
   flashDrops            FlashDrop[]
   menuItems             MenuItem[]
   orders                Order[]
@@ -137,8 +139,8 @@ model Order {
   status          String             @default("AWAITING_PAYMENT")
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
-  vendor          Vendor             @relation(fields: [vendorId], references: [id])
   host            User               @relation("HostRelation", fields: [hostId], references: [id])
+  vendor          Vendor             @relation(fields: [vendorId], references: [id])
   items           OrderItem[]
   participants    ParticipantOrder[]
 }
@@ -151,23 +153,23 @@ model ParticipantOrder {
   hasPaid              Boolean @default(false)
   paymentScreenshotUrl String?
   ocrVerificationLog   String?
-  user                 User    @relation(fields: [userId], references: [id])
   order                Order   @relation(fields: [orderId], references: [id])
+  user                 User    @relation(fields: [userId], references: [id])
 }
 
 model OrderItem {
-  id          String     @id @default(uuid())
-  orderId     String
-  menuItemId  String?
-  flashDropId String?
-  name        String
-  price       Float
-  quantity    Int        @default(1)
-  modifiers   String
+  id           String     @id @default(uuid())
+  orderId      String
+  menuItemId   String?
+  flashDropId  String?
+  name         String
+  price        Float
+  quantity     Int        @default(1)
+  modifiers    String
   specialNotes String?
-  flashDrop   FlashDrop? @relation(fields: [flashDropId], references: [id])
-  menuItem    MenuItem?  @relation(fields: [menuItemId], references: [id])
-  order       Order      @relation(fields: [orderId], references: [id])
+  flashDrop    FlashDrop? @relation(fields: [flashDropId], references: [id])
+  menuItem     MenuItem?  @relation(fields: [menuItemId], references: [id])
+  order        Order      @relation(fields: [orderId], references: [id])
 }
 
 model SystemConfig {
@@ -177,25 +179,24 @@ model SystemConfig {
   updatedAt DateTime @updatedAt
 }
 
-// Safe Session — DB-backed to survive Vercel serverless cold starts
 model SafeSession {
-  id             String   @id
-  hostId         String
-  hostName       String
-  restaurantId   String
-  restaurantName String
-  targetAmount   Int      @default(2)
-  timeRemaining  Int      @default(300)
-  maxTime        Int      @default(300)
-  status         String   @default("ACTIVE")
-  isCoveredByHost Boolean @default(false)
-  isGlobal       Boolean  @default(false)
-  orderId        String?
-  orderNumber    String?
-  participants   Json     @default("[]")
-  orders         Json     @default("[]")
-  deployedCards  Json     @default("[]")
-  expiresAt      DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id
+  hostId          String
+  hostName        String
+  restaurantId    String
+  restaurantName  String
+  targetAmount    Int      @default(2)
+  timeRemaining   Int      @default(300)
+  maxTime         Int      @default(300)
+  status          String   @default("ACTIVE")
+  isCoveredByHost Boolean  @default(false)
+  isGlobal        Boolean  @default(false)
+  orderId         String?
+  orderNumber     String?
+  participants    Json     @default("[]")
+  orders          Json     @default("[]")
+  deployedCards   Json     @default("[]")
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

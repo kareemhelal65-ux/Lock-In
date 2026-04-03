@@ -130,12 +130,14 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                 feeToAdd = soloFee;
             }
 
-            if (feeToAdd > 0) {
-                await prisma.vendor.update({
-                    where: { id },
-                    data: { commissionOwedBalance: { increment: feeToAdd } }
-                });
-            }
+            await prisma.vendor.update({
+                where: { id },
+                data: {
+                    commissionOwedBalance: { increment: feeToAdd },
+                    lifetimeSales: { increment: order.totalAmount },
+                    lifetimeOrders: { increment: 1 }
+                }
+            });
         }
 
         // 4. Award Hype Score when vendor approves & fires
@@ -267,7 +269,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         const { period } = req.query as { period?: string };
         const vendor = await prisma.vendor.findUnique({
             where: { id },
-            select: { commissionOwedBalance: true }
+            select: { commissionOwedBalance: true, lifetimeSales: true, lifetimeOrders: true }
         });
 
         if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
@@ -309,14 +311,12 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         let currentOrdersCount = 0;
         let previousOrdersCount = 0;
         const currentOrders: typeof orders = [];
-        let periodCommissionOwed = 0;
 
         orders.forEach(order => {
             const orderDate = new Date(order.createdAt);
             if (period === 'all') {
-                currentVolume += order.totalAmount;
-                currentOrdersCount++;
                 currentOrders.push(order);
+                // In 'all', volume and counts are handled by lifetime metrics below
             } else if (orderDate >= startOfCurrent) {
                 currentVolume += order.totalAmount;
                 currentOrdersCount++;
@@ -325,26 +325,18 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
                 previousVolume += order.totalAmount;
                 previousOrdersCount++;
             }
-
-            // Calculate fees for all completed orders in the filtered set
-            const participantCount = order.participants.length;
-            if (participantCount === 1) {
-                periodCommissionOwed += 10;
-            } else if (participantCount > 1) {
-                periodCommissionOwed += participantCount * 5;
-            }
         });
 
-        const volumeChange = previousVolume === 0
+        const volumeChange = period === 'all' ? 100 : (previousVolume === 0
             ? (currentVolume > 0 ? 100 : 0)
-            : ((currentVolume - previousVolume) / previousVolume) * 100;
+            : ((currentVolume - previousVolume) / previousVolume) * 100);
 
-        const ordersChange = previousOrdersCount === 0
+        const ordersChange = period === 'all' ? 100 : (previousOrdersCount === 0
             ? (currentOrdersCount > 0 ? 100 : 0)
-            : ((currentOrdersCount - previousOrdersCount) / previousOrdersCount) * 100;
+            : ((currentOrdersCount - previousOrdersCount) / previousOrdersCount) * 100);
 
-        const totalVolume = currentVolume;
-        const totalOrders = currentOrdersCount;
+        const totalVolume = period === 'all' ? vendor.lifetimeSales : currentVolume;
+        const totalOrders = period === 'all' ? vendor.lifetimeOrders : currentOrdersCount;
 
         // 1. Calculate Peak Hours (8am to 11pm)
         const hourCounts = new Array(16).fill(0);
