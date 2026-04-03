@@ -434,6 +434,9 @@ adminRouter.put('/cards/:id', async (req, res) => {
 
 adminRouter.delete('/cards/:id', async (req, res) => {
     try {
+        await prisma.userCard.deleteMany({
+            where: { cardId: req.params.id }
+        });
         await prisma.card.delete({
             where: { id: req.params.id }
         });

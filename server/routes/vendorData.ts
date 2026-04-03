@@ -114,6 +114,30 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
             include: { participants: true }
         });
 
+        // 3.5 Calculate and Add commission to platform when order is COMPLETED
+        if (status === 'COMPLETED') {
+            const configKeys = await prisma.systemConfig.findMany({
+                where: { key: { in: ['soloFeeAmount', 'groupPerPersonFeeAmount'] } }
+            });
+            const soloFee = parseFloat(configKeys.find((c: {key: string; value: string}) => c.key === 'soloFeeAmount')?.value || '10');
+            const groupFee = parseFloat(configKeys.find((c: {key: string; value: string}) => c.key === 'groupPerPersonFeeAmount')?.value || '5');
+
+            let feeToAdd = 0;
+            if (order.participants.length > 0) {
+                // Number of participants + host
+                feeToAdd = groupFee * (order.participants.length + 1);
+            } else {
+                feeToAdd = soloFee;
+            }
+
+            if (feeToAdd > 0) {
+                await prisma.vendor.update({
+                    where: { id },
+                    data: { commissionOwedBalance: { increment: feeToAdd } }
+                });
+            }
+        }
+
         // 4. Award Hype Score when vendor approves & fires
         if (status === 'FIRE') {
             // Logic moved from consumer.ts /payment-verification

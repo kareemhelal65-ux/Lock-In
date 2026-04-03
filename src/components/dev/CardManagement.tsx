@@ -4,6 +4,8 @@ import { Plus, Gift, Flame, Edit2, Trash2, Send } from 'lucide-react';
 export default function CardManagement() {
     const [cards, setCards] = useState<any[]>([]);
     const [showMintModal, setShowMintModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingCard, setEditingCard] = useState<any>(null);
     const [newCard, setNewCard] = useState({
         name: '',
         description: '',
@@ -140,7 +142,7 @@ export default function CardManagement() {
                                 >
                                     <Send className="w-3 h-3" /> Airdrop All
                                 </button>
-                                <button onClick={() => alert('Editing live assets is disabled for safety. Use Mint Modal to override and re-issue.')} className="p-2 border-2 border-black rounded hover:bg-gray-50 transition-all">
+                                <button onClick={() => { setEditingCard(card); setShowEditModal(true); }} className="p-2 border-2 border-black rounded hover:bg-gray-50 transition-all">
                                     <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button onClick={() => handleDeleteCard(card.id)} className="p-2 border-2 border-black bg-electric-red/10 text-electric-red rounded hover:bg-electric-red hover:text-white transition-all">
@@ -215,6 +217,89 @@ export default function CardManagement() {
                                 className="flex-1 py-4 bg-black text-volt-green border-4 border-black font-black uppercase brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all"
                             >
                                 Mint Asset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Edit Modal */}
+            {showEditModal && editingCard && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                    <div className="bg-white border-8 border-black p-8 rounded-2xl w-full max-w-lg brutal-shadow-lg scale-in">
+                        <h3 className="font-display font-black text-3xl uppercase mb-6 flex items-center gap-3">
+                            <Edit2 className="w-8 h-8 text-black" /> Edit Asset
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block font-black uppercase text-xs mb-1">Asset Name</label>
+                                <input 
+                                    className="w-full p-4 border-4 border-black font-bold outline-none" 
+                                    value={editingCard.name}
+                                    onChange={e => setEditingCard({...editingCard, name: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-black uppercase text-xs mb-1">Description</label>
+                                <textarea 
+                                    className="w-full p-4 border-4 border-black font-bold outline-none" 
+                                    rows={2}
+                                    value={editingCard.description}
+                                    onChange={e => setEditingCard({...editingCard, description: e.target.value})}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block font-black uppercase text-xs mb-1">Perk Code</label>
+                                    <input 
+                                        className="w-full p-4 border-4 border-black font-bold outline-none" 
+                                        value={editingCard.perkCode}
+                                        onChange={e => setEditingCard({...editingCard, perkCode: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block font-black uppercase text-xs mb-1">Rarity</label>
+                                    <select 
+                                        className="w-full p-4 border-4 border-black font-bold outline-none appearance-none"
+                                        value={editingCard.rarity}
+                                        onChange={e => setEditingCard({...editingCard, rarity: e.target.value})}
+                                    >
+                                        <option>COMMON</option>
+                                        <option>RARE</option>
+                                        <option>LEGENDARY</option>
+                                        <option>MYTHIC</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-8 flex gap-4">
+                            <button 
+                                onClick={() => setShowEditModal(false)}
+                                className="flex-1 py-4 border-4 border-black font-black uppercase hover:bg-gray-100 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={async () => {
+                                    try {
+                                        await fetch(`/api/admin/cards/${editingCard.id}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                name: editingCard.name,
+                                                description: editingCard.description,
+                                                perkCode: editingCard.perkCode,
+                                                rarity: editingCard.rarity
+                                            })
+                                        });
+                                        setShowEditModal(false);
+                                        fetchCards();
+                                    } catch (e) {
+                                        console.error(e);
+                                    }
+                                }}
+                                className="flex-1 py-4 bg-black text-volt-green border-4 border-black font-black uppercase brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all"
+                            >
+                                Save Changes
                             </button>
                         </div>
                     </div>
