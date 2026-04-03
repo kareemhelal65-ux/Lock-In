@@ -16,6 +16,7 @@ import SocialSafePulse from './components/dev/SocialSafePulse';
 import RetentionMetrics from './components/dev/RetentionMetrics';
 import VendorFriction from './components/dev/VendorFriction';
 import FinancialHealth from './components/dev/FinancialHealth';
+import PayoutsTab from './components/dev/PayoutsTab';
 
 interface DevDashboardProps {
     onBack: () => void;
@@ -50,6 +51,7 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
         { id: 'retention', label: 'Retention', icon: LayoutDashboard },
         { id: 'vendor-friction', label: 'Vendor Friction', icon: Clock },
         { id: 'financial', label: 'Financial Health', icon: DollarSign },
+        { id: 'payouts', label: 'Vendor Payouts', icon: DollarSign },
     ];
 
     return (
@@ -105,8 +107,8 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                     
                     {morningCoffee ? (
                         <div className="flex gap-8">
-                            <div className="flex flex-col items-end">
-                                <span className="text-xs font-bold text-gray-500 uppercase">Active Group Orders</span>
+                            <div className="flex flex-col items-end" title="Total number of active group orders created today vs 7 days ago. Tracks network vitality.">
+                                <span className="text-xs font-bold text-gray-500 uppercase cursor-help border-b border-dashed border-gray-400">Active Group Orders</span>
                                 <div className="flex items-center gap-2">
                                     <span className="font-display font-black text-2xl">{morningCoffee.groupOrders.today}</span>
                                     <span className={`text-sm font-bold py-0.5 px-2 rounded-full border-2 border-black ${morningCoffee.groupOrders.today >= morningCoffee.groupOrders.lastWeek ? 'bg-volt-green' : 'bg-electric-red text-white'}`}>
@@ -115,8 +117,8 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-xs font-bold text-gray-500 uppercase">Avg Delivery Time</span>
+                            <div className="flex flex-col items-end" title="Average minutes from order creation to completion status. Lower means faster turnaround.">
+                                <span className="text-xs font-bold text-gray-500 uppercase cursor-help border-b border-dashed border-gray-400">Avg Delivery Time</span>
                                 <div className="flex items-center gap-2">
                                     <span className="font-display font-black text-2xl">{morningCoffee.deliveryTime.today}m</span>
                                     <span className={`text-sm font-bold py-0.5 px-2 rounded-full border-2 border-black ${morningCoffee.deliveryTime.today <= morningCoffee.deliveryTime.lastWeek ? 'bg-volt-green' : 'bg-electric-red text-white'}`}>
@@ -124,8 +126,8 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-xs font-bold text-gray-500 uppercase">New Card Claims</span>
+                            <div className="flex flex-col items-end" title="Count of new perk cards claimed by users today. Indicates engagement with gamification.">
+                                <span className="text-xs font-bold text-gray-500 uppercase cursor-help border-b border-dashed border-gray-400">New Card Claims</span>
                                 <div className="flex items-center gap-2">
                                     <span className="font-display font-black text-2xl">{morningCoffee.cardClaims.today}</span>
                                     <span className={`text-sm font-bold py-0.5 px-2 rounded-full border-2 border-black ${morningCoffee.cardClaims.today >= morningCoffee.cardClaims.lastWeek ? 'bg-volt-green' : 'bg-electric-red text-white'}`}>
@@ -164,8 +166,9 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                             {activeTab === 'retention' && <RetentionMetrics />}
                             {activeTab === 'vendor-friction' && <VendorFriction />}
                             {activeTab === 'financial' && <FinancialHealth />}
+                            {activeTab === 'payouts' && <PayoutsTab />}
 
-                            {(activeTab !== 'god-mode' && activeTab !== 'operations' && activeTab !== 'analytics' && activeTab !== 'hype') && (
+                            {(activeTab !== 'god-mode' && activeTab !== 'operations' && activeTab !== 'analytics' && activeTab !== 'hype' && activeTab !== 'payouts') && (
                                 <div className="text-gray-500 font-bold uppercase tracking-widest mt-12 text-center items-center justify-center flex flex-col opacity-50">
                                     <Activity className="w-16 h-16 mb-4" />
                                     Module Under Construction

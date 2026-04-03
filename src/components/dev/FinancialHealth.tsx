@@ -12,45 +12,37 @@ export default function FinancialHealth() {
             .catch(console.error);
     }, []);
 
-    const chartData = [
-        { name: 'Mon', revenue: 400, ltv: 240 },
-        { name: 'Tue', revenue: 300, ltv: 260 },
-        { name: 'Wed', revenue: 600, ltv: 310 },
-        { name: 'Thu', revenue: 800, ltv: 380 },
-        { name: 'Fri', revenue: 1100, ltv: 450 },
-        { name: 'Sat', revenue: 900, ltv: 480 },
-        { name: 'Sun', revenue: 1400, ltv: 520 },
-    ];
+    const chartData = financial?.chartData || [];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm">
-                    <div className="text-[10px] font-black uppercase text-gray-400 mb-1">Total TVV (Gross)</div>
+                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm cursor-help" title="Total Value Processed - The gross revenue generated across all completed orders historically.">
+                    <div className="text-[10px] border-b border-dashed border-gray-400 font-black uppercase text-gray-400 mb-1 inline-block">Total TVV (Gross)</div>
                     <div className="text-2xl font-black italic">${financial?.totalRevenue.toFixed(0) || 0}</div>
                     <div className="flex items-center gap-1 text-[10px] font-black text-green-600 mt-2">
-                        <ArrowUpRight className="w-3 h-3" /> +12% vs LW
+                        <ArrowUpRight className="w-3 h-3" /> Realized Value
                     </div>
                 </div>
-                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm">
-                    <div className="text-[10px] font-black uppercase text-gray-400 mb-1">Avg Order Value</div>
+                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm cursor-help" title="Average Order Value - Total TVV divided by the number of completed orders.">
+                    <div className="text-[10px] border-b border-dashed border-gray-400 font-black uppercase text-gray-400 mb-1 inline-block">Avg Order Value</div>
                     <div className="text-2xl font-black italic">${financial?.aov.toFixed(1) || 0}</div>
                     <div className="flex items-center gap-1 text-[10px] font-black text-green-600 mt-2">
-                        <ArrowUpRight className="w-3 h-3" /> Group Upsell: +$4.20
+                        <ArrowUpRight className="w-3 h-3" /> Metric Tracked
                     </div>
                 </div>
-                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm">
-                    <div className="text-[10px] font-black uppercase text-gray-400 mb-1">Net Take Rate</div>
+                <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm cursor-help" title="Net Take Rate - The 10% platform fee assumed to have been captured from the gross TVV.">
+                    <div className="text-[10px] border-b border-dashed border-gray-400 font-black uppercase text-gray-400 mb-1 inline-block">Net Take Rate</div>
                     <div className="text-2xl font-black italic">${financial?.takeRate.toFixed(1) || 0}</div>
                     <div className="flex items-center gap-1 text-[10px] font-black text-red-600 mt-2">
-                        <ArrowDownRight className="w-3 h-3" /> Hype Subsidy: -2%
+                        <ArrowDownRight className="w-3 h-3" /> Derived standard
                     </div>
                 </div>
-                <div className="bg-black text-volt-green border-4 border-black p-6 rounded-xl brutal-shadow-sm">
-                    <div className="text-[10px] font-black uppercase text-gray-400 mb-1">CAC Payback</div>
-                    <div className="text-2xl font-black italic">1.4 Orders</div>
+                <div className="bg-black text-volt-green border-4 border-black p-6 rounded-xl brutal-shadow-sm cursor-help" title="Cost of Acquisition Payback period representing how many orders an average user makes to pay back their marketing subsidy.">
+                    <div className="text-[10px] border-b border-dashed border-gray-400 font-black uppercase text-gray-400 mb-1 inline-block">CAC Payback</div>
+                    <div className="text-2xl font-black italic">{(financial?.aov > 0) ? (4.2 / financial.aov).toFixed(1) : 0} Orders</div>
                     <div className="flex items-center gap-1 text-[10px] font-black text-volt-green mt-2 uppercase">
-                        Breakeven High
+                        Estimated Calculation
                     </div>
                 </div>
             </div>

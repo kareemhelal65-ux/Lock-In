@@ -65,7 +65,10 @@ export default function OperationsHub() {
                                         <span className="font-black text-sm uppercase px-2 py-1 bg-black text-white rounded">
                                             {order.status}
                                         </span>
-                                        <button className="flex items-center gap-1 text-[10px] font-black uppercase text-electric-red hover:underline">
+                                        <button 
+                                            onClick={() => alert(`Opening internal support system to handle Order #${order.orderNumber}...`)}
+                                            className="flex items-center gap-1 text-[10px] font-black uppercase text-electric-red hover:underline"
+                                        >
                                             <ExternalLink className="w-3 h-3" /> Support Ticket
                                         </button>
                                     </div>
@@ -106,10 +109,16 @@ export default function OperationsHub() {
                                     </div>
                                 </div>
                                 <div className="mt-4 flex gap-2">
-                                    <button className="flex-1 py-2 bg-black text-white border-2 border-black rounded-lg font-black uppercase text-[10px] hover:bg-gray-800 transition-all">
+                                    <button 
+                                        onClick={() => alert(`Routing to ${v.name}'s complete data history ledger...`)}
+                                        className="flex-1 py-2 bg-black text-white border-2 border-black rounded-lg font-black uppercase text-[10px] hover:bg-gray-800 transition-all"
+                                    >
                                         View History
                                     </button>
-                                    <button className="flex-1 py-2 bg-white text-black border-2 border-black rounded-lg font-black uppercase text-[10px] hover:bg-gray-100 transition-all">
+                                    <button 
+                                        onClick={() => window.location.href = `mailto:vendor-${v.id}@sawa-app.com`}
+                                        className="flex-1 py-2 bg-white text-black border-2 border-black rounded-lg font-black uppercase text-[10px] hover:bg-gray-100 transition-all"
+                                    >
                                         Contact
                                     </button>
                                 </div>

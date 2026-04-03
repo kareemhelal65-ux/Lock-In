@@ -29,9 +29,18 @@ adminRouter.get('/morning-coffee', async (req, res) => {
             where: { createdAt: { gte: lastWeek, lt: lastWeekEnd }, participants: { some: {} } }
         });
 
-        // Avg Delivery Time mockup (we don't have deliveredAt yet, returning static mockup to avoid complex schema changes)
-        const todayDelivery = 19;
-        const lastWeekDelivery = 14;
+        // Avg Delivery Time using createdAt to updatedAt diff for COMPLETED orders
+        const getAvgDeliveryTime = async (startDate: Date, endDate: Date) => {
+            const completed = await prisma.order.findMany({
+                where: { status: 'COMPLETED', createdAt: { gte: startDate, lt: endDate } },
+                select: { createdAt: true, updatedAt: true }
+            });
+            if (completed.length === 0) return 0;
+            const diffs = completed.map(o => (o.updatedAt.getTime() - o.createdAt.getTime()) / 60000);
+            return Math.round(diffs.reduce((a, b) => a + b, 0) / diffs.length);
+        };
+        const todayDelivery = await getAvgDeliveryTime(today, tomorrow);
+        const lastWeekDelivery = await getAvgDeliveryTime(lastWeek, lastWeekEnd);
 
         // New Card Claims
         const todayClaims = await prisma.userCard.count({
@@ -144,7 +153,8 @@ adminRouter.get('/operations/vendors', async (req, res) => {
             status: v.status,
             ordersToday: v.orders.length,
             rating: v.rating,
-            hypeMultiplier: v.hypeMultiplier
+            hypeMultiplier: v.hypeMultiplier,
+            commissionOwedBalance: v.commissionOwedBalance
         }));
         res.json({ scorecards });
     } catch (e: any) {
@@ -189,12 +199,34 @@ adminRouter.get('/analytics/financial', async (req, res) => {
         
         const aov = orders.length ? (totalRevenue / orders.length) : 0;
         
+        // Generate chart data for last 7 days dynamically
+        const chartData = [];
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            d.setHours(0,0,0,0);
+            const dEnd = new Date(d);
+            dEnd.setDate(d.getDate() + 1);
+            
+            const dayOrders = orders.filter(o => o.createdAt >= d && o.createdAt < dEnd);
+            let dayRev = 0;
+            dayOrders.forEach(o => dayRev += o.totalAmount);
+            
+            chartData.push({
+                name: days[d.getDay()],
+                revenue: dayRev,
+                ltv: dayRev * 0.6 // Represents long term value estimated retention
+            });
+        }
+        
         res.json({
             aov,
             totalRevenue,
             groupRevenue,
             soloRevenue,
-            takeRate: totalRevenue * 0.1 // 10% example
+            takeRate: totalRevenue * 0.1, // 10% example
+            chartData
         });
     } catch (e: any) {
         res.status(500).json({ error: e.message });
@@ -323,6 +355,22 @@ adminRouter.post('/leaderboard/reset', async (req, res) => {
             data: { hypeScore: 0 }
         });
         res.json(result);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// ==========================================
+// 8. VENDOR PAYOUTS
+// ==========================================
+adminRouter.post('/payouts/collect', async (req, res) => {
+    try {
+        const { vendorId } = req.body;
+        const vendor = await prisma.vendor.update({
+            where: { id: vendorId },
+            data: { commissionOwedBalance: 0 }
+        });
+        res.json(vendor);
     } catch (e: any) {
         res.status(500).json({ error: e.message });
     }
