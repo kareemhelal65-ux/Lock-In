@@ -138,6 +138,28 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                     lifetimeOrders: { increment: 1 }
                 }
             });
+
+            // 3.6 Global Dev Dashboard Rollup
+            const dateString = new Date().toISOString().split('T')[0];
+            const isGroup = order.participants.length > 1;
+            const groupRev = isGroup ? order.totalAmount : 0;
+            const soloRev = isGroup ? 0 : order.totalAmount;
+            const groupCount = isGroup ? 1 : 0;
+            const participantCount = isGroup ? order.participants.length : 0;
+            
+            await prisma.$executeRawUnsafe(`
+                INSERT INTO "SystemSnapshot" ("id", "dateString", "totalRevenue", "groupRevenue", "soloRevenue", "totalOrders", "groupOrders", "totalParticipants", "platformTake", "updatedAt")
+                VALUES (gen_random_uuid(), '${dateString}', ${order.totalAmount}, ${groupRev}, ${soloRev}, 1, ${groupCount}, ${participantCount}, ${feeToAdd}, NOW())
+                ON CONFLICT ("dateString") DO UPDATE
+                SET "totalRevenue" = "SystemSnapshot"."totalRevenue" + ${order.totalAmount},
+                    "groupRevenue" = "SystemSnapshot"."groupRevenue" + ${groupRev},
+                    "soloRevenue" = "SystemSnapshot"."soloRevenue" + ${soloRev},
+                    "totalOrders" = "SystemSnapshot"."totalOrders" + 1,
+                    "groupOrders" = "SystemSnapshot"."groupOrders" + ${groupCount},
+                    "totalParticipants" = "SystemSnapshot"."totalParticipants" + ${participantCount},
+                    "platformTake" = "SystemSnapshot"."platformTake" + ${feeToAdd},
+                    "updatedAt" = NOW();
+            `);
         }
 
         // 4. Award Hype Score when vendor approves & fires

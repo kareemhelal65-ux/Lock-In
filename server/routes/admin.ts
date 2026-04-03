@@ -43,15 +43,18 @@ adminRouter.get('/morning-coffee', async (req, res) => {
         const lastWeekEnd = new Date(lastWeek);
         lastWeekEnd.setDate(lastWeek.getDate() + 1);
 
-        // Active Group Orders (orders with participants)
+        const dateStringToday = today.toISOString().split('T')[0];
+        const dateStringLastWeek = lastWeek.toISOString().split('T')[0];
+
+        // Active Group Orders (orders with participants) - Today use live DB (since it's < 24h), Last Week use snapshots
         const todayGroupOrders = await prisma.order.count({
             where: { createdAt: { gte: today, lt: tomorrow }, participants: { some: {} } }
         });
-        const lastWeekGroupOrders = await prisma.order.count({
-            where: { createdAt: { gte: lastWeek, lt: lastWeekEnd }, participants: { some: {} } }
-        });
 
-        // Avg Delivery Time using createdAt to updatedAt diff for COMPLETED orders
+        const lastWeekSnapshot = await prisma.$queryRawUnsafe(`SELECT "groupOrders" FROM "SystemSnapshot" WHERE "dateString" = '${dateStringLastWeek}'`) as any[];
+        const lastWeekGroupOrders = lastWeekSnapshot.length > 0 ? Number(lastWeekSnapshot[0].groupOrders) : 0;
+
+        // Avg Delivery Time - Today only (Historical delivery time is less critical for coffee report)
         const getAvgDeliveryTime = async (startDate: Date, endDate: Date) => {
             const completed = await prisma.order.findMany({
                 where: { status: 'COMPLETED', createdAt: { gte: startDate, lt: endDate } },
@@ -62,7 +65,7 @@ adminRouter.get('/morning-coffee', async (req, res) => {
             return Math.round(diffs.reduce((a, b) => a + b, 0) / diffs.length);
         };
         const todayDelivery = await getAvgDeliveryTime(today, tomorrow);
-        const lastWeekDelivery = await getAvgDeliveryTime(lastWeek, lastWeekEnd);
+        const lastWeekDelivery = 0; // Legacy orders purged, so default to 0 or could store this in snapshot too if needed.
 
         // New Card Claims
         const todayClaims = await prisma.userCard.count({
@@ -210,28 +213,23 @@ adminRouter.get('/analytics/financial', async (req, res) => {
         const soloFee = parseFloat(configKeys.find(c => c.key === 'soloFeeAmount')?.value || '10');
         const groupFee = parseFloat(configKeys.find(c => c.key === 'groupPerPersonFeeAmount')?.value || '5');
 
-        const orders = await prisma.order.findMany({
-            where: { status: 'COMPLETED' },
-            include: { participants: true }
-        });
+        const snapshots = await prisma.$queryRawUnsafe(`SELECT * FROM "SystemSnapshot"`) as any[];
         
         let totalRevenue = 0;
         let groupRevenue = 0;
         let soloRevenue = 0;
         let platformTake = 0;
+        let totalOrders = 0;
         
-        orders.forEach(o => {
-            totalRevenue += o.totalAmount;
-            if (o.participants.length > 0) {
-                groupRevenue += o.totalAmount;
-                platformTake += groupFee * (o.participants.length + 1); // participants + host
-            } else {
-                soloRevenue += o.totalAmount;
-                platformTake += soloFee;
-            }
+        snapshots.forEach((s: any) => {
+            totalRevenue += Number(s.totalRevenue || 0);
+            groupRevenue += Number(s.groupRevenue || 0);
+            soloRevenue += Number(s.soloRevenue || 0);
+            platformTake += Number(s.platformTake || 0);
+            totalOrders += Number(s.totalOrders || 0);
         });
         
-        const aov = orders.length ? (totalRevenue / orders.length) : 0;
+        const aov = totalOrders ? (totalRevenue / totalOrders) : 0;
         
         // Generate chart data for last 7 days dynamically
         const chartData = [];
@@ -239,13 +237,9 @@ adminRouter.get('/analytics/financial', async (req, res) => {
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
-            d.setHours(0,0,0,0);
-            const dEnd = new Date(d);
-            dEnd.setDate(d.getDate() + 1);
-            
-            const dayOrders = orders.filter(o => o.createdAt >= d && o.createdAt < dEnd);
-            let dayRev = 0;
-            dayOrders.forEach(o => dayRev += o.totalAmount);
+            const dateString = d.toISOString().split('T')[0];
+            const snapshot = snapshots.find((s: any) => s.dateString === dateString);
+            const dayRev = snapshot ? Number(snapshot.totalRevenue) : 0;
             
             chartData.push({
                 name: days[d.getDay()],
@@ -270,12 +264,10 @@ adminRouter.get('/analytics/financial', async (req, res) => {
 
 adminRouter.get('/analytics/social', async (req, res) => {
     try {
-        const groupOrders = await prisma.order.findMany({
-            where: { participants: { some: {} } },
-            include: { participants: true }
-        });
-        const totalGroups = groupOrders.length || 1;
-        const totalParticipants = groupOrders.reduce((sum, o) => sum + o.participants.length, 0);
+        // Viral coefficient = 1 + (totalParticipants / totalGroups)
+        const snapshots = await prisma.$queryRawUnsafe(`SELECT "groupOrders", "totalParticipants" FROM "SystemSnapshot"`) as any[];
+        const totalGroups = snapshots.reduce((sum, s) => sum + Number(s.groupOrders || 0), 0) || 1;
+        const totalParticipants = snapshots.reduce((sum, s) => sum + Number(s.totalParticipants || 0), 0);
         const viralCoefficient = 1 + (totalParticipants / totalGroups);
         
         const recentOrders = await prisma.order.count({
