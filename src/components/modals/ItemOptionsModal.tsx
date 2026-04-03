@@ -90,19 +90,30 @@ export default function ItemOptionsModal({ isOpen, onClose, item, onConfirm }: I
                   <div className="space-y-2">
                     {availableAddOns.map((addon: any, idx: number) => {
                       const isSelected = selectedAddOns.find(a => a.name === addon.name);
+                      const isSoldOut = addon.inStock === false;
+                      
                       return (
                         <button
                           key={idx}
-                          onClick={() => toggleAddOn(addon)}
+                          onClick={() => !isSoldOut && toggleAddOn(addon)}
+                          disabled={isSoldOut}
                           className={`w-full p-4 border-2 border-black rounded-xl flex items-center justify-between transition-all ${
+                            isSoldOut ? 'bg-gray-200 opacity-60 cursor-not-allowed grayscale' :
                             isSelected ? 'bg-volt-green shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -translate-x-1 -translate-y-1' : 'bg-gray-50 hover:bg-gray-100'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center ${isSelected ? 'bg-black text-white' : 'bg-white'}`}>
+                            <div className={`w-6 h-6 border-2 border-black rounded flex items-center justify-center ${
+                              isSoldOut ? 'bg-gray-300' :
+                              isSelected ? 'bg-black text-white' : 'bg-white'
+                            }`}>
                               {isSelected && <Check className="w-4 h-4" />}
+                              {isSoldOut && <X className="w-3 h-3 text-black/40" />}
                             </div>
-                            <span className="font-display font-bold text-sm uppercase">{addon.name}</span>
+                            <div className="flex flex-col items-start">
+                              <span className="font-display font-bold text-sm uppercase">{addon.name}</span>
+                              {isSoldOut && <span className="text-[10px] font-black text-electric-red uppercase">Sold Out</span>}
+                            </div>
                           </div>
                           <span className="font-display font-black text-sm">+{addon.price} EGP</span>
                         </button>

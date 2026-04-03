@@ -229,7 +229,12 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">
-                                                        <p className="font-bold text-lg">{item.name}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-bold text-lg">{item.name}</p>
+                                                            {!item.inStock && (
+                                                                <span className="bg-electric-red text-white text-[10px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">SOLD OUT</span>
+                                                            )}
+                                                        </div>
                                                         {item.description && (
                                                             <p className="text-xs text-cool-gray leading-tight mb-1">{item.description}</p>
                                                         )}
@@ -383,13 +388,28 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                             }}
                                                         />
                                                         <button
+                                                            onClick={() => {
+                                                                const updated = [...editForm.addOns];
+                                                                updated[idx] = { ...updated[idx], inStock: !addon.hasOwnProperty('inStock') ? false : !addon.inStock };
+                                                                setEditForm({ ...editForm, addOns: updated });
+                                                            }}
+                                                            title={lang === 'ar' ? "تغيير حالة المخزون" : "Toggle Stock"}
+                                                            className={`px-2 py-1 rounded text-[10px] font-black uppercase border-2 transition-all ${
+                                                                (addon.inStock !== false)
+                                                                    ? 'bg-volt-green/10 border-volt-green/50 text-volt-green'
+                                                                    : 'bg-electric-red/10 border-electric-red/50 text-electric-red'
+                                                            }`}
+                                                        >
+                                                            {(addon.inStock !== false) ? t.inStock : t.soldOut}
+                                                        </button>
+                                                        <button
                                                             onClick={() => setEditForm({ ...editForm, addOns: editForm.addOns.filter((_: any, i: number) => i !== idx) })}
                                                             className="text-electric-red text-xs font-bold hover:underline"
                                                         >✕</button>
                                                     </div>
                                                 ))}
                                                 <button
-                                                    onClick={() => setEditForm({ ...editForm, addOns: [...(editForm.addOns || []), { name: '', price: 0 }] })}
+                                                    onClick={() => setEditForm({ ...editForm, addOns: [...(editForm.addOns || []), { name: '', price: 0, inStock: true }] })}
                                                     className="text-xs text-volt-green font-bold uppercase hover:underline"
                                                 >{t.addOption}</button>
                                             </div>

@@ -277,6 +277,12 @@ export default function VendorProfile({
                           Requires Hype Level {item.requiredHypeLevel}
                         </p>
                       </div>
+                    ) : !item.inStock ? (
+                      <div className="bg-electric-red/10 border-2 border-electric-red px-3 py-1 rounded-pill">
+                        <span className="text-[10px] font-display font-black text-electric-red uppercase tracking-widest">
+                          Sold Out
+                        </span>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2">
                         {cart.filter(c => c.item.id === item.id).length > 0 ? (

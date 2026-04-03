@@ -38,6 +38,23 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
         fetchLedger();
     }, [isUnlocked, vendorId, period]);
 
+    const handleClearBalance = async () => {
+        if (!confirm(lang === 'ar' ? 'هل أنت متأكد من تسوية الرصيد؟' : 'Are you sure you want to clear the balance?')) return;
+        try {
+            await fetch('/api/admin/payouts/collect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vendorId })
+            });
+            // Re-fetch stats
+            const res = await fetch(`/api/vendorData/${vendorId}/ledger?period=${period}`);
+            const data = await res.json();
+            if (data.stats) setStats(data.stats);
+        } catch (err) {
+            console.error("Failed to clear balance", err);
+        }
+    };
+
     const handleUnlock = () => {
         if (pin === correctPin) {
             setIsUnlocked(true);
@@ -128,7 +145,10 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                             <h3 className="font-bold text-volt-green uppercase text-sm tracking-widest">{t.balanceDue}</h3>
                         </div>
                         <p className="font-display font-black text-4xl relative z-10">{stats.commissionOwed.toLocaleString()} <span className="text-xl text-cool-gray">EGP</span></p>
-                        <button className="mt-4 w-full bg-volt-green/20 text-volt-green font-display font-black uppercase py-2 rounded border border-volt-green/50 hover:bg-volt-green hover:text-deep-charcoal transition-colors relative z-10 text-sm">
+                        <button 
+                            onClick={handleClearBalance}
+                            className="mt-4 w-full bg-volt-green/20 text-volt-green font-display font-black uppercase py-2 rounded border border-volt-green/50 hover:bg-volt-green hover:text-deep-charcoal transition-colors relative z-10 text-sm"
+                        >
                             {t.clearBalance}
                         </button>
                     </div>

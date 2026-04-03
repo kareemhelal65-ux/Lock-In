@@ -270,6 +270,8 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
             select: { commissionOwedBalance: true }
         });
 
+        if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
+
         const now = new Date();
         let startOfCurrent = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         let startOfPrevious = new Date(startOfCurrent);
@@ -379,7 +381,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
 
         const stats = {
             totalVolume,
-            commissionOwed: periodCommissionOwed,
+            commissionOwed: vendor.commissionOwedBalance,
             totalOrders,
             peakHours,
             itemPopularity,
@@ -529,6 +531,24 @@ vendorDataRouter.put('/:id/menu/:itemId', upload.single('image'), async (req, re
         res.json({ message: 'Item updated', item: updatedItem });
     } catch (error) {
         console.error('Error updating menu item:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 6a. Toggle Menu Item Stock
+vendorDataRouter.patch('/:id/menu/:itemId/stock', async (req, res) => {
+    try {
+        const { id, itemId } = req.params;
+        const { inStock } = req.body;
+
+        const updatedItem = await prisma.menuItem.update({
+            where: { id: itemId, vendorId: id },
+            data: { inStock }
+        });
+
+        res.json({ message: 'Stock status updated', inStock: updatedItem.inStock });
+    } catch (error) {
+        console.error('Error toggling stock:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

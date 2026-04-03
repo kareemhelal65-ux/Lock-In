@@ -46,6 +46,7 @@ export interface MenuItem {
   description: string;
   price: number;
   image: string;
+  inStock: boolean;
   isLocked: boolean;
   requiredHypeLevel: number;
   category: string;
