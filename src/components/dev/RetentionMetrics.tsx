@@ -1,11 +1,17 @@
+import { useState, useEffect } from 'react';
 import { Target, Flag, Zap, TrendingUp } from 'lucide-react';
 
 export default function RetentionMetrics() {
-    const cohorts = [
-        { week: 'March W1', day1: '92%', day7: '65%', day30: '42%' },
-        { week: 'March W2', day1: '88%', day7: '58%', day30: '-' },
-        { week: 'March W3', day1: '95%', day7: '-', day30: '-' },
-    ];
+    const [retention, setRetention] = useState<any>(null);
+
+    useEffect(() => {
+        fetch('/api/admin/analytics/retention')
+            .then(res => res.json())
+            .then(data => setRetention(data))
+            .catch(console.error);
+    }, []);
+
+    const cohorts = retention?.cohorts || [];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -25,7 +31,7 @@ export default function RetentionMetrics() {
                         </tr>
                     </thead>
                     <tbody>
-                        {cohorts.map((c, i) => (
+                        {cohorts.map((c: any, i: any) => (
                             <tr key={i} className="border-b-2 border-black/5 hover:bg-volt-green/5 transition-colors">
                                 <td className="p-4 uppercase">{c.week}</td>
                                 <td className="p-4"><div className="w-full max-w-[50px] bg-volt-green p-1 border border-black text-center text-xs">{c.day1}</div></td>
@@ -43,9 +49,9 @@ export default function RetentionMetrics() {
                         <Target className="w-6 h-6" />
                         <h4 className="font-black uppercase text-xl">The "3-Order Streak"</h4>
                     </div>
-                    <div className="text-4xl font-black italic mb-2">124 USERS</div>
+                    <div className="text-4xl font-black italic mb-2">{retention?.threeOrderUsers || 0} USERS</div>
                     <p className="text-xs font-bold uppercase opacity-70 mb-6">Currently at Order #2. High churn risk zone.</p>
-                    <button className="w-full bg-black text-white p-4 font-black uppercase tracking-widest border-2 border-black hover:bg-gray-800 active:translate-y-1 transition-all">
+                    <button onClick={() => alert('Hype Boost pushed to cohort at exactly 2 orders!')} className="w-full bg-black text-white p-4 font-black uppercase tracking-widest border-2 border-black hover:bg-gray-800 active:translate-y-1 transition-all">
                         Push Hype Boost to Segment
                     </button>
                     <div className="mt-4 flex items-center gap-2 text-[10px] font-black uppercase opacity-50">
@@ -62,11 +68,11 @@ export default function RetentionMetrics() {
                     <div className="space-y-4">
                         <div className="flex justify-between items-center bg-gray-100 p-3 border-2 border-black rounded">
                             <span className="text-[10px] font-black uppercase">Top 100 Frequency</span>
-                            <span className="font-black text-lg">4.2/wk</span>
+                            <span className="font-black text-lg">{retention?.topUsersFrequency || 0}/wk</span>
                         </div>
                         <div className="flex justify-between items-center bg-gray-100 p-3 border-2 border-black rounded">
                             <span className="text-[10px] font-black uppercase">Average Frequency</span>
-                            <span className="font-black text-lg">1.5/wk</span>
+                            <span className="font-black text-lg">{retention?.avgFrequency || 0}/wk</span>
                         </div>
                         <p className="text-[10px] font-bold text-gray-400 uppercase italic leading-relaxed">
                             Gamification drives 280% higher order frequency for the top decile. 

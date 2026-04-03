@@ -179,11 +179,11 @@ export default function HypeEngine() {
                 </div>
                 <div className="flex flex-wrap gap-4">
                     {['ALL USERS', 'TOP 50', 'ENGINEERING', 'FRESHMEN', 'INACTIVE (7D)'].map(group => (
-                        <button key={group} className="px-6 py-3 bg-white border-4 border-black font-black uppercase text-sm brutal-shadow-sm hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0">
+                        <button onClick={() => alert(`Targeting Segment Selected: ${group}`)} key={group} className="px-6 py-3 bg-white border-4 border-black font-black uppercase text-sm brutal-shadow-sm hover:-translate-x-1 hover:-translate-y-1 transition-all active:translate-x-0 active:translate-y-0">
                             {group}
                         </button>
                     ))}
-                    <button className="px-6 py-3 bg-black text-volt-green border-4 border-black font-black uppercase text-sm brutal-shadow-sm">
+                    <button onClick={() => alert('New rule-builder segment logic initializing...')} className="px-6 py-3 bg-black text-volt-green border-4 border-black font-black uppercase text-sm brutal-shadow-sm">
                         + New Segment
                     </button>
                 </div>

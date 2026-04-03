@@ -30,10 +30,19 @@ export default function LeaderboardCommand() {
         }
     };
 
-    const handleBan = async (_userId: string) => {
+    const handleBan = async (userId: string) => {
         if (!confirm('BAN USER from leaderboard? This will hide them from rankings forever.')) return;
-        // Mocking ban for now as it needs schema update to hide from leaderboards
-        alert('User flagged for investigation and hidden from public view.');
+        try {
+            await fetch('/api/admin/leaderboard/ban', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+            fetchUsers();
+            alert('User mapped out of public rankings.');
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     const filteredUsers = users.filter(u => 
@@ -60,7 +69,7 @@ export default function LeaderboardCommand() {
                             className="w-full pl-10 pr-4 py-2 border-2 border-black font-bold outline-none focus:bg-volt-green/5"
                         />
                     </div>
-                    <button className="p-2 border-2 border-black rounded md:flex hidden">
+                    <button onClick={() => alert('Filter toggled (mock visual action. Text input is live).')} className="p-2 border-2 border-black rounded md:flex hidden hover:bg-gray-100 transition-all">
                         <Filter className="w-5 h-5" />
                     </button>
                 </div>

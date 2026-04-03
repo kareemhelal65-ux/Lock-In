@@ -2,25 +2,25 @@ import { useState, useEffect } from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
 
 export default function VendorFriction() {
-    const [vendors, setVendors] = useState<any[]>([]);
+    const [data, setData] = useState<any>({ scorecard: [], metrics: [] });
 
     useEffect(() => {
-        fetch('/api/admin/operations/vendors')
+        fetch('/api/admin/operations/friction')
             .then(res => res.json())
-            .then(data => setVendors(data.scorecards))
+            .then(fetchedData => setData(fetchedData))
             .catch(console.error);
     }, []);
 
-    const metrics = [
-        { label: 'Avg Prep Offset', value: '+4.2 min', status: 'WARN' },
-        { label: 'Order Accuracy', value: '98.5%', status: 'GOOD' },
-        { label: 'Busy Overload', value: '12/day', status: 'CRITICAL' },
+    const metrics = data.metrics.length ? data.metrics : [
+        { label: 'Avg Prep Offset', value: '--', status: 'WARN' },
+        { label: 'Order Accuracy', value: '--', status: 'WARN' },
+        { label: 'Busy Overload', value: '--', status: 'WARN' },
     ];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {metrics.map(m => (
+                {metrics.map((m: any) => (
                     <div key={m.label} className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm">
                         <div className="text-[10px] font-black uppercase text-gray-400 mb-1">{m.label}</div>
                         <div className="flex items-center justify-between">
@@ -39,7 +39,7 @@ export default function VendorFriction() {
                     <AlertTriangle className="w-5 h-5 text-electric-red" />
                 </div>
                 <div className="divide-y-2 divide-black/10">
-                    {vendors.map(v => (
+                    {data.scorecard.map((v: any) => (
                         <div key={v.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-gray-50 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-black text-white flex items-center justify-center font-display font-black text-xl rounded border-2 border-black">
@@ -48,8 +48,8 @@ export default function VendorFriction() {
                                 <div>
                                     <div className="font-black uppercase text-lg">{v.name}</div>
                                     <div className="flex gap-2 mt-1">
-                                        <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded border border-black font-bold">Accuracy: 99%</span>
-                                        <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded border border-black font-bold">Latency: High</span>
+                                        <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded border border-black font-bold">Accuracy: {v.accuracy}</span>
+                                        <span className="text-[10px] bg-gray-200 px-2 py-0.5 rounded border border-black font-bold">Latency: {v.latency}</span>
                                     </div>
                                 </div>
                             </div>
@@ -57,13 +57,13 @@ export default function VendorFriction() {
                             <div className="flex flex-wrap gap-4 items-center">
                                 <div className="text-center px-4 border-r-2 border-black last:border-0">
                                     <div className="text-[10px] font-bold text-gray-400 uppercase">Prep Time</div>
-                                    <div className="font-black text-electric-red">14m (Avg)</div>
+                                    <div className="font-black text-electric-red">{v.prepTime} (Avg)</div>
                                 </div>
                                 <div className="text-center px-4 border-r-2 border-black last:border-0">
                                     <div className="text-[10px] font-bold text-gray-400 uppercase">Off-Line Freq</div>
                                     <div className="font-black">2x / Hr</div>
                                 </div>
-                                <button className="ml-4 bg-black text-white px-4 py-2 font-black uppercase text-[10px] border-2 border-black rounded hover:bg-electric-red transition-all">
+                                <button onClick={() => window.location.href=`mailto:support@sawa-app.com?subject=Performance Call regarding ${v.name}`} className="ml-4 bg-black text-white px-4 py-2 font-black uppercase text-[10px] border-2 border-black rounded hover:bg-electric-red transition-all">
                                     Performance Call
                                 </button>
                             </div>

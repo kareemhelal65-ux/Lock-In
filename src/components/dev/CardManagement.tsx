@@ -66,6 +66,16 @@ export default function CardManagement() {
         }
     };
 
+    const handleDeleteCard = async (cardId: string) => {
+        if (!confirm('Are you sure you want to delete this global asset from the platform?')) return;
+        try {
+            await fetch(`/api/admin/cards/${cardId}`, { method: 'DELETE' });
+            fetchCards();
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex justify-between items-center mb-6">
@@ -130,10 +140,10 @@ export default function CardManagement() {
                                 >
                                     <Send className="w-3 h-3" /> Airdrop All
                                 </button>
-                                <button className="p-2 border-2 border-black rounded hover:bg-gray-50 transition-all">
+                                <button onClick={() => alert('Editing live assets is disabled for safety. Use Mint Modal to override and re-issue.')} className="p-2 border-2 border-black rounded hover:bg-gray-50 transition-all">
                                     <Edit2 className="w-4 h-4" />
                                 </button>
-                                <button className="p-2 border-2 border-black bg-electric-red/10 text-electric-red rounded hover:bg-electric-red hover:text-white transition-all">
+                                <button onClick={() => handleDeleteCard(card.id)} className="p-2 border-2 border-black bg-electric-red/10 text-electric-red rounded hover:bg-electric-red hover:text-white transition-all">
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>

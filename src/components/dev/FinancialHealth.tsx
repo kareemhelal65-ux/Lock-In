@@ -5,12 +5,39 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function FinancialHealth() {
     const [financial, setFinancial] = useState<any>(null);
 
-    useEffect(() => {
+    const [soloFee, setSoloFee] = useState(10);
+    const [groupFee, setGroupFee] = useState(5);
+
+    const fetchFinancials = () => {
         fetch('/api/admin/analytics/financial')
             .then(res => res.json())
-            .then(data => setFinancial(data))
+            .then(data => {
+                setFinancial(data);
+                if (data.fees) {
+                    setSoloFee(data.fees.soloFeeAmount);
+                    setGroupFee(data.fees.groupPerPersonFeeAmount);
+                }
+            })
             .catch(console.error);
+    };
+
+    useEffect(() => {
+        fetchFinancials();
     }, []);
+
+    const updateFees = async () => {
+        try {
+            await fetch('/api/admin/config/fees', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ soloFeeAmount: soloFee, groupPerPersonFeeAmount: groupFee })
+            });
+            alert('Fees updated!');
+            fetchFinancials();
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const chartData = financial?.chartData || [];
 
@@ -91,24 +118,35 @@ export default function FinancialHealth() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm">
                     <h3 className="font-display font-black text-xl uppercase mb-4 flex items-center gap-2">
-                        <DollarSign className="w-5 h-5" /> Take Rate Logic
+                        <DollarSign className="w-5 h-5" /> Take Rate Configuration
                     </h3>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center py-2 border-b-2 border-black/5">
-                            <span className="text-xs font-bold uppercase">Base Platform Fee</span>
-                            <span className="font-black text-lg">10%</span>
+                            <span className="text-xs font-bold uppercase">Solo Flat Fee (EGP)</span>
+                            <input 
+                                type="number" 
+                                title="Solo Flat Fee"
+                                placeholder="10"
+                                value={soloFee} 
+                                onChange={e => setSoloFee(parseInt(e.target.value))}
+                                className="font-black text-lg w-20 text-right border-2 border-black p-1" 
+                            />
                         </div>
                         <div className="flex justify-between items-center py-2 border-b-2 border-black/5">
-                            <span className="text-xs font-bold uppercase">Hype Discount Subsidy (Avg)</span>
-                            <span className="font-black text-lg text-electric-red">-2.5%</span>
+                            <span className="text-xs font-bold uppercase">Group Person Fee (EGP)</span>
+                            <input 
+                                type="number" 
+                                title="Group Person Fee"
+                                placeholder="5"
+                                value={groupFee} 
+                                onChange={e => setGroupFee(parseInt(e.target.value))}
+                                className="font-black text-lg w-20 text-right border-2 border-black p-1" 
+                            />
                         </div>
-                        <div className="flex justify-between items-center py-2 border-b-2 border-black/5">
-                            <span className="text-xs font-bold uppercase">Transaction Handling</span>
-                            <span className="font-black text-lg text-electric-red">-1.5%</span>
-                        </div>
+                        
                         <div className="flex justify-between items-center py-2 bg-volt-green/20 p-2 border-2 border-black">
-                            <span className="font-black uppercase">Net Platform Margin</span>
-                            <span className="font-black text-xl">6.0%</span>
+                            <span className="font-black uppercase text-sm">Update Configuration</span>
+                            <button onClick={updateFees} className="bg-black text-white px-4 py-1 rounded font-black text-xs hover:bg-gray-800 transition-all uppercase border-2 border-black brutal-shadow-sm active:translate-y-1 active:shadow-none">Save</button>
                         </div>
                     </div>
                 </div>

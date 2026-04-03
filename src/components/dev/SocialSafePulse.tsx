@@ -3,13 +3,19 @@ import { Users, Share2, Zap } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis } from 'recharts';
 
 export default function SocialSafePulse() {
+    const [socialStats, setSocialStats] = useState<any>(null);
     const [stats, setStats] = useState<any>(null);
 
     useEffect(() => {
-        // Fetch group-to-solo and viral coefficient from analytics/financial + other endpoints
+        // Fetch group-to-solo and viral coefficient from analytics
         fetch('/api/admin/analytics/financial')
             .then(res => res.json())
             .then(data => setStats(data))
+            .catch(console.error);
+
+        fetch('/api/admin/analytics/social')
+            .then(res => res.json())
+            .then(data => setSocialStats(data))
             .catch(console.error);
     }, []);
 
@@ -18,6 +24,8 @@ export default function SocialSafePulse() {
         { name: 'Group Orders', value: stats.groupRevenue },
         { name: 'Solo Orders', value: stats.soloRevenue },
     ] : [{ name: 'Group', value: 1 }, { name: 'Solo', value: 1 }];
+    
+    const lineChartData = socialStats?.lineChartData || [];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -26,21 +34,21 @@ export default function SocialSafePulse() {
                     <div className="w-12 h-12 bg-volt-green rounded-full border-2 border-black flex items-center justify-center mx-auto mb-4">
                         <Share2 className="w-6 h-6" />
                     </div>
-                    <div className="text-3xl font-black italic">1.8x</div>
+                    <div className="text-3xl font-black italic">{socialStats?.viralCoefficient || '1.0'}x</div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Viral Coefficient</div>
                 </div>
                 <div className="bg-white border-4 border-black p-6 rounded-xl brutal-shadow-sm text-center">
                     <div className="w-12 h-12 bg-electric-red text-white rounded-full border-2 border-black flex items-center justify-center mx-auto mb-4">
                         <Zap className="w-6 h-6" />
                     </div>
-                    <div className="text-3xl font-black italic">42%</div>
+                    <div className="text-3xl font-black italic">{socialStats?.hypeVelocity || 0}/hr</div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Hype Velocity</div>
                 </div>
                 <div className="bg-black text-white p-6 rounded-xl border-4 border-black brutal-shadow-sm text-center">
                     <div className="w-12 h-12 bg-white text-black rounded-full border-2 border-black flex items-center justify-center mx-auto mb-4">
                         <Users className="w-6 h-6" />
                     </div>
-                    <div className="text-3xl font-black italic text-volt-green">68%</div>
+                    <div className="text-3xl font-black italic text-volt-green">{socialStats?.lockedInRate || 0}%</div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Locked-In Rate</div>
                 </div>
             </div>
@@ -80,14 +88,7 @@ export default function SocialSafePulse() {
                     </h3>
                     <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={[
-                                { time: '12pm', v: 20 },
-                                { time: '2pm', v: 45 },
-                                { time: '4pm', v: 30 },
-                                { time: '6pm', v: 85 },
-                                { time: '8pm', v: 60 },
-                                { time: '10pm', v: 90 },
-                            ]}>
+                            <LineChart data={lineChartData}>
                                 <XAxis dataKey="time" hide />
                                 <YAxis hide domain={[0, 100]} />
                                 <Tooltip />
