@@ -54,7 +54,7 @@ async function purgeStorageAndDatabase() {
             }
         }
 
-        // 2. DELETE SafeSession records older than 7 days (if not completed)
+        // 2. DELETE SafeSession records older than 6 hours (if not completed)
         const deletedSafesResult = await prisma.safeSession.deleteMany({
             where: {
                 status: { not: 'COMPLETED' },
@@ -63,7 +63,7 @@ async function purgeStorageAndDatabase() {
         });
         console.log(`🗑️ Deleted ${deletedSafesResult.count} abandoned SafeSession records.`);
 
-        // 3. DELETE Order records older than 30 days.
+        // 3. DELETE Order records older than 24 hours.
         // Prisma cascade delete requires us to find them and delete related ParticipantOrders and OrderItems first if not configured in DB.
         // Assuming schema has NO SET NULL / CASCADE, we delete children first:
         const oldOrders = await prisma.order.findMany({
@@ -80,7 +80,7 @@ async function purgeStorageAndDatabase() {
             const deletedOrdersResult = await prisma.order.deleteMany({
                 where: { id: { in: oldOrderIds } }
             });
-            console.log(`🗑️ Deleted ${deletedOrdersResult.count} Order records older than 30 days.`);
+            console.log(`🗑️ Deleted ${deletedOrdersResult.count} Order records older than 24 hours.`);
         } else {
             console.log(`🗑️ No Orders older than 24 hours to delete.`);
         }

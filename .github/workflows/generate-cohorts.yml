@@ -1,0 +1,39 @@
+name: Generate Daily Cohorts
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run at midnight UTC daily
+  workflow_dispatch: # Enable manual run
+
+jobs:
+  generate-cohorts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/checkout@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./lock_in_app
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: ./lock_in_app
+
+      - name: Run Cohort Generation
+        run: npx tsx scripts/generate_cohorts.ts
+        working-directory: ./lock_in_app
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run Smart Purge
+        run: npx tsx scripts/maintenance_purge.ts
+        working-directory: ./lock_in_app
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
