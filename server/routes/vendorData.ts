@@ -108,14 +108,31 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
         const { id, orderId } = req.params;
         const { status } = req.body;
 
+        // DELIVERY GUARD: If the order has an active peer delivery (OPEN or ACCEPTED),
+        // the vendor cannot mark it COMPLETED — only the peer deliverer can do that.
+        // When the vendor presses their "done/delivered" button we intercept and set
+        // READY instead, which signals to the deliverer that the food is ready for pickup.
+        let effectiveStatus = status;
+        if (status === 'COMPLETED') {
+            const activeDelivery = await prisma.deliveryRequest.findUnique({
+                where: { orderId },
+                select: { status: true }
+            });
+            if (activeDelivery && (activeDelivery.status === 'OPEN' || activeDelivery.status === 'ACCEPTED')) {
+                // Change to PICKED_UP — the vendor is done, but the peer deliverer will COMPLETED it later.
+                // This ensures it vanishes from the vendor terminal.
+                effectiveStatus = 'PICKED_UP';
+            }
+        }
+
         const order = await prisma.order.update({
             where: { id: orderId, vendorId: id },
-            data: { status },
+            data: { status: effectiveStatus },
             include: { participants: true }
         });
 
         // 3.5 Calculate and Add commission to platform when order is COMPLETED
-        if (status === 'COMPLETED') {
+        if (effectiveStatus === 'COMPLETED') {
             const configKeys = await prisma.systemConfig.findMany({
                 where: { key: { in: ['soloFeeAmount', 'groupPerPersonFeeAmount'] } }
             });
@@ -161,6 +178,8 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                     "updatedAt" = NOW();
             `);
         }
+        
+        // 3.7 Handle auto-transition logic removed for vendor isolation
 
         // 4. Award Hype Score when vendor approves & fires
         if (status === 'FIRE') {

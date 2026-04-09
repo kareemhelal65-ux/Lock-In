@@ -398,6 +398,11 @@ consumerRouter.get('/:userId/orders', async (req, res) => {
                 },
                 vendor: {
                     select: { name: true, image: true, instapayAddress: true }
+                },
+                deliveryRequest: {
+                    include: {
+                        deliverer: { select: { name: true, avatar: true } }
+                    }
                 }
             },
             orderBy: { createdAt: 'desc' }
@@ -1742,4 +1747,233 @@ consumerRouter.get('/user/:userId/inventory', async (req, res) => {
     }
 });
 
-// 15. Cancel Order — REMOVED (consolidated into handler 5b above)
+
+
+// --- FINAL ISOLATED DELIVERY SYSTEM ---
+
+// 19. Request Delivery — Requester submits campus location
+consumerRouter.post('/order/:orderId/request-delivery', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { userId, campusLocation, location } = req.body;
+        // BUG FIX: Normalize both field names into finalLocation
+        const finalLocation = (campusLocation || location)?.trim();
+
+        if (!userId || !finalLocation) {
+            return res.status(400).json({ error: 'Missing userId or campusLocation' });
+        }
+
+        const order = await prisma.order.findUnique({ where: { id: orderId } });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        if (order.hostId !== userId) return res.status(403).json({ error: 'Only the order host can request delivery' });
+        // Allow delivery request for any payment-verified status (PENDING, FIRE, or READY)
+        const verifiedStatuses = ['PENDING', 'FIRE', 'READY'];
+        if (!verifiedStatuses.includes(order.status)) {
+            return res.status(400).json({ error: 'Order must be payment-verified (PENDING/FIRE/READY) to request delivery' });
+        }
+
+        // Check if a non-cancelled delivery request already exists
+        const existing = await prisma.deliveryRequest.findUnique({ where: { orderId } });
+        if (existing && existing.status !== 'CANCELLED') {
+            return res.status(400).json({ error: 'A delivery request already exists for this order' });
+        }
+
+        // BUG FIX: If there is a cancelled request (orderId is @unique), delete it first so we can create a new one
+        if (existing && existing.status === 'CANCELLED') {
+            await prisma.deliveryRequest.delete({ where: { id: existing.id } });
+        }
+
+        const deliveryRequest = await prisma.deliveryRequest.create({
+            data: {
+                orderId,
+                requesterId: userId,
+                // BUG FIX: Use finalLocation (not campusLocation which may be undefined)
+                campusLocation: finalLocation,
+                status: 'OPEN',
+            }
+        });
+
+        res.status(201).json({ message: 'Delivery request created', deliveryRequest });
+    } catch (error) {
+        console.error('Request delivery error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+
+// 20. Get All Open Delivery Requests (for Radar tab)
+consumerRouter.get('/delivery-requests', async (req, res) => {
+    try {
+        const { userId } = req.query as { userId: string };
+
+        const requests = await prisma.deliveryRequest.findMany({
+            where: { status: 'OPEN' },
+            include: {
+                order: {
+                    include: {
+                        vendor: { select: { name: true, image: true } }
+                    }
+                },
+                requester: {
+                    select: { id: true, name: true, avatar: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        const formatted = requests
+            // BUG FIX: Do NOT filter out the requester's own posts — the frontend handles
+            // displaying "Your Own Request" label. Removing this filter allows the requester
+            // to see their listing is live in Radar.
+            .map(r => ({
+                id: r.id,
+                orderId: r.orderId,
+                orderNumber: r.order.orderNumber,
+                restaurantName: r.order.vendor?.name || 'Unknown',
+                restaurantImage: r.order.vendor?.image || '',
+                campusLocation: r.campusLocation,
+                requesterId: r.requesterId,
+                requesterName: r.requester.name,
+                requesterAvatar: r.requester.avatar,
+                status: r.status,
+                createdAt: r.createdAt,
+            }));
+
+        res.json({ deliveryRequests: formatted });
+    } catch (error) {
+        console.error('Get delivery requests error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 21. Accept Delivery Request
+consumerRouter.post('/delivery-requests/:requestId/accept', async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+        const deliveryRequest = await prisma.deliveryRequest.findUnique({
+            where: { id: requestId },
+            include: { order: true }
+        });
+
+        if (!deliveryRequest) return res.status(404).json({ error: 'Delivery request not found' });
+        if (deliveryRequest.status !== 'OPEN') return res.status(400).json({ error: 'This delivery request is no longer open' });
+        if (deliveryRequest.requesterId === userId) return res.status(400).json({ error: 'You cannot accept your own delivery request' });
+
+        await prisma.$transaction([
+            prisma.deliveryRequest.update({
+                where: { id: requestId },
+                data: { delivererId: userId, status: 'ACCEPTED' }
+            })
+            // REMOVED: prisma.order.update({ status: 'DELIVERY_ACCEPTED' })
+        ]);
+
+        res.json({ message: 'Delivery accepted! Head to the vendor to pick up the order.' });
+    } catch (error) {
+        console.error('Accept delivery error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 22. Mark Delivery as Delivered (awards 100 Hype Points to deliverer)
+consumerRouter.post('/delivery-requests/:requestId/delivered', async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+        const deliveryRequest = await prisma.deliveryRequest.findUnique({
+            where: { id: requestId }
+        });
+
+        if (!deliveryRequest) return res.status(404).json({ error: 'Delivery request not found' });
+        if (deliveryRequest.delivererId !== userId) return res.status(403).json({ error: 'Only the assigned deliverer can mark this as delivered' });
+        if (deliveryRequest.status !== 'ACCEPTED') return res.status(400).json({ error: 'Delivery is not in ACCEPTED state' });
+
+        await prisma.$transaction(async (tx) => {
+            await tx.deliveryRequest.update({
+                where: { id: requestId },
+                data: { status: 'DELIVERED' }
+            });
+            // Mark order as COMPLETED for both parties
+            await tx.order.update({
+                where: { id: deliveryRequest.orderId },
+                data: { status: 'COMPLETED' }
+            });
+            // Award 100 Hype Points to the deliverer
+            await updateHypeScore(userId, 100, tx, 'Campus Delivery');
+        });
+
+        res.json({ message: 'Delivery confirmed! You earned 100 Hype Points 🎉', pointsAwarded: 100 });
+    } catch (error) {
+        console.error('Mark delivered error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 22.b Cancel Delivery Request (by Requester only)
+consumerRouter.post('/delivery-requests/:requestId/cancel', async (req, res) => {
+    try {
+        const { requestId } = req.params;
+        const { userId } = req.body;
+
+        if (!userId) return res.status(400).json({ error: 'Missing userId' });
+
+        const dr = await prisma.deliveryRequest.findUnique({ 
+            where: { id: requestId } 
+        });
+
+        if (!dr) return res.status(404).json({ error: 'Request not found' });
+        if (dr.requesterId !== userId) return res.status(403).json({ error: 'Only the requester can cancel this' });
+        if (dr.status !== 'OPEN') return res.status(400).json({ error: 'Only open delivery requests can be cancelled' });
+
+        await prisma.deliveryRequest.update({
+            where: { id: requestId },
+            data: { status: 'CANCELLED' }
+        });
+
+        res.json({ message: 'Delivery request cancelled successfully' });
+    } catch (err) {
+        console.error('Cancel delivery request error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 23. Get My Active Deliveries (orders I have accepted to deliver)
+consumerRouter.get('/my-deliveries/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const myDeliveries = await prisma.deliveryRequest.findMany({
+            where: { delivererId: userId, status: 'ACCEPTED' },
+            include: {
+                order: {
+                    include: { vendor: { select: { name: true, image: true } } }
+                },
+                requester: { select: { name: true, avatar: true } }
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        const formatted = myDeliveries.map(d => ({
+            id: d.id,
+            orderId: d.orderId,
+            orderNumber: d.order.orderNumber,
+            orderStatus: d.order.status,
+            restaurantName: d.order.vendor?.name || 'Unknown',
+            campusLocation: d.campusLocation,
+            requesterName: d.requester.name,
+            requesterAvatar: d.requester.avatar,
+            status: d.status,
+        }));
+
+        res.json({ deliveries: formatted });
+    } catch (error) {
+        console.error('Get my deliveries error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});

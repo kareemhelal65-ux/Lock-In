@@ -74,7 +74,9 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                 body: JSON.stringify({ status: newStatus })
             });
             if (res.ok) {
-                setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+                const data = await res.json();
+                const actualStatus = data.order?.status || newStatus;
+                setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: actualStatus } : o));
                 setReviewingOrder(null);
             }
         } catch (err) {
@@ -138,9 +140,6 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     )}
                                     {order.status === 'AWAITING_VERIFICATION' && (
                                         <div className="absolute top-0 left-0 right-0 h-1 bg-blue-400" />
-                                    )}
-                                    {(order.status === 'PENDING' || order.status === 'FIRE' || order.status === 'SYNC') && (
-                                        <div className="absolute top-0 left-0 right-0 h-1 bg-volt-green" />
                                     )}
 
                                     <div className="flex justify-between items-start mb-4">
