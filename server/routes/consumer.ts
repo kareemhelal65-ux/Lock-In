@@ -496,7 +496,8 @@ consumerRouter.post('/order', async (req, res) => {
             isCoveredByHost = false, 
             participantShare = totalAmount, 
             hasPaid = false,
-            useActivePerk = false // NEW: Manual choice for solo orders
+            useActivePerk = false,
+            perkUserCardId
         } = req.body;
 
         if (!userId || !vendorId || !items || items.length === 0) {
@@ -508,9 +509,11 @@ consumerRouter.post('/order', async (req, res) => {
         let isZeroFee = false;
         let sawaSubsidy = 0;
 
-        if (user?.activeCardId && useActivePerk) {
+        const targetCardId = perkUserCardId || user?.activeCardId;
+
+        if (targetCardId && useActivePerk) {
             const activeUserCard = await prisma.userCard.findUnique({
-                where: { id: user.activeCardId },
+                where: { id: targetCardId },
                 include: { card: true }
             });
             
@@ -530,7 +533,7 @@ consumerRouter.post('/order', async (req, res) => {
                     sawaSubsidy = Math.min(availableValue, participantShare + (isSolo ? 10 : 5));
                     if (availableValue - sawaSubsidy <= 0) {
                         await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
-                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
                     } else {
                         await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - sawaSubsidy } });
                     }

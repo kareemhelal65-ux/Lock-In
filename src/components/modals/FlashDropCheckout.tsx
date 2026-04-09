@@ -26,11 +26,14 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
   const [vendorInstapayName, setVendorInstapayName] = useState('Vendor');
   const [error, setError] = useState<string | null>(null);
 
-  const activePerk = currentUser?.activeCard;
+  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => !uc.isUsed && ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(uc.card.perkCode));
+  const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
+  const activePerk = activePerkCard?.card;
+  
   const isZeroFee = activePerk?.perkCode === 'THE01';
   const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
   const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
-  const hasPerk = isZeroFee || isDiscount || isFeast;
+  const hasPerk = !!activePerk;
   const [useActivePerk, setUseActivePerk] = useState(hasPerk);
 
   // Step 1: User chose solo or lock
@@ -69,7 +72,8 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
         }],
         isSolo: claimType === 'solo',
         isGroupOrder: claimType === 'lock',
-        useActivePerk: useActivePerk // NEW: Pass choices to backend
+        useActivePerk: useActivePerk && activePerkCard ? true : false,
+        perkUserCardId: useActivePerk && activePerkCard ? activePerkCard.id : undefined // Pass the specific card to use
       };
 
       const res = await fetch('/api/consumer/order', {
@@ -203,11 +207,11 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
               </span>
             </div>
             
-            {useActivePerk && (isDiscount || isFeast) && (
+            {useActivePerk && activePerkCard && (isDiscount || isFeast) && (
               <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-volt-green">
-                <span className="text-xs font-bold uppercase">{activePerk?.card.name}</span>
+                <span className="text-xs font-bold uppercase">{activePerk?.name}</span>
                 <span className="text-xs font-bold">
-                  -{Math.round(isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))))} EGP
+                  -{Math.round(isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : Math.min(activePerkCard.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))))} EGP
                 </span>
               </div>
             )}
@@ -217,7 +221,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
               <span className="font-display font-black text-volt-green text-xl">
                 {Math.max(0, Math.ceil(
                   (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                  (useActivePerk ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
+                  (useActivePerk && activePerkCard ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerkCard.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
                 ))} EGP
               </span>
             </div>
@@ -234,8 +238,8 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
                   <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
                 </div>
                 <div>
-                  <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.card.name}</p>
-                  <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.card.description}</p>
+                  <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.name}</p>
+                  <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.description}</p>
                 </div>
               </div>
               <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
@@ -292,7 +296,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             <Zap className="w-5 h-5 inline mr-2" />
             {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${Math.max(0, Math.ceil(
                   (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                  (useActivePerk ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
+                  (useActivePerk && activePerkCard ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerkCard.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
                 ))} EGP)` : 'SELECT PAYMENT'}
           </motion.button>
         </div>

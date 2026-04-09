@@ -23,11 +23,15 @@ export default function SoloPenaltyDrawer({
   onCheckoutSolo
 }: SoloPenaltyDrawerProps) {
   const { currentUser } = useApp();
-  const activePerk = currentUser?.activeCard;
+  // Auto-detect any available economy card from inventory
+  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => !uc.isUsed && ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(uc.card.perkCode));
+  const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
+  const activePerk = activePerkCard?.card;
+  
   const isZeroFee = activePerk?.perkCode === 'THE01';
   const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
   const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
-  const hasPerk = isZeroFee || isDiscount || isFeast;
+  const hasPerk = !!activePerk;
   
   const standardFee = 10;
 
@@ -42,9 +46,9 @@ export default function SoloPenaltyDrawer({
 
   // Subsidies / Final Price Calculation
   let sawaSubsidy = 0;
-  if (useActivePerk) {
+  if (useActivePerk && activePerkCard) {
       if (isDiscount) sawaSubsidy = (data.total + standardFee) * 0.15;
-      else if (isFeast) sawaSubsidy = Math.min(activePerk?.remainingValue ?? 150, data.total + standardFee);
+      else if (isFeast) sawaSubsidy = Math.min(activePerkCard.remainingValue ?? 150, data.total + standardFee);
   }
 
   const finalServiceFee = isZeroFee && useActivePerk ? 0 : standardFee;
@@ -70,7 +74,8 @@ export default function SoloPenaltyDrawer({
           participantShare: data.total,
           isCoveredByHost: false,
           hasPaid: false, // instapay = not paid yet, pending screenshot
-          useActivePerk, // NEW: Pass the choice to the backend
+          useActivePerk: useActivePerk && activePerkCard ? true : false,
+          perkUserCardId: useActivePerk && activePerkCard ? activePerkCard.id : undefined,
           items: data.cart.map(c => ({
             menuItemId: c.item.id,
             name: c.item.name,
@@ -118,7 +123,8 @@ export default function SoloPenaltyDrawer({
           participantShare: data.total,
           isCoveredByHost: false,
           hasPaid: selectedPayment !== 'cash',
-          useActivePerk, // NEW: Pass the choice to the backend
+          useActivePerk: useActivePerk && activePerkCard ? true : false,
+          perkUserCardId: useActivePerk && activePerkCard ? activePerkCard.id : undefined,
           items: data.cart.map(c => ({
             menuItemId: c.item.id,
             name: c.item.name,
@@ -304,8 +310,8 @@ export default function SoloPenaltyDrawer({
                         <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
                       </div>
                       <div>
-                        <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.card.name}</p>
-                        <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.card.description}</p>
+                        <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.name}</p>
+                        <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.description}</p>
                       </div>
                     </div>
                     <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
@@ -326,7 +332,7 @@ export default function SoloPenaltyDrawer({
                   </div>
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm ${(isZeroFee && useActivePerk) ? 'text-volt-green font-bold' : 'text-gray-500'}`}>
-                      Service Fee {(isZeroFee && useActivePerk) && `(${activePerk?.card.name})`}
+                      Service Fee {(isZeroFee && useActivePerk) && `(${activePerk?.name})`}
                     </span>
                     <span className={`font-display font-bold ${(isZeroFee && useActivePerk) ? 'text-volt-green' : 'text-gray-600'}`}>
                       {(isZeroFee && useActivePerk) ? (
@@ -341,7 +347,7 @@ export default function SoloPenaltyDrawer({
                   </div>
                   {sawaSubsidy > 0 && (
                     <div className="flex items-center justify-between mb-2 text-volt-green">
-                      <span className="text-sm font-bold uppercase tracking-widest">{activePerk?.card.name}</span>
+                      <span className="text-sm font-bold uppercase tracking-widest">{activePerk?.name}</span>
                       <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>
                     </div>
                   )}
