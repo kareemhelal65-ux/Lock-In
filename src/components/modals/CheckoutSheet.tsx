@@ -58,10 +58,15 @@ export default function CheckoutSheet({
   const { currentUser } = useApp();
 
   // Card Logic
-  const activePerk = currentUser?.activeCard;
-  const isZeroFee = activePerk?.perkCode === 'THE01';
+  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => !uc.isUsed && ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(uc.card.perkCode));
+  const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
+  const activePerk = activePerkCard?.card;
+  
+  const isZeroFee = isHostCover ? activePerk?.perkCode === 'THE01' : false; // Host uses Hub Breach
   const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
   const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
+  const hasPerk = !!activePerk;
+  const [useActivePerk, setUseActivePerk] = useState(hasPerk);
 
   // Calculate discounts
   const baseTotal = isHostCover && safeTotal ? safeTotal : myTotal;
@@ -71,13 +76,16 @@ export default function CheckoutSheet({
   const squadSpinnerDiscount = hasSquadSpinner ? Math.round(baseTotal * 0.10) : 0; // 10% for demo
   const totalDiscount = squadSpinnerDiscount;
   const standardFee = isHostCover ? (participantCount || 1) * 5 : (isSolo ? 10 : 5);
-  const serviceFee = isZeroFee ? 0 : standardFee;
+  const serviceFee = isZeroFee && useActivePerk ? 0 : standardFee;
   
   let sawaSubsidy = 0;
-  if (isDiscount) sawaSubsidy = (baseTotal + serviceFee) * 0.15;
-  else if (isFeast) sawaSubsidy = Math.min(activePerk?.remainingValue ?? 150, baseTotal + serviceFee);
+  if (useActivePerk && activePerkCard) {
+    if (isDiscount) sawaSubsidy = (baseTotal + serviceFee) * 0.15;
+    else if (isFeast) sawaSubsidy = Math.min(activePerkCard.remainingValue ?? 150, baseTotal + serviceFee);
+  }
 
   const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - sawaSubsidy);
+
 
   const handlePayment = () => {
     if (!selectedPayment) return;
@@ -204,10 +212,10 @@ export default function CheckoutSheet({
                   <h2 className="font-display font-extrabold text-2xl uppercase">
                     Pay Your Share
                   </h2>
-                  <div className={`flex justify-between text-sm ${isZeroFee ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
-                  <span>Service Fee {isZeroFee && `(${activePerk?.name})`}</span>
-                  <span className={isZeroFee ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
-                  {isZeroFee && <span>0 EGP</span>}
+                  <div className={`flex justify-between text-sm ${isZeroFee && useActivePerk ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
+                  <span>Service Fee {isZeroFee && useActivePerk && `(${activePerk?.name})`}</span>
+                  <span className={isZeroFee && useActivePerk ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
+                  {isZeroFee && useActivePerk && <span>0 EGP</span>}
                 </div>
                   <p className="text-cool-gray text-sm mt-1">
                     The Drop Point
@@ -303,13 +311,38 @@ export default function CheckoutSheet({
                   </div>
                 )}
 
+                {/* Perk Toggle */}
+                {hasPerk && !isHostCover && (
+                  <div 
+                    onClick={() => setUseActivePerk(!useActivePerk)}
+                    className={`brutal-card p-4 mt-4 flex items-center justify-between cursor-pointer transition-all ${useActivePerk ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full border-2 border-black flex items-center justify-center ${useActivePerk ? 'bg-white' : 'bg-gray-100'}`}>
+                        <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
+                      </div>
+                      <div>
+                        <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.name}</p>
+                        <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.description}</p>
+                      </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
+                      <motion.div 
+                        initial={false}
+                        animate={{ x: useActivePerk ? 24 : 2 }}
+                        className="absolute top-0.5 w-4 h-4 bg-white rounded-full border-2 border-black"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {/* Total */}
                 <div className="border-t-2 border-deep-charcoal pt-3 mt-3">
                   <div className="flex items-center justify-between mt-1 pt-2 border-t border-deep-charcoal/10">
                     <span className="text-cool-gray text-sm">Service Fee</span>
-                    <span className={`font-display font-medium ${isZeroFee ? 'text-volt-green' : 'text-cool-gray'}`}>{isZeroFee ? '0' : `+${serviceFee}`} EGP</span>
+                    <span className={`font-display font-medium ${isZeroFee && useActivePerk ? 'text-volt-green' : 'text-cool-gray'}`}>{isZeroFee && useActivePerk ? '0' : `+${serviceFee}`} EGP</span>
                   </div>
-                  {(isDiscount || isFeast) && (
+                  {useActivePerk && (isDiscount || isFeast) && (
                     <div className="flex items-center justify-between mt-1 text-volt-green">
                       <span className="text-sm font-bold uppercase">{activePerk?.name}</span>
                       <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>

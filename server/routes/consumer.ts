@@ -687,21 +687,16 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
 // 6. Payment Verification (OCR Simulator processing)
 consumerRouter.post('/payment-verification', async (req, res) => {
     try {
-        const { orderId, userId, amountExpected, receiptData } = req.body;
+        const { orderId, userId, amountExpected, receiptData, perkUserCardId } = req.body;
 
         if (!orderId || !userId || !amountExpected) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // 1. Manual Review Only
-        // We no longer perform OCR validation here. 
-        // Any submitted receiptData is considered a successful upload,
-        // and it is strictly up to the vendor to manually accept/reject it.
         if (!receiptData) {
             return res.status(400).json({ error: 'Receipt upload is required.' });
         }
 
-        // 2. Update ParticipantOrder to Paid
         const participantOrder = await prisma.participantOrder.findFirst({
             where: { orderId, userId }
         });
@@ -710,19 +705,64 @@ consumerRouter.post('/payment-verification', async (req, res) => {
             return res.status(404).json({ error: 'Participant order not found' });
         }
 
+        let newSawaSubsidy = participantOrder.sawaSubsidy;
+
+        // Process perk on checkout if provided
+        if (perkUserCardId) {
+            const activeUserCard = await prisma.userCard.findUnique({
+                where: { id: perkUserCardId },
+                include: { card: true }
+            });
+
+            if (activeUserCard && !activeUserCard.isUsed) {
+                const perk = activeUserCard.card.perkCode;
+
+                if (perk === 'SAWA_DISCOUNT') {
+                    // 15% discount
+                    newSawaSubsidy = participantOrder.shareAmount * 0.15;
+                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                    // Detach from user if it was their primary
+                    const u = await prisma.user.findUnique({ where: { id: userId } });
+                    if (u?.activeCardId === activeUserCard.id) {
+                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                    }
+                } else if (perk === 'SAWA_FEAST') {
+                    const availableValue = activeUserCard.remainingValue ?? 150;
+                    newSawaSubsidy = Math.min(availableValue, participantOrder.shareAmount);
+                    if (availableValue - newSawaSubsidy <= 0) {
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                        const u = await prisma.user.findUnique({ where: { id: userId } });
+                        if (u?.activeCardId === activeUserCard.id) {
+                            await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        }
+                    } else {
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - newSawaSubsidy } });
+                    }
+                }
+            }
+        }
+
         await prisma.participantOrder.update({
             where: { id: participantOrder.id },
             data: {
                 hasPaid: true,
-                paymentScreenshotUrl: receiptData
+                paymentScreenshotUrl: receiptData,
+                sawaSubsidy: newSawaSubsidy
             }
         });
 
-        // 2b. Always touch the Order to update its timestamp (for sorting in Vendor Dashboard)
-        await prisma.order.update({
-            where: { id: orderId },
-            data: { updatedAt: new Date() }
-        });
+        // Add this participant's subsidy to the total order subsidy
+        if (newSawaSubsidy > 0) {
+            await prisma.order.update({
+                where: { id: orderId },
+                data: { sawaSubsidy: { increment: newSawaSubsidy }, updatedAt: new Date() }
+            });
+        } else {
+            await prisma.order.update({
+                where: { id: orderId },
+                data: { updatedAt: new Date() }
+            });
+        }
 
         // 3. Check if all participants have paid
         const allParticipants = await prisma.participantOrder.findMany({
@@ -1331,32 +1371,7 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                 for (const participant of participants) {
                     const baseShare = participantShares[participant.userId] || (totalAmount / participants.length);
                     let shareWithFee = isZeroFeeSafe ? baseShare : baseShare + 5;
-                    let sawaSubsidy = 0;
-                    
-                    const pUser = await tx.user.findUnique({ where: { id: participant.userId } });
-                    if (pUser?.activeCardId) {
-                        const pCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
-                        if (pCard && !pCard.isUsed) {
-                            if (pCard.card.perkCode === 'SAWA_DISCOUNT') {
-                                sawaSubsidy = shareWithFee * 0.15;
-                                shareWithFee -= sawaSubsidy;
-                                await tx.userCard.update({ where: { id: pCard.id }, data: { isUsed: true } });
-                                await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
-                            } else if (pCard.card.perkCode === 'SAWA_FEAST') {
-                                const availableValue = pCard.remainingValue ?? 150;
-                                sawaSubsidy = Math.min(availableValue, shareWithFee);
-                                shareWithFee -= sawaSubsidy;
-                                if (availableValue - sawaSubsidy <= 0) {
-                                    await tx.userCard.update({ where: { id: pCard.id }, data: { isUsed: true, remainingValue: 0 } });
-                                    await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
-                                } else {
-                                    await tx.userCard.update({ where: { id: pCard.id }, data: { remainingValue: availableValue - sawaSubsidy } });
-                                }
-                            }
-                        }
-                    }
-
-                    totalSawaSubsidy += sawaSubsidy;
+                    let sawaSubsidy = 0; // Will be set during actual payment verification
 
                     await tx.participantOrder.create({
                         data: { orderId: orderDoc.id, userId: participant.userId, shareAmount: shareWithFee, sawaSubsidy, hasPaid: isCoveredByHost }

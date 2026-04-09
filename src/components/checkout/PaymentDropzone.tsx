@@ -8,6 +8,7 @@ interface PaymentDropzoneProps {
     vendorInstapayName?: string;
     orderId: string;
     userId: string;
+    perkUserCardId?: string;
     onVerifySuccess: () => void;
     onCancel: () => void;
 }
@@ -18,6 +19,7 @@ export default function PaymentDropzone({
     vendorInstapayName,
     orderId,
     userId,
+    perkUserCardId,
     onVerifySuccess,
     onCancel
 }: PaymentDropzoneProps) {
@@ -81,7 +83,8 @@ export default function PaymentDropzone({
                     orderId,
                     userId,
                     amountExpected: expectedAmount,
-                    receiptData: uploadedUrl
+                    receiptData: uploadedUrl,
+                    perkUserCardId
                 }),
             });
 
