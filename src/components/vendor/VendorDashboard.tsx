@@ -166,7 +166,14 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             </span>
                                         </div>
                                         <div className={`text-${lang === 'ar' ? 'left' : 'right'}`}>
-                                            <span className="font-display font-bold text-lg text-white">{order.totalAmount} EGP</span>
+                                            <span className="font-display font-bold text-lg text-white">
+                                                {order.sawaSubsidy > 0 ? order.totalAmount - order.sawaSubsidy : order.totalAmount} EGP
+                                            </span>
+                                            {order.sawaSubsidy > 0 && (
+                                                <p className="text-[10px] text-volt-green font-bold uppercase">
+                                                    (+SAWA SUBSIDY {order.sawaSubsidy} EGP)
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
@@ -349,9 +356,14 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                 <h2 className="font-display font-black text-2xl uppercase tracking-wider text-white">
                                     {t.reviewOrder} {reviewingOrder.orderNumber || reviewingOrder.id.slice(-6).toUpperCase()}
                                 </h2>
-                                <p className="text-cool-gray mt-1 text-sm font-bold uppercase tracking-widest">
-                                    {t.total}: {reviewingOrder.totalAmount} EGP
-                                </p>
+                                <div className="mt-1 text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                                    <span className="text-cool-gray">{t.total}: {reviewingOrder.totalAmount} EGP</span>
+                                    {reviewingOrder.sawaSubsidy > 0 && (
+                                        <span className="bg-volt-green/20 text-volt-green px-2 py-0.5 rounded text-[10px]">
+                                            CUSTOMER REMAINDER: {reviewingOrder.totalAmount - reviewingOrder.sawaSubsidy} EGP
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-6 space-y-6">
