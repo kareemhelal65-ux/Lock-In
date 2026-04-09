@@ -23,11 +23,16 @@ export default function SoloPenaltyDrawer({
   onCheckoutSolo
 }: SoloPenaltyDrawerProps) {
   const { currentUser } = useApp();
-  const isZeroFee = currentUser?.activeCard?.perkCode === 'THE01';
+  const activePerk = currentUser?.activeCard;
+  const isZeroFee = activePerk?.perkCode === 'THE01';
+  const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
+  const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
+  const hasPerk = isZeroFee || isDiscount || isFeast;
+  
   const standardFee = 10;
 
   const [showCheckout, setShowCheckout] = useState(false);
-  const [useActivePerk, setUseActivePerk] = useState(isZeroFee);
+  const [useActivePerk, setUseActivePerk] = useState(hasPerk);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDropzone, setShowDropzone] = useState(false);
@@ -35,8 +40,16 @@ export default function SoloPenaltyDrawer({
   const [orderDbId, setOrderDbId] = useState(''); // real DB id for payment-verification
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const finalServiceFee = (isZeroFee && useActivePerk) ? 0 : standardFee;
-  const finalTotal = data.total + finalServiceFee;
+  // Subsidies / Final Price Calculation
+  const feeDelta = (isZeroFee && useActivePerk) ? standardFee : 0;
+  let sawaSubsidy = 0;
+  if (useActivePerk) {
+      if (isDiscount) sawaSubsidy = (data.total + standardFee) * 0.15;
+      else if (isFeast) sawaSubsidy = Math.min(activePerk?.remainingValue ?? 150, data.total + standardFee);
+  }
+
+  const finalServiceFee = isZeroFee && useActivePerk ? 0 : standardFee;
+  const finalTotal = Math.max(0, data.total + finalServiceFee - sawaSubsidy);
 
   const handleSoloCheckout = () => {
     setShowCheckout(true);
@@ -282,7 +295,7 @@ export default function SoloPenaltyDrawer({
                 </div>
 
                 {/* Perk Toggle */}
-                {isZeroFee && (
+                {hasPerk && (
                   <div 
                     onClick={() => setUseActivePerk(!useActivePerk)}
                     className={`brutal-card p-4 mb-4 flex items-center justify-between cursor-pointer transition-all ${useActivePerk ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
@@ -292,8 +305,8 @@ export default function SoloPenaltyDrawer({
                         <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
                       </div>
                       <div>
-                        <p className="font-display font-black text-xs uppercase tracking-tight">The 0.1% Perk</p>
-                        <p className="text-[10px] font-bold text-black/60 uppercase">Zero service fees</p>
+                        <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.card.name}</p>
+                        <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.card.description}</p>
                       </div>
                     </div>
                     <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
@@ -314,7 +327,7 @@ export default function SoloPenaltyDrawer({
                   </div>
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm ${(isZeroFee && useActivePerk) ? 'text-volt-green font-bold' : 'text-gray-500'}`}>
-                      Service Fee {(isZeroFee && useActivePerk) && '(THE0.1%)'}
+                      Service Fee {(isZeroFee && useActivePerk) && `(${activePerk?.card.name})`}
                     </span>
                     <span className={`font-display font-bold ${(isZeroFee && useActivePerk) ? 'text-volt-green' : 'text-gray-600'}`}>
                       {(isZeroFee && useActivePerk) ? (
@@ -327,9 +340,15 @@ export default function SoloPenaltyDrawer({
                       )}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  {sawaSubsidy > 0 && (
+                    <div className="flex items-center justify-between mb-2 text-volt-green">
+                      <span className="text-sm font-bold uppercase tracking-widest">{activePerk?.card.name}</span>
+                      <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                     <span className="font-display font-bold text-gray-600">Total</span>
-                    <span className="font-display font-extrabold text-2xl text-gray-600">{finalTotal} EGP</span>
+                    <span className="font-display font-extrabold text-2xl text-gray-600">{Math.ceil(finalTotal)} EGP</span>
                   </div>
                 </div>
 

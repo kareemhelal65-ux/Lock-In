@@ -57,8 +57,11 @@ export default function CheckoutSheet({
   const [localOrderId, setLocalOrderId] = useState('');
   const { currentUser } = useApp();
 
-  // THE01 Card Logic: Zero Fees
-  const isZeroFee = currentUser?.activeCard?.perkCode === 'THE01';
+  // Card Logic
+  const activePerk = currentUser?.activeCard;
+  const isZeroFee = activePerk?.perkCode === 'THE01';
+  const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
+  const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
 
   // Calculate discounts
   const baseTotal = isHostCover && safeTotal ? safeTotal : myTotal;
@@ -69,7 +72,12 @@ export default function CheckoutSheet({
   const totalDiscount = squadSpinnerDiscount;
   const standardFee = isHostCover ? (participantCount || 1) * 5 : (isSolo ? 10 : 5);
   const serviceFee = isZeroFee ? 0 : standardFee;
-  const finalTotal = baseTotal - totalDiscount + serviceFee;
+  
+  let sawaSubsidy = 0;
+  if (isDiscount) sawaSubsidy = (baseTotal + serviceFee) * 0.15;
+  else if (isFeast) sawaSubsidy = Math.min(activePerk?.remainingValue ?? 150, baseTotal + serviceFee);
+
+  const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - sawaSubsidy);
 
   const handlePayment = () => {
     if (!selectedPayment) return;
@@ -197,10 +205,10 @@ export default function CheckoutSheet({
                     Pay Your Share
                   </h2>
                   <div className={`flex justify-between text-sm ${isZeroFee ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
-              <span>Service Fee {isZeroFee && '(THE0.1%)'}</span>
-              <span className={isZeroFee ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
-              {isZeroFee && <span>0 EGP</span>}
-            </div>
+                  <span>Service Fee {isZeroFee && `(${activePerk?.card.name})`}</span>
+                  <span className={isZeroFee ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
+                  {isZeroFee && <span>0 EGP</span>}
+                </div>
                   <p className="text-cool-gray text-sm mt-1">
                     The Drop Point
                   </p>
@@ -297,10 +305,16 @@ export default function CheckoutSheet({
 
                 {/* Total */}
                 <div className="border-t-2 border-deep-charcoal pt-3 mt-3">
-                  <div className="flex items-center justify-between mt-1">
+                  <div className="flex items-center justify-between mt-1 pt-2 border-t border-deep-charcoal/10">
                     <span className="text-cool-gray text-sm">Service Fee</span>
-                    <span className="font-display font-medium text-cool-gray">+{serviceFee} EGP</span>
+                    <span className={`font-display font-medium ${isZeroFee ? 'text-volt-green' : 'text-cool-gray'}`}>{isZeroFee ? '0' : `+${serviceFee}`} EGP</span>
                   </div>
+                  {(isDiscount || isFeast) && (
+                    <div className="flex items-center justify-between mt-1 text-volt-green">
+                      <span className="text-sm font-bold uppercase">{activePerk?.card.name}</span>
+                      <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between mt-1">
                     <span className="text-cool-gray text-sm">Subtotal</span>
                     <span className="font-display font-bold line-through text-cool-gray">{baseTotal} EGP</span>

@@ -26,6 +26,13 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
   const [vendorInstapayName, setVendorInstapayName] = useState('Vendor');
   const [error, setError] = useState<string | null>(null);
 
+  const activePerk = currentUser?.activeCard;
+  const isZeroFee = activePerk?.perkCode === 'THE01';
+  const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
+  const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
+  const hasPerk = isZeroFee || isDiscount || isFeast;
+  const [useActivePerk, setUseActivePerk] = useState(hasPerk);
+
   // Step 1: User chose solo or lock
   const handleChoose = async (type: 'solo' | 'lock') => {
     setClaimType(type);
@@ -61,7 +68,8 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
           quantity: 1
         }],
         isSolo: claimType === 'solo',
-        isGroupOrder: claimType === 'lock'
+        isGroupOrder: claimType === 'lock',
+        useActivePerk: useActivePerk // NEW: Pass choices to backend
       };
 
       const res = await fetch('/api/consumer/order', {
@@ -187,14 +195,58 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
               <span className="font-display font-bold text-deep-charcoal">{drop.dropPrice} EGP</span>
             </div>
             <div className="flex items-center justify-between border-t border-gray-100 pt-2">
-              <span className="text-xs font-bold text-cool-gray uppercase">Service Fee ({claimType === 'solo' ? 'Solo' : 'Group'})</span>
-              <span className="text-xs font-bold text-deep-charcoal">{claimType === 'solo' ? '10' : '5'} EGP</span>
+              <span className={`text-xs font-bold ${isZeroFee && useActivePerk ? 'text-volt-green' : 'text-cool-gray'} uppercase`}>
+                Service Fee ({claimType === 'solo' ? 'Solo' : 'Group'}) {isZeroFee && useActivePerk && '(FREE)'}
+              </span>
+              <span className={`text-xs font-bold ${isZeroFee && useActivePerk ? 'line-through text-cool-gray opacity-50' : 'text-deep-charcoal'}`}>
+                {claimType === 'solo' ? '10' : '5'} EGP
+              </span>
             </div>
+            
+            {useActivePerk && (isDiscount || isFeast) && (
+              <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-volt-green">
+                <span className="text-xs font-bold uppercase">{activePerk?.card.name}</span>
+                <span className="text-xs font-bold">
+                  -{Math.round(isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))))} EGP
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between border-t-2 border-deep-charcoal pt-2">
               <span className="font-display font-black text-deep-charcoal uppercase">Total</span>
-              <span className="font-display font-black text-volt-green text-xl">{(drop.dropPrice + (claimType === 'solo' ? 10 : 5))} EGP</span>
+              <span className="font-display font-black text-volt-green text-xl">
+                {Math.max(0, Math.ceil(
+                  (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
+                  (useActivePerk ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
+                ))} EGP
+              </span>
             </div>
           </div>
+
+          {/* Perk Toggle */}
+          {hasPerk && (
+            <div 
+              onClick={() => setUseActivePerk(!useActivePerk)}
+              className={`brutal-card p-4 flex items-center justify-between cursor-pointer transition-all ${useActivePerk ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full border-2 border-black flex items-center justify-center ${useActivePerk ? 'bg-white' : 'bg-gray-100'}`}>
+                  <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
+                </div>
+                <div>
+                  <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.card.name}</p>
+                  <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.card.description}</p>
+                </div>
+              </div>
+              <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
+                <motion.div 
+                  initial={false}
+                  animate={{ x: useActivePerk ? 24 : 2 }}
+                  className="absolute top-0.5 w-4 h-4 bg-white rounded-full border-2 border-black"
+                />
+              </div>
+            </div>
+          )}
 
           {error && <div className="brutal-card p-3 bg-red-50 border-electric-red text-electric-red text-sm font-bold">{error}</div>}
 
@@ -238,7 +290,10 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             whileTap={selectedPayment && !isCreatingOrder ? { scale: 0.95 } : {}}
           >
             <Zap className="w-5 h-5 inline mr-2" />
-            {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${drop.dropPrice + (claimType === 'solo' ? 10 : 5)} EGP)` : 'SELECT PAYMENT'}
+            {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${Math.max(0, Math.ceil(
+                  (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
+                  (useActivePerk ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerk?.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
+                ))} EGP)` : 'SELECT PAYMENT'}
           </motion.button>
         </div>
       </motion.div>
