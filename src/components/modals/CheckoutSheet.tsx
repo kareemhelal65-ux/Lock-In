@@ -205,7 +205,7 @@ export default function CheckoutSheet({
                     Pay Your Share
                   </h2>
                   <div className={`flex justify-between text-sm ${isZeroFee ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
-                  <span>Service Fee {isZeroFee && `(${activePerk?.card.name})`}</span>
+                  <span>Service Fee {isZeroFee && `(${activePerk?.name})`}</span>
                   <span className={isZeroFee ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
                   {isZeroFee && <span>0 EGP</span>}
                 </div>
@@ -311,7 +311,7 @@ export default function CheckoutSheet({
                   </div>
                   {(isDiscount || isFeast) && (
                     <div className="flex items-center justify-between mt-1 text-volt-green">
-                      <span className="text-sm font-bold uppercase">{activePerk?.card.name}</span>
+                      <span className="text-sm font-bold uppercase">{activePerk?.name}</span>
                       <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>
                     </div>
                   )}
