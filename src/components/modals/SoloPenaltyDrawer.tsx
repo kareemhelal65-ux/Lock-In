@@ -41,7 +41,6 @@ export default function SoloPenaltyDrawer({
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Subsidies / Final Price Calculation
-  const feeDelta = (isZeroFee && useActivePerk) ? standardFee : 0;
   let sawaSubsidy = 0;
   if (useActivePerk) {
       if (isDiscount) sawaSubsidy = (data.total + standardFee) * 0.15;
