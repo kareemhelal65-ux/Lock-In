@@ -16,6 +16,7 @@ model User {
   name                 String
   avatar               String
   hypeScore            Int                @default(0)
+  sawaCurrency         Int                @default(0)
   keysAvailable        Int                @default(0)
   activeCardId         String?
   walletBalance        Float              @default(0.0)
@@ -28,6 +29,8 @@ model User {
   hostedOrders         Order[]            @relation("HostRelation")
   participantOrders    ParticipantOrder[]
   inventory            UserCard[]
+  deliveryRequests     DeliveryRequest[]  @relation("DeliveryRequests")
+  acceptedDeliveries   DeliveryRequest[]  @relation("AcceptedDeliveries")
 }
 
 model HypeLog {
@@ -54,8 +57,9 @@ model UserCard {
   id         String   @id @default(uuid())
   userId     String
   cardId     String
-  isUsed     Boolean  @default(false)
-  acquiredAt DateTime @default(now())
+  isUsed         Boolean  @default(false)
+  remainingValue Float?
+  acquiredAt     DateTime @default(now())
   card       Card     @relation(fields: [cardId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
 }
@@ -135,6 +139,7 @@ model Order {
   hostId          String
   vendorId        String
   totalAmount     Float
+  sawaSubsidy     Float              @default(0.0)
   isCoveredByHost Boolean            @default(false)
   status          String             @default("AWAITING_PAYMENT")
   createdAt       DateTime           @default(now())
@@ -143,6 +148,7 @@ model Order {
   vendor          Vendor             @relation(fields: [vendorId], references: [id])
   items           OrderItem[]
   participants    ParticipantOrder[]
+  deliveryRequest DeliveryRequest?
 }
 
 model ParticipantOrder {
@@ -150,6 +156,7 @@ model ParticipantOrder {
   orderId              String
   userId               String
   shareAmount          Float
+  sawaSubsidy          Float   @default(0.0)
   hasPaid              Boolean @default(false)
   paymentScreenshotUrl String?
   ocrVerificationLog   String?
@@ -170,6 +177,20 @@ model OrderItem {
   flashDrop    FlashDrop? @relation(fields: [flashDropId], references: [id])
   menuItem     MenuItem?  @relation(fields: [menuItemId], references: [id])
   order        Order      @relation(fields: [orderId], references: [id])
+}
+
+model DeliveryRequest {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  requesterId    String
+  delivererId    String?
+  campusLocation String
+  status         String   @default("OPEN") // OPEN | ACCEPTED | DELIVERED | CANCELLED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  order          Order    @relation(fields: [orderId], references: [id])
+  requester      User     @relation("DeliveryRequests", fields: [requesterId], references: [id])
+  deliverer      User?    @relation("AcceptedDeliveries", fields: [delivererId], references: [id])
 }
 
 model SystemConfig {
@@ -213,4 +234,14 @@ model SystemSnapshot {
   totalParticipants Int      @default(0)
   activeUsers       Int      @default(0)
   updatedAt         DateTime @updatedAt
+}
+
+model UserCohort {
+  id        String   @id @default(uuid())
+  date      DateTime @unique
+  weekLabel String   // e.g. "March W1"
+  day1Rate  Float    @default(0.0)
+  day7Rate  Float    @default(0.0)
+  day30Rate Float    @default(0.0)
+  updatedAt DateTime @updatedAt
 }

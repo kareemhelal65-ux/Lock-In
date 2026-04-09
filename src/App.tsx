@@ -11,7 +11,7 @@ import {
   Lock as LockIcon
 } from 'lucide-react';
 import type { TabType } from '@/types';
-import { currentUser as mockCurrentUser } from '@/data/mockData';
+// Removed mock data import to ensure backend-authoritative state
 
 // Tab Components
 import FeedTab from '@/components/tabs/FeedTab';
@@ -473,7 +473,7 @@ function AppContent() {
           >
             <div className="relative">
               <User className="w-8 h-8" strokeWidth={activeTab === 'vault' ? 3 : 2} />
-              {(currentUser?.hypeScore || mockCurrentUser.hypeScore) > 800 && (
+              {(currentUser?.hypeScore || 0) > 800 && (
                 <Crown className="absolute -top-2 -right-2 w-5 h-5 text-volt-green drop-shadow-md" fill="#CCFF00" />
               )}
             </div>
@@ -585,7 +585,7 @@ function AppContent() {
           >
             <div className="relative">
               <User className="w-6 h-6" strokeWidth={activeTab === 'vault' ? 3 : 2} />
-              {(currentUser?.hypeScore || mockCurrentUser.hypeScore) > 800 && (
+              {(currentUser?.hypeScore || 0) > 800 && (
                 <Crown className="absolute -top-2 -right-1 w-4 h-4 text-volt-green" fill="#CCFF00" />
               )}
             </div>

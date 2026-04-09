@@ -186,7 +186,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
     if (appState === 'login') {
         return (
             <div className="min-h-screen bg-deep-charcoal text-white p-6 flex flex-col pt-safe">
-                <button onClick={onBack} className="self-start p-2 hover:bg-white/10 rounded-full transition-colors mb-8">
+                <button onClick={onBack} title="Go Back" className="self-start p-2 hover:bg-white/10 rounded-full transition-colors mb-8">
                     <ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
@@ -239,7 +239,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
     if (appState === 'signup') {
         return (
             <div className="min-h-screen bg-deep-charcoal text-white p-6 flex flex-col pt-safe">
-                <button onClick={() => { setErrorMessage(''); setAppState('login'); }} className="self-start p-2 hover:bg-white/10 rounded-full transition-colors mb-8">
+                <button onClick={() => { setErrorMessage(''); setAppState('login'); }} title="Go to Login" className="self-start p-2 hover:bg-white/10 rounded-full transition-colors mb-8">
                     <ArrowLeft className="w-6 h-6" />
                 </button>
                 <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">

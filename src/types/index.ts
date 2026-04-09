@@ -5,6 +5,7 @@ export interface User {
   name: string;
   avatar: string;
   hypeScore: number;
+  sawaCurrency: number;
   socialTitle: string;
   walletBalance: number;
   streaks: Streak[];
@@ -62,11 +63,12 @@ export interface Order {
   restaurantName: string;
   items: OrderItem[];
   total: number;
-  status: 'pending' | 'locked' | 'delivered';
+  status: 'pending' | 'locked' | 'delivered' | 'AWAITING_PAYMENT' | 'AWAITING_VERIFICATION' | 'PENDING' | 'FIRE' | 'READY' | 'COMPLETED' | 'REJECTED' | 'AWAITING_DELIVERY' | 'DELIVERY_ACCEPTED' | 'ON_THE_WAY' | 'DELIVERED';
   createdAt: Date;
   safeId?: string;
   orderId?: string; // For QR code
   qrCode?: string;
+  deliveryRequest?: DeliveryRequest;
 }
 
 export interface OrderItem {
@@ -157,6 +159,7 @@ export interface LeaderboardEntry {
   name: string;
   avatar: string;
   hypeScore: number;
+  sawaCurrency: number;
   rank: number;
 }
 
@@ -176,6 +179,19 @@ export interface GiftOrder {
   createdAt: Date;
   orderId: string;
   qrCode: string;
+}
+
+export interface DeliveryRequest {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  restaurantName: string;
+  campusLocation: string;
+  requesterId: string;
+  requesterName: string;
+  requesterAvatar: string;
+  status: 'OPEN' | 'ACCEPTED' | 'DELIVERED' | 'CANCELLED';
+  createdAt: string;
 }
 
 export type TabType = 'feed' | 'explore' | 'host' | 'radar' | 'profile' | 'orders' | 'vault' | 'locks';

@@ -12,7 +12,7 @@ import {
   Flame,
   Users
 } from 'lucide-react';
-import { restaurants as mockRestaurants } from '@/data/mockData';
+// Removed mockRestaurants for backend-authoritative state
 import type { MenuItem } from '@/types';
 import { useApp } from '@/context/AppContext';
 import CheckoutSheet from '@/components/modals/CheckoutSheet';
@@ -61,7 +61,6 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const safe = activeSafes.find(s => s.id === safeId) || activeSafes[0];
   if (!safe) return null; // Guard against undefined safe
   
-  const mockRestaurant = mockRestaurants.find(r => r.id === safe.restaurantId);
   // Host_Master_Key: Use server-provided role as authoritative source
   const isHost = userRole === 'host';
 
@@ -272,8 +271,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     }))
   ];
 
-  // Use the effective restaurant (real data takes priority over mock)
-  const restaurant = realRestaurant || mockRestaurant;
+  // Use the effective restaurant (real data from API)
+  const restaurant = realRestaurant;
 
   const localSharedFullPrice = hasLockedIn ? 0 : sharedItems.reduce((sum, i) => sum + i.item.price, 0);
 
@@ -484,8 +483,15 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 pb-48 scroll-smooth w-full max-w-2xl mx-auto custom-scrollbar">
-        {/* Hero Timer Section */}
-        <div className="bg-sneaker-white rounded-3xl border-4 border-black brutal-shadow-md p-6 mb-6 mt-4 relative overflow-hidden">
+        {!restaurant ? (
+          <div className="flex flex-col items-center justify-center py-20 text-volt-green font-display font-bold uppercase animate-pulse">
+            <div className="w-12 h-12 border-4 border-t-volt-green border-volt-green/20 rounded-full animate-spin mb-4" />
+            Connecting to Hub...
+          </div>
+        ) : (
+          <>
+            {/* Hero Timer Section */}
+            <div className="bg-sneaker-white rounded-3xl border-4 border-black brutal-shadow-md p-6 mb-6 mt-4 relative overflow-hidden">
           {/* Background pattern */}
           <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '16px 16px' }} />
 
@@ -881,10 +887,13 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             );
           })}
         </div>
+          </>
+        )}
       </div>
 
       {/* Floating Action Bar */}
-      <div className="absolute bottom-6 left-4 right-4 z-20">
+      {restaurant && (
+        <div className="absolute bottom-6 left-4 right-4 z-20">
         <div className="bg-white rounded-2xl border-4 border-black brutal-shadow-md p-3 flex items-center justify-between">
           <div className="pl-2">
             <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Your Share</p>
@@ -929,6 +938,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
           )}
         </div>
       </div>
+      )}
 
       <AnimatePresence>
         {showCheckout && (
@@ -1177,28 +1187,29 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
           </motion.div>
         )}
       </AnimatePresence>
+
       <ItemOptionsModal 
         isOpen={!!itemWithOptions}
-        onClose={() => {
-          setItemWithOptions(null);
-          setIsSplitting(false);
-        }}
-        item={itemWithOptions}
-        onConfirm={(addons, notes) => {
-          if (itemWithOptions) {
-            const addOnsTotal = addons.reduce((sum, a) => sum + (a.price || 0), 0);
-            if (isSplitting) {
-              const modifiedItem = { ...itemWithOptions, price: itemWithOptions.price + addOnsTotal };
-              setItemToSplit(modifiedItem);
-              setItemWithOptions(null);
-              setIsSplitting(false);
-            } else {
-              confirmAddToOrder(itemWithOptions, addons, notes);
-              setItemWithOptions(null);
-            }
-          }
-        }}
-      />
-    </motion.div>
-  );
+  onClose={() => {
+    setItemWithOptions(null);
+    setIsSplitting(false);
+  }}
+  item={itemWithOptions}
+  onConfirm={(addons, notes) => {
+    if (itemWithOptions) {
+      const addOnsTotal = addons.reduce((sum, a) => sum + (a.price || 0), 0);
+      if (isSplitting) {
+        const modifiedItem = { ...itemWithOptions, price: itemWithOptions.price + addOnsTotal };
+        setItemToSplit(modifiedItem);
+        setItemWithOptions(null);
+        setIsSplitting(false);
+      } else {
+        confirmAddToOrder(itemWithOptions, addons, notes);
+        setItemWithOptions(null);
+      }
+    }
+  }}
+/>
+</motion.div>
+);
 }

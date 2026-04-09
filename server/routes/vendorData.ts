@@ -64,6 +64,7 @@ vendorDataRouter.get('/:id/dashboard', async (req, res) => {
                     select: {
                         userId: true,
                         shareAmount: true,
+                        sawaSubsidy: true,
                         hasPaid: true,
                         paymentScreenshotUrl: true,
                         user: { select: { name: true, username: true } }
@@ -202,6 +203,7 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                 if (isHost) {
                     points = isSolo ? 15 : 100;
                 }
+                const baseSCPoints = points;
 
                 // Helper to consume
                 const consume = async () => {
@@ -272,7 +274,7 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                     await consume();
                 }
 
-                await updateHypeScore(userId, points);
+                await updateHypeScore(userId, points, prisma, undefined, baseSCPoints);
             }
 
             // 5. Award Friendship Streaks amongst all pairs

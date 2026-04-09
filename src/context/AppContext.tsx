@@ -28,6 +28,7 @@ interface AppContextType {
 
   // User Stats
   hypeScore: number;
+  sawaCurrency: number;
   addHypeScore: (points: number) => void;
   pointsUntilGamble: number;
   keysAvailable: number;
@@ -59,6 +60,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [myOrders, setMyOrders] = useState<Order[]>([]);
 
   const [hypeScore, setHypeScore] = useState(0);
+  const [sawaCurrency, setSawaCurrency] = useState(0);
   const [keysAvailable, setKeysAvailable] = useState(0);
   const [inventory, setInventory] = useState<any[]>([]);
   const [vendorsOnLock, setVendorsOnLock] = useState<string[]>(['rest1']);
@@ -68,6 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (currentUser) {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       if (currentUser.hypeScore !== undefined) setHypeScore(currentUser.hypeScore);
+      if (currentUser.sawaCurrency !== undefined) setSawaCurrency(currentUser.sawaCurrency);
       if (currentUser.keysAvailable !== undefined) setKeysAvailable(currentUser.keysAvailable);
     } else {
       localStorage.removeItem('currentUser');
@@ -90,6 +93,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               // Only trigger a state update if meaningful gamification data changed
               if (
                 prev.hypeScore !== data.user.hypeScore ||
+                prev.sawaCurrency !== data.user.sawaCurrency ||
                 prev.keysAvailable !== data.user.keysAvailable ||
                 JSON.stringify(prev.streaks) !== JSON.stringify(data.user.streaks) ||
                 prev.activeCard?.perkCode !== data.user.activeCard?.perkCode
@@ -239,6 +243,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addOrder,
 
         hypeScore,
+        sawaCurrency,
         addHypeScore,
         pointsUntilGamble,
         keysAvailable,

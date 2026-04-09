@@ -388,10 +388,13 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                         <div className="flex justify-between items-center mb-4">
                                             <div>
                                                 <p className="font-bold text-white text-lg">{participant.user?.name || participant.user?.username || t.customer}</p>
-                                                <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">{t.share}: {participant.shareAmount} EGP</p>
+                                                <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">
+                                                    {t.share}: {participant.shareAmount} EGP
+                                                    {participant.sawaSubsidy > 0 && <span className="ml-2 text-volt-green">(SAWA Paid {Math.round(participant.sawaSubsidy)} EGP)</span>}
+                                                </p>
                                             </div>
-                                            <div className={`px-3 py-1 rounded text-xs font-black uppercase ${participant.hasPaid ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400'}`}>
-                                                {participant.hasPaid ? t.paid : t.awaitingPayment}
+                                            <div className={`px-3 py-1 rounded text-xs font-black uppercase ${(participant.hasPaid || participant.sawaSubsidy > 0) ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400'}`}>
+                                                {participant.sawaSubsidy > 0 ? (participant.shareAmount > 0 ? 'DISCOUNTED' : 'PAID BY SAWA') : (participant.hasPaid ? t.paid : t.awaitingPayment)}
                                             </div>
                                         </div>
 

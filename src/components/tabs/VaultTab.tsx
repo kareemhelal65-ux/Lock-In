@@ -11,8 +11,8 @@ import ProfileEditorModal from '@/components/modals/ProfileEditorModal';
 import GambleWheel from '@/components/modals/GambleWheel';
 
 export default function VaultTab() {
-  const { currentUser, setCurrentUser, hypeScore, pointsUntilGamble, keysAvailable, addNotification } = useApp();
-  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'leaderboard' | 'friends'>('overview');
+  const { currentUser, setCurrentUser, hypeScore, sawaCurrency, pointsUntilGamble, keysAvailable, addNotification } = useApp();
+  const [activeTab, setActiveTab] = useState<'overview' | 'inventory' | 'vault' | 'leaderboard' | 'friends'>('overview');
   const [showEditor, setShowEditor] = useState(false);
   const [isGambleOpen, setIsGambleOpen] = useState(false);
 
@@ -151,6 +151,32 @@ export default function VaultTab() {
     }
   }, [activeTab, fetchLeaderboard]);
 
+  const handleBuyCard = async (type: string) => {
+    try {
+      const res = await fetch('/api/consumer/vault/buy-card', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser?.id, cardType: type })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        addNotification({
+          id: `vault-${Date.now()}`,
+          type: 'gift_received',
+          title: 'Card Acquired!',
+          message: 'The card has been added to your Arsenal.',
+          timestamp: new Date(),
+          read: false
+        });
+        window.location.reload();
+      } else {
+        alert(data.error || 'Failed to buy card');
+      }
+    } catch (e) {
+      console.error('Buy card error', e);
+    }
+  };
+
 
 
   const getRankIcon = (rank: number) => {
@@ -194,7 +220,7 @@ export default function VaultTab() {
             <div className="flex items-center gap-4 mt-2">
               <div className="flex items-center gap-1">
                 <Wallet className="w-4 h-4 text-cool-gray" />
-                <span className="font-display font-bold">{currentUser.walletBalance} EGP</span>
+                <span className="font-display font-bold">{sawaCurrency} SC</span>
               </div>
             </div>
           </div>
@@ -202,7 +228,7 @@ export default function VaultTab() {
       </motion.div>
 
       <div className="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
-        {(['overview', 'inventory', 'leaderboard', 'friends'] as const).map((tab) => (
+        {(['overview', 'inventory', 'vault', 'leaderboard', 'friends'] as const).map((tab) => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`flex-shrink-0 py-2 px-4 rounded-pill font-display font-bold text-xs uppercase tracking-wider border-2 transition-all ${activeTab === tab ? 'bg-deep-charcoal text-white border-deep-charcoal' : 'bg-white text-deep-charcoal border-deep-charcoal/30'}`}
           >
@@ -212,6 +238,37 @@ export default function VaultTab() {
       </div>
 
       <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+        {activeTab === 'vault' && (
+          <div className="space-y-6">
+            <div className="brutal-card p-4">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-display font-black text-2xl uppercase">SAWA Vault</h3>
+                <div className="bg-deep-charcoal border-2 border-volt-green/50 px-3 py-1 rounded-xl flex items-center gap-2">
+                  <span className="font-display font-bold text-volt-green text-sm">{sawaCurrency}</span>
+                  <span className="text-white text-[10px] font-bold tracking-widest uppercase">SC</span>
+                </div>
+              </div>
+              <p className="text-cool-gray text-xs mb-6">Spend SAWA Currency (SC) earned from orders and deliveries to unlock powerful cards.</p>
+              
+              <div className="space-y-4">
+                <div className="bg-zinc-900 p-4 border-2 border-cool-gray/30 rounded-xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 bg-cool-gray/20 text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">1000 SC</div>
+                   <h4 className="font-display font-bold text-white text-lg">Hype Hub Discount</h4>
+                   <p className="text-cool-gray text-xs mb-3 mt-1">Get 15% off your next SAWA order.</p>
+                   <button onClick={() => handleBuyCard('HYPE_HUB')} disabled={sawaCurrency < 1000} className="w-full bg-volt-green text-deep-charcoal font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
+                </div>
+                
+                <div className="bg-zinc-900 p-4 border-2 border-electric-red/50 rounded-xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 bg-electric-red text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">5000 SC</div>
+                   <h4 className="font-display font-bold text-white text-lg">The Feast</h4>
+                   <p className="text-cool-gray text-xs mb-3 mt-1">A free SAWA meal (up to 150 EGP off).</p>
+                   <button onClick={() => handleBuyCard('THE_FEAST')} disabled={sawaCurrency < 5000} className="w-full bg-electric-red text-white font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="brutal-card p-4 mb-6">

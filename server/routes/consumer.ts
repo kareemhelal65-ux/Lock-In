@@ -79,7 +79,7 @@ const formatUserResponse = (user: any) => {
 };
 
 // Helper to update hype score and award keys
-export const updateHypeScore = async (userId: string, points: number, tx: any = prisma, reason?: string) => {
+export const updateHypeScore = async (userId: string, points: number, tx: any = prisma, reason?: string, baseSCPoints: number = 0) => {
     const user = await tx.user.findUnique({ where: { id: userId } });
     if (!user) return { updatedUser: null, keysEarned: 0 };
 
@@ -99,6 +99,7 @@ export const updateHypeScore = async (userId: string, points: number, tx: any = 
         where: { id: userId },
         data: {
             hypeScore: newScore,
+            ...(baseSCPoints > 0 ? { sawaCurrency: { increment: baseSCPoints } } : {}),
             keysAvailable: { increment: keysEarned }
         }
     });
@@ -520,8 +521,32 @@ consumerRouter.post('/order', async (req, res) => {
         }
 
         const serviceFee = isZeroFee ? 0 : (isSolo ? 10 : 5);
-        const adjustedTotal = totalAmount + serviceFee;
-        const finalShare = participantShare + serviceFee; 
+        let adjustedTotal = totalAmount + serviceFee;
+        let finalShare = participantShare + serviceFee; 
+
+        let sawaSubsidy = 0;
+        if (user?.activeCardId && useActivePerk) {
+            const activeUserCard = await prisma.userCard.findUnique({
+                where: { id: user.activeCardId },
+                include: { card: true }
+            });
+            if (activeUserCard?.card.perkCode === 'SAWA_DISCOUNT') {
+                sawaSubsidy = finalShare * 0.15;
+                finalShare -= sawaSubsidy;
+                await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+            } else if (activeUserCard?.card.perkCode === 'SAWA_FEAST') {
+                const availableValue = activeUserCard.remainingValue ?? 150;
+                sawaSubsidy = Math.min(availableValue, finalShare);
+                finalShare -= sawaSubsidy;
+                if (availableValue - sawaSubsidy <= 0) {
+                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                    await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                } else {
+                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - sawaSubsidy } });
+                }
+            }
+        }
 
         const newOrderNumber = await getNextOrderNumber();
 
@@ -545,6 +570,7 @@ consumerRouter.post('/order', async (req, res) => {
                     hostId: userId,
                     vendorId: actualVendorId,
                     totalAmount: adjustedTotal,
+                    sawaSubsidy,
                     isCoveredByHost,
                     status: isCoveredByHost ? 'PENDING' : 'AWAITING_PAYMENT',
                 }
@@ -569,6 +595,7 @@ consumerRouter.post('/order', async (req, res) => {
                     orderId: order.id,
                     userId,
                     shareAmount: finalShare,
+                    sawaSubsidy,
                     hasPaid: isCoveredByHost ? true : hasPaid
                 }
             });
@@ -1289,16 +1316,48 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     });
                 }
 
+                let totalSawaSubsidy = 0;
                 for (const participant of participants) {
                     const baseShare = participantShares[participant.userId] || (totalAmount / participants.length);
-                    const shareWithFee = isZeroFeeSafe ? baseShare : baseShare + 5;
+                    let shareWithFee = isZeroFeeSafe ? baseShare : baseShare + 5;
+                    let sawaSubsidy = 0;
+                    
+                    const pUser = await tx.user.findUnique({ where: { id: participant.userId } });
+                    if (pUser?.activeCardId) {
+                        const pCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
+                        if (pCard && !pCard.isUsed) {
+                            if (pCard.card.perkCode === 'SAWA_DISCOUNT') {
+                                sawaSubsidy = shareWithFee * 0.15;
+                                shareWithFee -= sawaSubsidy;
+                                await tx.userCard.update({ where: { id: pCard.id }, data: { isUsed: true } });
+                                await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
+                            } else if (pCard.card.perkCode === 'SAWA_FEAST') {
+                                const availableValue = pCard.remainingValue ?? 150;
+                                sawaSubsidy = Math.min(availableValue, shareWithFee);
+                                shareWithFee -= sawaSubsidy;
+                                if (availableValue - sawaSubsidy <= 0) {
+                                    await tx.userCard.update({ where: { id: pCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                                    await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
+                                } else {
+                                    await tx.userCard.update({ where: { id: pCard.id }, data: { remainingValue: availableValue - sawaSubsidy } });
+                                }
+                            }
+                        }
+                    }
+
+                    totalSawaSubsidy += sawaSubsidy;
+
                     await tx.participantOrder.create({
-                        data: { orderId: orderDoc.id, userId: participant.userId, shareAmount: shareWithFee, hasPaid: isCoveredByHost }
+                        data: { orderId: orderDoc.id, userId: participant.userId, shareAmount: shareWithFee, sawaSubsidy, hasPaid: isCoveredByHost }
                     });
+                }
+                
+                if (totalSawaSubsidy > 0) {
+                    await tx.order.update({ where: { id: orderDoc.id }, data: { sawaSubsidy: totalSawaSubsidy } });
                 }
 
                 if (isCoveredByHost) {
-                    await updateHypeScore(safe.hostId, 75, tx);
+                    await updateHypeScore(safe.hostId, 75, tx, undefined, 75);
                     for (let i = 0; i < participants.length; i++) {
                         const participant = participants[i];
                         if (participant.userId !== safe.hostId) {
@@ -1312,7 +1371,7 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                                     await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
                                 }
                             }
-                            await updateHypeScore(participant.userId, points, tx);
+                            await updateHypeScore(participant.userId, points, tx, undefined, 25);
                         }
                     }
                 }
@@ -1905,7 +1964,7 @@ consumerRouter.post('/delivery-requests/:requestId/delivered', async (req, res) 
                 data: { status: 'COMPLETED' }
             });
             // Award 100 Hype Points to the deliverer
-            await updateHypeScore(userId, 100, tx, 'Campus Delivery');
+            await updateHypeScore(userId, 100, tx, 'Campus Delivery', 100);
         });
 
         res.json({ message: 'Delivery confirmed! You earned 100 Hype Points 🎉', pointsAwarded: 100 });
@@ -1974,6 +2033,52 @@ consumerRouter.get('/my-deliveries/:userId', async (req, res) => {
         res.json({ deliveries: formatted });
     } catch (error) {
         console.error('Get my deliveries error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Vault: Buy Card
+consumerRouter.post('/vault/buy-card', async (req, res) => {
+    try {
+        const { userId, cardType } = req.body;
+        const cost = cardType === 'THE_FEAST' ? 5000 : 1000;
+        const perkCode = cardType === 'THE_FEAST' ? 'SAWA_FEAST' : 'SAWA_DISCOUNT';
+        
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || user.sawaCurrency < cost) {
+            return res.status(400).json({ error: 'Insufficient SAWA Currency' });
+        }
+
+        let card = await prisma.card.findUnique({ where: { perkCode } });
+        if (!card) {
+            card = await prisma.card.create({
+                data: {
+                    name: cardType === 'THE_FEAST' ? 'The Feast' : 'Hype Hub Discount',
+                    description: cardType === 'THE_FEAST' ? 'Free 150 EGP Meal' : '15% Off Your Next Order',
+                    perkCode,
+                    rarity: 'Legendary',
+                    usage: 'ONE_TIME'
+                }
+            });
+        }
+        
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: userId },
+                data: { sawaCurrency: { decrement: cost } }
+            }),
+            prisma.userCard.create({
+                data: { userId, cardId: card.id, remainingValue: cardType === 'THE_FEAST' ? 150 : null }
+            })
+        ]);
+
+        const updatedUser = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { inventory: { include: { card: true } } }
+        });
+
+        res.json({ message: 'Purchase successful', user: formatUserResponse(updatedUser) });
+    } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });

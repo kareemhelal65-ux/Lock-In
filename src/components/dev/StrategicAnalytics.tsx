@@ -5,6 +5,7 @@ import { Map, PieChart as PieIcon, LineChart as LineIcon } from 'lucide-react';
 export default function StrategicAnalytics() {
     const [heatmap, setHeatmap] = useState<any[]>([]);
     const [financial, setFinancial] = useState<any>(null);
+    const [retention, setRetention] = useState<any>(null);
 
     useEffect(() => {
         fetch('/api/admin/analytics/heatmap')
@@ -22,6 +23,11 @@ export default function StrategicAnalytics() {
             .then(res => res.json())
             .then(data => setFinancial(data))
             .catch(console.error);
+
+        fetch('/api/admin/analytics/retention')
+            .then(res => res.json())
+            .then(data => setRetention(data))
+            .catch(console.error);
     }, []);
 
     const COLORS = ['#CCFF00', '#FF3B30', '#000000', '#8E8E93'];
@@ -30,6 +36,13 @@ export default function StrategicAnalytics() {
         { name: 'Group Orders', value: financial.groupRevenue },
         { name: 'Solo Orders', value: financial.soloRevenue },
     ] : [];
+
+    const retentionData = retention?.cohorts?.map((c: any) => ({
+        name: c.week,
+        day1: parseFloat(c.day1),
+        day7: parseFloat(c.day7),
+        day30: parseFloat(c.day30)
+    })).reverse() || [];
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -98,30 +111,29 @@ export default function StrategicAnalytics() {
                     </div>
                 </div>
 
-                {/* Growth Pulse (Mocked as we don't have historical cohort data yet) */}
+                {/* Growth Pulse (Realized via Cohort Data) */}
                 <div className="bg-black text-white p-6 rounded-xl border-4 border-black brutal-shadow-sm">
                     <div className="flex items-center gap-3 mb-8">
                         <LineIcon className="w-8 h-8 text-volt-green" />
-                        <h3 className="font-display font-black text-2xl uppercase tracking-wider text-volt-green">Retention Pulse</h3>
+                        <h3 className="font-display font-black text-2xl uppercase tracking-wider text-volt-green">Retention (D1)</h3>
                     </div>
-                    <div className="h-[200px] w-full opacity-50">
+                    <div className="h-[200px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={[
-                                { name: 'W1', value: 100 },
-                                { name: 'W2', value: 85 },
-                                { name: 'W3', value: 78 },
-                                { name: 'W4', value: 72 },
-                                { name: 'W5', value: 75 },
-                            ]}>
-                                <Line type="monotone" dataKey="value" stroke="#CCFF00" strokeWidth={4} dot={{ r: 6, fill: '#CCFF00', stroke: '#000', strokeWidth: 2 }} />
-                                <Tooltip />
+                            <LineChart data={retentionData}>
+                                <Line type="monotone" dataKey="day1" stroke="#CCFF00" strokeWidth={4} dot={{ r: 6, fill: '#CCFF00', stroke: '#000', strokeWidth: 2 }} />
+                                <XAxis dataKey="name" stroke="#6E727A" fontSize={10} fontStyle="bold" />
+                                <YAxis stroke="#6E727A" fontSize={10} fontStyle="bold" />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: '#fff', border: '4px solid #000', borderRadius: '0', color: '#000' }}
+                                    itemStyle={{ color: '#000', fontWeight: 'black' }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                     <div className="mt-6 pt-6 border-t-2 border-volt-green/20">
                         <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Daily Active Streak</span>
-                            <span className="font-black text-2xl text-volt-green">72.4%</span>
+                            <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Power Users (3+ Orders)</span>
+                            <span className="font-black text-2xl text-volt-green">{retention?.threeOrderUsers || 0}</span>
                         </div>
                     </div>
                 </div>

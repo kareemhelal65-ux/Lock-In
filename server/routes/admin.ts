@@ -305,19 +305,29 @@ adminRouter.get('/analytics/retention', async (req, res) => {
         const users = await prisma.user.findMany({
             include: { _count: { select: { hostedOrders: true } } }
         });
-        const threeOrderUsers = users.filter(u => u._count.hostedOrders === 2).length;
+        const threeOrderUsers = users.filter(u => u._count.hostedOrders >= 3).length;
         
-        const topUsersFrequency = "4.2";
-        const avgFrequency = "1.5";
+        const topUsersFrequency = (users.reduce((sum, u) => sum + u._count.hostedOrders, 0) / (users.length || 1)).toFixed(1);
+        const avgFrequency = (await prisma.order.count() / (users.length || 1)).toFixed(1);
+        
+        const cohorts = await prisma.userCohort.findMany({
+            orderBy: { date: 'desc' },
+            take: 3
+        });
+
+        const formattedCohorts = cohorts.map(c => ({
+            week: c.weekLabel,
+            day1: `${c.day1Rate.toFixed(0)}%`,
+            day7: `${c.day7Rate.toFixed(0)}%`,
+            day30: `${c.day30Rate.toFixed(0)}%`
+        }));
         
         res.json({
             threeOrderUsers,
             topUsersFrequency,
             avgFrequency,
-            cohorts: [
-                { week: 'March W1', day1: '92%', day7: '65%', day30: '42%' },
-                { week: 'March W2', day1: '88%', day7: '58%', day30: '30%' },
-                { week: 'Current W3', day1: '95%', day7: '-', day30: '-' },
+            cohorts: formattedCohorts.length > 0 ? formattedCohorts : [
+                { week: 'No Data', day1: '0%', day7: '0%', day30: '0%' }
             ]
         });
     } catch (e: any) {
