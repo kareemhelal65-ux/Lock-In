@@ -271,19 +271,45 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                         : 'border-cool-gray/30'
                                         }`}
                                 >
-                                    <div className="flex justify-between items-center mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="font-display font-black text-2xl text-white tracking-tighter">
-                                                {order.orderNumber || order.id.slice(-6).toUpperCase()}
-                                            </h3>
-                                            <span className={`px-2 py-1 text-[10px] uppercase font-black rounded ${(order.status === 'READY' || order.status === 'ready') ? 'bg-volt-green text-deep-charcoal' : 'bg-electric-red text-white'}`}>
-                                                {order.status}
-                                            </span>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="font-display font-black text-2xl text-white tracking-tighter">
+                                                    {order.orderNumber || order.id.slice(-6).toUpperCase()}
+                                                </h3>
+                                                <span className={`px-2 py-1 text-[10px] uppercase font-black rounded ${(order.status === 'READY' || order.status === 'ready') ? 'bg-volt-green text-deep-charcoal' : 'bg-electric-red text-white'}`}>
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                            {(() => {
+                                                const orderSubsidy = order.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || order.sawaSubsidy || 0;
+                                                return orderSubsidy > 0 ? (
+                                                    <span className="bg-volt-green w-fit text-deep-charcoal px-2 py-0.5 rounded text-xs font-black uppercase">
+                                                        SAWA PAID {Math.round(orderSubsidy)} EGP
+                                                    </span>
+                                                ) : null;
+                                            })()}
                                         </div>
-                                        <p className="text-cool-gray text-xs font-bold">{order.participants?.length > 1 ? t.group : t.solo}</p>
-                                    </div>
-
-                                    <div className="space-y-3 mb-6">                                        
+                                        <div className="text-right">
+                                            {(() => {
+                                                const orderSubsidy = order.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || order.sawaSubsidy || 0;
+                                                const expectedFromCustomer = Math.max(0, order.totalAmount - orderSubsidy);
+                                                return (
+                                                    <>
+                                                        <p className="font-display font-black text-xl text-white">
+                                                            {expectedFromCustomer} EGP
+                                                        </p>
+                                                        {orderSubsidy > 0 && (
+                                                            <p className="text-[10px] text-cool-gray line-through uppercase mt-0.5">
+                                                                ORIGINAL: {order.totalAmount}
+                                                            </p>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
+                                            <p className="text-cool-gray text-xs font-bold mt-1">{order.participants?.length > 1 ? t.group : t.solo}</p>
+                                        </div>
+                                    </div>                                    <div className="space-y-3 mb-6">                                        
                                         {Array.isArray(order.items) && order.items.length > 0 ? (
                                             order.items.map((item: any, idx: number) => (
                                                 <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
