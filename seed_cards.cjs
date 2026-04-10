@@ -44,6 +44,18 @@ const cards = [
     perkCode: "THE01",
     rarity: "Exotic",
   },
+  {
+    name: "Sawa Discount",
+    description: "Active 15% discount on your next order share.",
+    perkCode: "SAWA_DISCOUNT",
+    rarity: "Rare",
+  },
+  {
+    name: "The Feast",
+    description: "Up to 150 EGP subsidy on your next group order.",
+    perkCode: "SAWA_FEAST",
+    rarity: "Uncommon",
+  },
 ];
 
 async function main() {

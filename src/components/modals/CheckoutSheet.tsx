@@ -199,7 +199,7 @@ export default function CheckoutSheet({
               vendorInstapay={vendorInstapay || "@lockin_vendor"}
               orderId={orderId || ''}
               userId={userId || ''}
-              perkUserCardId={useActivePerk && activePerkCard && !isHostCover ? activePerkCard.id : undefined}
+              perkUserCardId={useActivePerk && activePerkCard ? activePerkCard.id : undefined}
               onVerifySuccess={triggerSuccess}
               onCancel={() => setShowDropzone(false)}
             />

@@ -738,6 +738,14 @@ consumerRouter.post('/payment-verification', async (req, res) => {
                     } else {
                         await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - newSawaSubsidy } });
                     }
+                } else if (perk === 'THE01') {
+                    // Legendary card: Zero fees, covering the entire share if needed (acting as a 100% subsidy for the participant share)
+                    newSawaSubsidy = participantOrder.shareAmount;
+                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                    const u = await prisma.user.findUnique({ where: { id: userId } });
+                    if (u?.activeCardId === activeUserCard.id) {
+                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                    }
                 }
             }
         }
@@ -1374,7 +1382,15 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     let sawaSubsidy = 0; // Will be set during actual payment verification
 
                     await tx.participantOrder.create({
-                        data: { orderId: orderDoc.id, userId: participant.userId, shareAmount: shareWithFee, sawaSubsidy, hasPaid: isCoveredByHost }
+                        data: { 
+                            orderId: orderDoc.id, 
+                            userId: participant.userId, 
+                            shareAmount: isCoveredByHost 
+                                ? (participant.userId === safe.hostId ? totalAmount : 0)
+                                : shareWithFee, 
+                            sawaSubsidy, 
+                            hasPaid: participant.userId === safe.hostId ? false : isCoveredByHost 
+                        }
                     });
                 }
                 

@@ -33,6 +33,11 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
             const data = await res.json();
             if (data.orders) {
                 setOrders(data.orders);
+                // Synchronize reviewing modal with fresh data if open
+                if (reviewingOrder) {
+                    const fresh = data.orders.find((o: any) => o.id === reviewingOrder.id);
+                    if (fresh) setReviewingOrder(fresh);
+                }
             }
         } catch (err) {
             console.error("Failed to load dashboard orders", err);

@@ -15,6 +15,8 @@ async function main() {
         { name: "The Magnet", description: "Pins your Safe to everyone's feed and extends priority expiry by 60s.", perkCode: "MAGNET", rarity: "Rare" },
         { name: "The Market Maker", description: "Massive Hype reward boost based on how many people join your Safe.", perkCode: "MARKET_MAKER", rarity: "Legendary" },
         { name: "The 0.1%", description: "Zero fees on your Solo orders and the entire Safe if you are the Host.", perkCode: "THE01", rarity: "Exotic" },
+        { name: "Sawa Discount", description: "Active 15% discount on your next order share.", perkCode: "SAWA_DISCOUNT", rarity: "Rare" },
+        { name: "The Feast", description: "Up to 150 EGP subsidy on your next group order.", perkCode: "SAWA_FEAST", rarity: "Uncommon" },
     ];
 
     for (const card of cards) {
