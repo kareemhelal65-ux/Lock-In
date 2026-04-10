@@ -727,16 +727,12 @@ consumerRouter.post('/payment-verification', async (req, res) => {
                         await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
                     }
                 } else if (perk === 'SAWA_FEAST') {
-                    const availableValue = activeUserCard.remainingValue ?? 150;
-                    newSawaSubsidy = Math.min(availableValue, participantOrder.shareAmount);
-                    if (availableValue - newSawaSubsidy <= 0) {
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
-                        const u = await prisma.user.findUnique({ where: { id: userId } });
-                        if (u?.activeCardId === activeUserCard.id) {
-                            await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                        }
-                    } else {
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - newSawaSubsidy } });
+                    // Single use Feast card: covers share up to 150 EGP once
+                    newSawaSubsidy = Math.min(150, participantOrder.shareAmount);
+                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                    const u = await prisma.user.findUnique({ where: { id: userId } });
+                    if (u?.activeCardId === activeUserCard.id) {
+                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
                     }
                 } else if (perk === 'THE01') {
                     // Legendary card: Zero fees, covering the entire share if needed (acting as a 100% subsidy for the participant share)

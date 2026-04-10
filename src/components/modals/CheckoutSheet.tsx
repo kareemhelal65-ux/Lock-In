@@ -58,14 +58,25 @@ export default function CheckoutSheet({
   const { currentUser } = useApp();
 
   // Card Logic
-  // Card Logic - Only allow THE01, SAWA_DISCOUNT, and SAWA_FEAST for Solo orders per new strategic requirements
+  // Card Logic - Only allow specific perks for Solo orders with amount caps
   const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => {
     if (uc.isUsed) return false;
     const perkCode = uc.card.perkCode;
-    if (['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(perkCode)) {
-      return isSolo; // Only eligible if it's a solo order
+    
+    // Base amount for activation checks (subtotal before fees)
+    const baseAmount = isHostCover && safeTotal ? safeTotal : myTotal;
+
+    if (perkCode === 'SAWA_FEAST') {
+      return isSolo && baseAmount <= 150;
     }
-    return true; // Keep other perks (like Squad Spinner logic elsewhere)
+    if (perkCode === 'SAWA_DISCOUNT') {
+      return isSolo && baseAmount <= 200;
+    }
+    if (perkCode === 'THE01') {
+      return isSolo;
+    }
+    
+    return true; // Keep other perks
   });
   const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
   const activePerk = activePerkCard?.card;
@@ -89,7 +100,7 @@ export default function CheckoutSheet({
   let sawaSubsidy = 0;
   if (useActivePerk && activePerkCard) {
     if (isDiscount) sawaSubsidy = (baseTotal + serviceFee) * 0.15;
-    else if (isFeast) sawaSubsidy = Math.min(activePerkCard.remainingValue ?? 150, baseTotal + serviceFee);
+    else if (isFeast) sawaSubsidy = Math.min(150, baseTotal + serviceFee);
   }
 
   const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - sawaSubsidy);
