@@ -1760,7 +1760,10 @@ consumerRouter.post('/gamble/spin', async (req, res) => {
 
             if (rarityQuery.length > 0) {
                 const availableCards = await prisma.card.findMany({
-                    where: { rarity: { in: rarityQuery } }
+                    where: { 
+                        rarity: { in: rarityQuery },
+                        perkCode: { notIn: ['SAWA_DISCOUNT', 'SAWA_FEAST'] }
+                    }
                 });
 
                 if (availableCards.length > 0) {

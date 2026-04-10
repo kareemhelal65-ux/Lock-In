@@ -58,11 +58,19 @@ export default function CheckoutSheet({
   const { currentUser } = useApp();
 
   // Card Logic
-  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => !uc.isUsed && ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(uc.card.perkCode));
+  // Card Logic - Only allow THE01, SAWA_DISCOUNT, and SAWA_FEAST for Solo orders per new strategic requirements
+  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => {
+    if (uc.isUsed) return false;
+    const perkCode = uc.card.perkCode;
+    if (['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'].includes(perkCode)) {
+      return isSolo; // Only eligible if it's a solo order
+    }
+    return true; // Keep other perks (like Squad Spinner logic elsewhere)
+  });
   const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
   const activePerk = activePerkCard?.card;
   
-  const isZeroFee = isHostCover ? activePerk?.perkCode === 'THE01' : false; // Host uses Hub Breach
+  const isZeroFee = activePerk?.perkCode === 'THE01'; // Hub Breach applies to whoever uses it
   const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
   const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
   const hasPerk = !!activePerk;
