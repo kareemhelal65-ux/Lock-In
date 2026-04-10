@@ -458,10 +458,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                         <div className="flex justify-between items-center mb-4">
                                             <div>
                                                 <p className="font-bold text-white text-lg">{participant.user?.name || participant.user?.username || t.customer}</p>
-                                                <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">
-                                                    {t.share}: {participant.shareAmount} EGP
-                                                    {participant.sawaSubsidy > 0 && <span className="ml-2 text-volt-green">(SAWA Paid {Math.round(participant.sawaSubsidy)} EGP)</span>}
-                                                </p>
+                                                <div className="flex flex-col mt-1">
+                                                    <p className="text-cool-gray text-xs font-bold uppercase tracking-widest">
+                                                        {t.share}: {participant.shareAmount} EGP
+                                                    </p>
+                                                    {participant.sawaSubsidy > 0 && (
+                                                        <p className="text-volt-green text-xs font-black uppercase mt-0.5">
+                                                            SAWA PAID: {Math.round(participant.sawaSubsidy)} EGP
+                                                        </p>
+                                                    )}
+                                                    <p className="text-white text-sm font-black uppercase mt-1">
+                                                        CUSTOMER PAID: {Math.max(0, participant.shareAmount - (participant.sawaSubsidy || 0))} EGP
+                                                    </p>
+                                                </div>
                                             </div>
                                             <div className={`px-3 py-1 rounded text-xs font-black uppercase ${(participant.hasPaid || participant.sawaSubsidy > 0) ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400'}`}>
                                                 {participant.sawaSubsidy > 0 ? (participant.shareAmount > 0 ? 'DISCOUNTED' : 'PAID BY SAWA') : (participant.hasPaid ? t.paid : t.awaitingPayment)}
