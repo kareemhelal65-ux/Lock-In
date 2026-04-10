@@ -155,11 +155,18 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                                 </h3>
                                                 {(() => {
                                                     const orderSubsidy = order.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || order.sawaSubsidy || 0;
-                                                    return orderSubsidy > 0 ? (
-                                                        <span className="bg-volt-green text-deep-charcoal px-2 py-1 rounded text-xs font-black uppercase">
-                                                            SAWA PAID {Math.round(orderSubsidy)} EGP
+                                                    if (orderSubsidy <= 0) return null;
+                                                    
+                                                    const expectedFromCustomer = Math.max(0, order.totalAmount - orderSubsidy);
+                                                    const isFullSubsidy = expectedFromCustomer === 0;
+                                                    
+                                                    return (
+                                                        <span className={`px-2 py-1 rounded text-[10px] font-black uppercase shadow-sm ${
+                                                            isFullSubsidy ? 'bg-purple-600 text-white' : 'bg-yellow-400 text-deep-charcoal'
+                                                        }`}>
+                                                            {isFullSubsidy ? 'PAYMENT: PAID BY SAWA' : 'PAYMENT: DISCOUNTED'}
                                                         </span>
-                                                    ) : null;
+                                                    );
                                                 })()}
                                             </div>
                                             <p className="text-cool-gray text-xs uppercase font-bold tracking-widest mt-1 flex items-center gap-2">
@@ -410,12 +417,13 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                 <div className="mt-1 text-sm font-bold uppercase tracking-widest flex items-center gap-2">
                                     {(() => {
                                         const actualSubsidy = reviewingOrder.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || reviewingOrder.sawaSubsidy || 0;
+                                        const collectable = Math.max(0, reviewingOrder.totalAmount - actualSubsidy);
                                         return (
                                             <>
                                                 <span className="text-cool-gray">{t.total}: {reviewingOrder.totalAmount} EGP</span>
                                                 {actualSubsidy > 0 && (
-                                                    <span className="bg-volt-green text-deep-charcoal px-2 py-0.5 rounded text-xs font-black">
-                                                        CUSTOMER PAYS: {reviewingOrder.totalAmount - actualSubsidy} EGP
+                                                    <span className={`px-2 py-1 rounded text-xs font-black ${collectable === 0 ? 'bg-purple-600 text-white' : 'bg-yellow-400 text-deep-charcoal'}`}>
+                                                        COLLECT: {collectable} EGP {actualSubsidy > 0 && `(SAWA covered ${Math.round(actualSubsidy)})`}
                                                     </span>
                                                 )}
                                             </>
@@ -464,16 +472,20 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                                     </p>
                                                     {participant.sawaSubsidy > 0 && (
                                                         <p className="text-volt-green text-xs font-black uppercase mt-0.5">
-                                                            SAWA PAID: {Math.round(participant.sawaSubsidy)} EGP
+                                                            SAWA COVERED: {Math.round(participant.sawaSubsidy)} EGP
                                                         </p>
                                                     )}
-                                                    <p className="text-white text-sm font-black uppercase mt-1">
-                                                        CUSTOMER PAID: {Math.max(0, participant.shareAmount - (participant.sawaSubsidy || 0))} EGP
+                                                    <p className="text-white text-sm font-black uppercase mt-1 italic">
+                                                        COLLECT FROM CUSTOMER: {Math.max(0, participant.shareAmount - (participant.sawaSubsidy || 0))} EGP
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className={`px-3 py-1 rounded text-xs font-black uppercase ${(participant.hasPaid || participant.sawaSubsidy > 0) ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400'}`}>
-                                                {participant.sawaSubsidy > 0 ? (participant.shareAmount > 0 ? 'DISCOUNTED' : 'PAID BY SAWA') : (participant.hasPaid ? t.paid : t.awaitingPayment)}
+                                            <div className={`px-3 py-1 rounded text-xs font-black uppercase ${
+                                                participant.sawaSubsidy > 0 
+                                                  ? (participant.shareAmount - participant.sawaSubsidy > 0 ? 'bg-yellow-400 text-deep-charcoal' : 'bg-purple-600 text-white')
+                                                  : (participant.hasPaid ? 'bg-volt-green/20 text-volt-green' : 'bg-yellow-400/20 text-yellow-400')
+                                            }`}>
+                                                {participant.sawaSubsidy > 0 ? (participant.shareAmount - participant.sawaSubsidy > 0 ? 'DISCOUNTED' : 'PAID BY SAWA') : (participant.hasPaid ? t.paid : t.awaitingPayment)}
                                             </div>
                                         </div>
 
