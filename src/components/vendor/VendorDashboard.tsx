@@ -144,9 +144,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
 
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <h3 className="font-display font-black text-3xl text-white tracking-tighter">
-                                                {order.orderNumber || (order.id ? order.id.slice(-6).toUpperCase() : 'ORDER')}
-                                            </h3>
+                                            <div className="flex items-center gap-3">
+                                                <h3 className="font-display font-black text-3xl text-white tracking-tighter">
+                                                    {order.orderNumber || (order.id ? order.id.slice(-6).toUpperCase() : 'ORDER')}
+                                                </h3>
+                                                {(() => {
+                                                    const orderSubsidy = order.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || order.sawaSubsidy || 0;
+                                                    return orderSubsidy > 0 ? (
+                                                        <span className="bg-volt-green text-deep-charcoal px-2 py-1 rounded text-xs font-black uppercase">
+                                                            SAWA PAID {Math.round(orderSubsidy)} EGP
+                                                        </span>
+                                                    ) : null;
+                                                })()}
+                                            </div>
                                             <p className="text-cool-gray text-xs uppercase font-bold tracking-widest mt-1 flex items-center gap-2">
                                                 <Clock className="w-3 h-3" />
                                                 {new Date(order.createdAt).toLocaleTimeString()}
@@ -166,14 +176,24 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             </span>
                                         </div>
                                         <div className={`text-${lang === 'ar' ? 'left' : 'right'}`}>
-                                            <span className="font-display font-bold text-lg text-white">
-                                                {order.sawaSubsidy > 0 ? order.totalAmount - order.sawaSubsidy : order.totalAmount} EGP
-                                            </span>
-                                            {order.sawaSubsidy > 0 && (
-                                                <p className="text-[10px] text-volt-green font-bold uppercase">
-                                                    (+SAWA SUBSIDY {order.sawaSubsidy} EGP)
-                                                </p>
-                                            )}
+                                            {(() => {
+                                                const orderSubsidy = order.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || order.sawaSubsidy || 0;
+                                                const expectedFromCustomer = Math.max(0, order.totalAmount - orderSubsidy);
+                                                return (
+                                                    <>
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="font-display font-bold text-lg text-white">
+                                                                {expectedFromCustomer} EGP
+                                                            </span>
+                                                            {orderSubsidy > 0 && (
+                                                                <span className="text-[10px] text-cool-gray line-through uppercase mt-0.5">
+                                                                    ORIGINAL: {order.totalAmount} EGP
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 
@@ -357,12 +377,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     {t.reviewOrder} {reviewingOrder.orderNumber || reviewingOrder.id.slice(-6).toUpperCase()}
                                 </h2>
                                 <div className="mt-1 text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <span className="text-cool-gray">{t.total}: {reviewingOrder.totalAmount} EGP</span>
-                                    {reviewingOrder.sawaSubsidy > 0 && (
-                                        <span className="bg-volt-green/20 text-volt-green px-2 py-0.5 rounded text-[10px]">
-                                            CUSTOMER REMAINDER: {reviewingOrder.totalAmount - reviewingOrder.sawaSubsidy} EGP
-                                        </span>
-                                    )}
+                                    {(() => {
+                                        const actualSubsidy = reviewingOrder.participants?.reduce((sum: number, p: any) => sum + (p.sawaSubsidy || 0), 0) || reviewingOrder.sawaSubsidy || 0;
+                                        return (
+                                            <>
+                                                <span className="text-cool-gray">{t.total}: {reviewingOrder.totalAmount} EGP</span>
+                                                {actualSubsidy > 0 && (
+                                                    <span className="bg-volt-green text-deep-charcoal px-2 py-0.5 rounded text-xs font-black">
+                                                        CUSTOMER PAYS: {reviewingOrder.totalAmount - actualSubsidy} EGP
+                                                    </span>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 
