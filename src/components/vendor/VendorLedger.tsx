@@ -17,6 +17,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
     const [stats, setStats] = useState<any>({
         totalVolume: 0,
         commissionOwed: 0,
+        subsidiesOwed: 0,
         totalSubsidies: 0,
         totalOrders: 0,
         peakHours: new Array(16).fill(0),
