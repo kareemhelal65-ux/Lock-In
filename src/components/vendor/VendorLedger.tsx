@@ -121,6 +121,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                         value={period}
                         onChange={(e) => setPeriod(e.target.value)}
                         className="bg-zinc-900 border-2 border-cool-gray/30 text-white font-bold px-4 py-2 rounded-lg font-display uppercase text-sm focus:outline-none focus:border-volt-green shadow-brutal-sm"
+                        title="Select analytics period"
                     >
                         <option value="today">{t.today}</option>
                         <option value="week">{t.week}</option>

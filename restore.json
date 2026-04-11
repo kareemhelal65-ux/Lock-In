@@ -1,0 +1,1017 @@
+{
+  "users": [],
+  "cards": [
+    {
+      "id": "5a1cd6a2-26d5-4f78-b410-fa2ba6c4b40c",
+      "name": "The Passenger",
+      "description": "Standard card for new users with no unique active mechanics.",
+      "perkCode": "PASSENGER",
+      "rarity": "Common",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "8c46cc16-cb06-49aa-913e-50f0d3bcccde",
+      "name": "The Lurker",
+      "description": "Hides your identity in lobbies and steals Hype points from others upon completion.",
+      "perkCode": "LURKER",
+      "rarity": "Common",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "fa812701-592a-4192-8f92-4b6558dd8e14",
+      "name": "The Whale",
+      "description": "Provides a 1.5x Hype multiplier to every participant in your Safe.",
+      "perkCode": "WHALE",
+      "rarity": "Uncommon",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "8396c17d-12b9-4adc-ba31-4beea4adec72",
+      "name": "The Early Bird",
+      "description": "Grants a 2x Hype multiplier if you are the very first person to join a Safe.",
+      "perkCode": "EARLYBIRD",
+      "rarity": "Uncommon",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "fc0a7cda-99b8-4f21-a9e7-8fc8c491ca94",
+      "name": "The Magnet",
+      "description": "Pins your Safe to everyone's feed and extends priority expiry by 60s.",
+      "perkCode": "MAGNET",
+      "rarity": "Rare",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "01e5cad5-948a-43d0-9cc4-2a4eda4f1f11",
+      "name": "The 0.1%",
+      "description": "Zero fees on your Solo orders and the entire Safe if you are the Host.",
+      "perkCode": "THE01",
+      "rarity": "Exotic",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    },
+    {
+      "id": "e4f64fe6-124b-45e8-90df-7b8c5968f134",
+      "name": "The Market Maker",
+      "description": "Massive Hype reward boost based on how many people join your Safe.",
+      "perkCode": "MARKET_MAKER",
+      "rarity": "Legendary",
+      "dropRate": 0.1,
+      "usage": "ONE_TIME"
+    }
+  ],
+  "userCards": [],
+  "vendors": [],
+  "menuItems": [
+    {
+      "id": "e5c89bfd-a0f9-4c97-89fa-cfa6bc56be12",
+      "vendorId": "fake_vendor_1772707414470",
+      "name": "Cyber Slice",
+      "description": "Pepperoni, jalapeños, and hot honey drizzle",
+      "price": 150,
+      "image": "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&h=300&fit=crop",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Pizza",
+      "addOns": "[]"
+    },
+    {
+      "id": "ae5fdc85-a477-4818-b5cf-96ef75a637ef",
+      "vendorId": "fake_vendor_1772707414470",
+      "name": "Neon Nuggets",
+      "description": "Crispy chicken bites with glowing cheese sauce",
+      "price": 90,
+      "image": "https://images.unsplash.com/photo-1562967914-608f82629710?w=400&h=300&fit=crop",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Sides",
+      "addOns": "[]"
+    },
+    {
+      "id": "d3290610-dd48-4f27-b992-976095ecf091",
+      "vendorId": "fake_vendor_1772707414470",
+      "name": "Glued Garlic Bread",
+      "description": "Extra cheesy garlic bread pulled straight out of the matrix",
+      "price": 60,
+      "image": "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&h=300&fit=crop",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Sides",
+      "addOns": "[]"
+    },
+    {
+      "id": "51b0670b-c8f1-4084-a3ca-70c48ef7c54d",
+      "vendorId": "fake_vendor_1772707414470",
+      "name": "Agent Premium Burger",
+      "description": "Created by the test script",
+      "price": 150,
+      "image": "/placeholder-item.jpg",
+      "inStock": false,
+      "requiredHypeLevel": 0,
+      "category": "Burgers",
+      "addOns": "[]"
+    },
+    {
+      "id": "36e0d7a3-85d1-483a-8b75-7eaf46986513",
+      "vendorId": "0cf3c7fb-6088-4433-9f49-1558a6cc7bd8",
+      "name": "cheese",
+      "description": "oriental old cheese made with delicacy this dish consists of tomatoes, mushrooms, steak and cottage cheese",
+      "price": 200,
+      "image": "/uploads/1772708872957-544068825.png",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Mains",
+      "addOns": "[{\"name\":\"extra cheese\",\"price\":10},{\"name\":\"hot sauce\",\"price\":0},{\"name\":\"buffalo sauce\",\"price\":0}]"
+    },
+    {
+      "id": "0d3de8ff-d2cb-4759-be38-eac7860875a7",
+      "vendorId": "0cf3c7fb-6088-4433-9f49-1558a6cc7bd8",
+      "name": "New ItemSpecial Pizza",
+      "description": "",
+      "price": 0,
+      "image": "/placeholder-item.jpg",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Drinks",
+      "addOns": "[]"
+    },
+    {
+      "id": "425045a4-03be-4f80-aa37-969ac0e48d80",
+      "vendorId": "0cf3c7fb-6088-4433-9f49-1558a6cc7bd8",
+      "name": "Fries",
+      "description": "",
+      "price": 60,
+      "image": "/placeholder-item.jpg",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Sides",
+      "addOns": "[{\"name\":\"Brisket\",\"price\":50},{\"name\":\"Loaded Cheese\",\"price\":20},{\"name\":\"Jalapeno\",\"price\":0},{\"name\":\"Hot Sauce\",\"price\":0}]"
+    },
+    {
+      "id": "cd2d1bb0-ae15-4246-98d3-0998572773c9",
+      "vendorId": "0cf3c7fb-6088-4433-9f49-1558a6cc7bd8",
+      "name": "New Item",
+      "description": "",
+      "price": 0,
+      "image": "/placeholder-item.jpg",
+      "inStock": true,
+      "requiredHypeLevel": 0,
+      "category": "Mains",
+      "addOns": "[]"
+    }
+  ],
+  "orders": [],
+  "participantOrders": [],
+  "friendshipStreaks": [
+    {
+      "id": "9141bbe4-60aa-4ea6-ad57-004c282efe7d",
+      "userId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "friendId": "d72b83bc-35cd-419a-9bb0-6cd00d9629e1",
+      "streak": 0,
+      "isActive": false,
+      "createdAt": "2026-03-07T00:51:55.398Z",
+      "updatedAt": "2026-03-07T00:51:55.398Z"
+    },
+    {
+      "id": "1b231cce-c012-461c-8e58-0c80bce008ba",
+      "userId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "friendId": "b5d4cdb1-d86a-49a6-b4ce-2fb6bd45b833",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:18:39.490Z",
+      "updatedAt": "2026-03-07T01:18:46.557Z"
+    },
+    {
+      "id": "68540d4f-9112-42e4-8efc-43e5615a4873",
+      "userId": "fd410b2b-8da5-4059-9cfa-46d7476c6f4e",
+      "friendId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:39:48.802Z",
+      "updatedAt": "2026-03-07T01:47:28.754Z"
+    },
+    {
+      "id": "70be9975-2272-43b6-8fef-9e505171170e",
+      "userId": "fd410b2b-8da5-4059-9cfa-46d7476c6f4e",
+      "friendId": "665e675e-45ec-48fc-9af3-abdb850b5655",
+      "streak": 0,
+      "isActive": false,
+      "createdAt": "2026-03-07T01:39:55.271Z",
+      "updatedAt": "2026-03-07T01:39:55.271Z"
+    },
+    {
+      "id": "7f666c33-162a-403f-b4ab-678d49307fc6",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "e819adac-d441-4f53-9fcb-176e0ccd662c",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.109Z",
+      "updatedAt": "2026-03-07T01:47:28.109Z"
+    },
+    {
+      "id": "a0d94919-59bb-4c79-9492-a1e403019e01",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "8fb8992c-5a69-4b02-9bbd-aec2b93a5dda",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.122Z",
+      "updatedAt": "2026-03-07T01:47:28.122Z"
+    },
+    {
+      "id": "2c0a3988-f36f-43c3-b5f3-2942ab403a0a",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "e04184ca-7a72-4a87-9d77-bcf4aaa38bee",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.134Z",
+      "updatedAt": "2026-03-07T01:47:28.134Z"
+    },
+    {
+      "id": "91a38596-f39a-4dcc-8814-d853b071f3f3",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "c8fc4019-6745-4c77-81be-87f60aa4a205",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.145Z",
+      "updatedAt": "2026-03-07T01:47:28.145Z"
+    },
+    {
+      "id": "ae4f0010-9dee-422b-a002-30e5a8e10237",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "d72b83bc-35cd-419a-9bb0-6cd00d9629e1",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.158Z",
+      "updatedAt": "2026-03-07T01:47:28.158Z"
+    },
+    {
+      "id": "de21cdc2-c4fa-4a09-b7ac-67e0791c072a",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "9a0b72d3-41b6-40c1-9be0-8a2cdcdf2651",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.169Z",
+      "updatedAt": "2026-03-07T01:47:28.169Z"
+    },
+    {
+      "id": "78f31275-f082-4ce4-8496-3854e8a5cde3",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "e2e324e3-1157-41fc-8b11-343750814995",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.180Z",
+      "updatedAt": "2026-03-07T01:47:28.180Z"
+    },
+    {
+      "id": "7a76a54f-fba1-4479-bec5-0e3206dede33",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "647873f1-dbd5-4528-8e8d-8863b13e5dda",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.191Z",
+      "updatedAt": "2026-03-07T01:47:28.191Z"
+    },
+    {
+      "id": "f4f4535a-5e66-41c3-9503-59bee1848b95",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "0af40eb5-12ad-4448-ac57-4c5c793394eb",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.201Z",
+      "updatedAt": "2026-03-07T01:47:28.201Z"
+    },
+    {
+      "id": "93ace647-72e5-4295-9977-f09e7995485b",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "8cb75383-3f76-4c06-97c9-e944caed4f59",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.212Z",
+      "updatedAt": "2026-03-07T01:47:28.212Z"
+    },
+    {
+      "id": "7719bb61-8238-4d21-8b46-963cebe1399d",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "deb19bf8-1086-4716-b0fd-024fde966875",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.221Z",
+      "updatedAt": "2026-03-07T01:47:28.221Z"
+    },
+    {
+      "id": "135eff98-fe2f-414e-b00f-b83eb3ad963b",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "756c7604-28a1-4c3a-a78f-f050f4e24dce",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.233Z",
+      "updatedAt": "2026-03-07T01:47:28.233Z"
+    },
+    {
+      "id": "24cc5d50-0037-4959-aff9-79ef8911e18c",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "1c138fde-17c9-40ca-b5f4-e441376d85be",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.243Z",
+      "updatedAt": "2026-03-07T01:47:28.243Z"
+    },
+    {
+      "id": "4807b7d6-efc7-4e7d-b8ee-f49978d33082",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "b919bbf4-69f9-472b-93b7-1644a47c984e",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.254Z",
+      "updatedAt": "2026-03-07T01:47:28.254Z"
+    },
+    {
+      "id": "9d153781-edef-4299-be3d-1fd458d79d72",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "33b47135-ec38-49a2-b17f-a660e2af4be6",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.266Z",
+      "updatedAt": "2026-03-07T01:47:28.266Z"
+    },
+    {
+      "id": "c81d2eaa-3e12-4e9c-ad33-c2374b5f77c0",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "0e902533-495b-496b-8423-2e1bc089c094",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.278Z",
+      "updatedAt": "2026-03-07T01:47:28.278Z"
+    },
+    {
+      "id": "da1a1bfd-cae8-4290-a35d-5df2434308f4",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "b149b1da-444f-4e27-b517-4a3dad9b1034",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.290Z",
+      "updatedAt": "2026-03-07T01:47:28.290Z"
+    },
+    {
+      "id": "bbea1502-c017-4e1d-8d10-0f2d55ec9214",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "802d5741-8e54-4422-a662-d85f2860d77b",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.301Z",
+      "updatedAt": "2026-03-07T01:47:28.301Z"
+    },
+    {
+      "id": "d72d44b1-d299-4c42-91e2-dfe28302fcc3",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "aa00d8a6-6e40-489c-8ee5-cc4b339021f3",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.311Z",
+      "updatedAt": "2026-03-07T01:47:28.311Z"
+    },
+    {
+      "id": "3717a392-c8c7-4a26-9225-d7969f7581f9",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "8a8def61-16ce-47c4-8192-2a945b494598",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.321Z",
+      "updatedAt": "2026-03-07T01:47:28.321Z"
+    },
+    {
+      "id": "534a8799-17d3-4c51-9cf7-3ab4693fa82d",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "5a3b999d-ed8c-4354-830c-a57ab469d701",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.333Z",
+      "updatedAt": "2026-03-07T01:47:28.333Z"
+    },
+    {
+      "id": "9ee4cb85-8217-4e0d-ba04-381b4509aa9e",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "f25e1fb4-1815-45d1-ba8d-b2568dcb3bfb",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.343Z",
+      "updatedAt": "2026-03-07T01:47:28.343Z"
+    },
+    {
+      "id": "a0c6231e-d8ba-47db-8996-b57c51255778",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "7a2816b9-23a1-48e0-9f42-4a7f15deda7c",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.354Z",
+      "updatedAt": "2026-03-07T01:47:28.354Z"
+    },
+    {
+      "id": "f06c6be3-666d-45b1-b1c5-39587c3856a1",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "c5f1dfff-5f41-49fa-9712-05bdf3c63171",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.364Z",
+      "updatedAt": "2026-03-07T01:47:28.364Z"
+    },
+    {
+      "id": "fe82b953-9ba7-4127-b64a-4e18187e012a",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "d655334d-2102-49cd-bfb2-f43424ab6959",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.374Z",
+      "updatedAt": "2026-03-07T01:47:28.374Z"
+    },
+    {
+      "id": "8f0bec90-dd2c-415a-b6ef-dbabdf6c69c6",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "5d44ab44-5b09-424a-9a71-5b2351bec197",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.384Z",
+      "updatedAt": "2026-03-07T01:47:28.384Z"
+    },
+    {
+      "id": "97a8c8f2-6e95-4dca-826d-bbb2f5ca018c",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "1481ed91-ff8b-4446-b6c0-3a3b702775f7",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.395Z",
+      "updatedAt": "2026-03-07T01:47:28.395Z"
+    },
+    {
+      "id": "f65ba05e-1cd2-42db-8471-b6c65bf1cb85",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "c4ee49a0-73a4-48d3-a8a3-bf54f22138b1",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.406Z",
+      "updatedAt": "2026-03-07T01:47:28.406Z"
+    },
+    {
+      "id": "814feab9-f974-4ca9-a1c7-8ab28fc35349",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "cfe67f25-d5bc-454d-a517-35b38650305a",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.416Z",
+      "updatedAt": "2026-03-07T01:47:28.416Z"
+    },
+    {
+      "id": "24c276a6-086f-468a-ab11-b946e1592e7a",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "4cce0664-66af-4691-90f6-c226211a5b69",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.439Z",
+      "updatedAt": "2026-03-07T01:47:28.439Z"
+    },
+    {
+      "id": "2d5b720f-2349-40d2-9320-d96639db6eec",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "f9d24f7e-b5e8-4754-8cde-05ad5e0dfbd5",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.457Z",
+      "updatedAt": "2026-03-07T01:47:28.457Z"
+    },
+    {
+      "id": "163c53e0-29fa-41b7-85b0-3ce7d826e9da",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "935364f6-590e-4298-93e9-62a51259c22c",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.467Z",
+      "updatedAt": "2026-03-07T01:47:28.467Z"
+    },
+    {
+      "id": "cd1e5753-1d76-4c90-b0b0-8657a357c696",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "bf0fd3fc-93f1-4a29-a171-d08e36910760",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.478Z",
+      "updatedAt": "2026-03-07T01:47:28.478Z"
+    },
+    {
+      "id": "8c4851de-067a-42b8-8b06-d7e60b4cbfd1",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "c272732c-df8a-41d5-a41b-92ef1fa2b4cd",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.488Z",
+      "updatedAt": "2026-03-07T01:47:28.488Z"
+    },
+    {
+      "id": "df6c6173-bad7-4f57-a1c0-625a5f954def",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "5c36175a-2bc7-49ba-b1aa-b45e31405f35",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.500Z",
+      "updatedAt": "2026-03-07T01:47:28.500Z"
+    },
+    {
+      "id": "162e7d65-70e8-406f-8b1e-6ac6415b2cc9",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "f10130a5-8ffe-461c-aaf9-de02988a8aa2",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.518Z",
+      "updatedAt": "2026-03-07T01:47:28.518Z"
+    },
+    {
+      "id": "81f3efc1-49e9-4649-805a-33812578ed29",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "11dd26c7-aee7-4046-b522-138ebbda2161",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.528Z",
+      "updatedAt": "2026-03-07T01:47:28.528Z"
+    },
+    {
+      "id": "4071716d-a4b9-43ca-99ab-38b50df1f34e",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "cdd09c95-d3a6-4680-86c4-03535ee41940",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.538Z",
+      "updatedAt": "2026-03-07T01:47:28.538Z"
+    },
+    {
+      "id": "48e530c7-8de9-4fde-9918-52c8128e116d",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "aa2b8af9-6428-474f-b2ae-90a2a1b0b878",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.548Z",
+      "updatedAt": "2026-03-07T01:47:28.548Z"
+    },
+    {
+      "id": "ca25d076-d445-46f8-b105-9cf5bb69d41b",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "bf4f51c4-1f1c-473c-8370-cd0563186c7b",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.558Z",
+      "updatedAt": "2026-03-07T01:47:28.558Z"
+    },
+    {
+      "id": "3a98f2ee-6b93-4a70-a421-907385b7a440",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "d0a10e6c-07d3-40f2-9965-148f50e3f212",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.568Z",
+      "updatedAt": "2026-03-07T01:47:28.568Z"
+    },
+    {
+      "id": "586c0e5e-703f-441d-9231-549c4da4ac91",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "aa3a1f05-4e25-4d01-adf3-a3c66c524ded",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.578Z",
+      "updatedAt": "2026-03-07T01:47:28.578Z"
+    },
+    {
+      "id": "6bd27e1c-17ae-407d-8a28-dea0d7907dfe",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "c56e3d17-28b8-4fb9-9135-3e3ef9544e88",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.590Z",
+      "updatedAt": "2026-03-07T01:47:28.590Z"
+    },
+    {
+      "id": "5139570e-7d63-452e-9d7d-677595f028a3",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "665e675e-45ec-48fc-9af3-abdb850b5655",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.602Z",
+      "updatedAt": "2026-03-07T01:47:28.602Z"
+    },
+    {
+      "id": "d1f9ca9c-aa46-4291-a3cb-9540e9e56580",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "67c8e23e-02f2-4369-9ff5-f80bd990852a",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.613Z",
+      "updatedAt": "2026-03-07T01:47:28.613Z"
+    },
+    {
+      "id": "b9ffe097-3c66-4688-84de-9d367c79c1a1",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "e1eee683-4ce0-4e95-84be-e00024243869",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.625Z",
+      "updatedAt": "2026-03-07T01:47:28.625Z"
+    },
+    {
+      "id": "6d02cb6f-93d0-4783-9f59-1c3780c9d6fe",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "dc33a96a-dd01-47d5-a798-4b1d0937ccc1",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.635Z",
+      "updatedAt": "2026-03-07T01:47:28.635Z"
+    },
+    {
+      "id": "81288dc1-2ee2-497d-8063-762a10362082",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "46c7af7f-5303-4782-bc59-4df80cd31b89",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.645Z",
+      "updatedAt": "2026-03-07T01:47:28.645Z"
+    },
+    {
+      "id": "607ae04f-986e-438d-a64a-acb2f9bd28db",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "3cb88200-1474-4c95-957d-6563ac3d5599",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.655Z",
+      "updatedAt": "2026-03-07T01:47:28.655Z"
+    },
+    {
+      "id": "e8b6bfe6-395f-4e1a-9e8b-8a44713fb584",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.667Z",
+      "updatedAt": "2026-03-07T01:47:28.667Z"
+    },
+    {
+      "id": "4f852742-a740-4b97-90b1-5025bf474fef",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "a6425836-c334-48c1-992d-5f3e5f95e96f",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.679Z",
+      "updatedAt": "2026-03-07T01:47:28.679Z"
+    },
+    {
+      "id": "3f2a959e-8523-446b-9472-6aa676fa2417",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "f7e8f677-d0eb-45be-8815-bda0216cde99",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.690Z",
+      "updatedAt": "2026-03-07T01:47:28.690Z"
+    },
+    {
+      "id": "49107cf8-b4ac-489e-8e9b-6b859339ccd6",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "3703e834-1741-4263-bde0-b7fde0d6458d",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.702Z",
+      "updatedAt": "2026-03-07T01:47:28.702Z"
+    },
+    {
+      "id": "b5ae0eae-1114-476a-a505-a55bb3c19d08",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "73445b68-e1a8-47ac-bc11-bf01db6de5a7",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.713Z",
+      "updatedAt": "2026-03-07T01:47:28.713Z"
+    },
+    {
+      "id": "aa9cdc09-da2a-453a-a6d9-a0d85ed28020",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "27999e46-0688-4d6d-b995-a80984c6ce86",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.724Z",
+      "updatedAt": "2026-03-07T01:47:28.724Z"
+    },
+    {
+      "id": "392f949a-9203-490c-9e5d-bc5778673d7c",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "b5d4cdb1-d86a-49a6-b4ce-2fb6bd45b833",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.736Z",
+      "updatedAt": "2026-03-07T01:47:28.736Z"
+    },
+    {
+      "id": "85b23ae8-91b8-4a91-8ab7-bd45e206d2da",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "07b9a947-d153-4d28-b937-b61cc4358640",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.759Z",
+      "updatedAt": "2026-03-07T01:47:28.759Z"
+    },
+    {
+      "id": "3e6bf7fa-e10c-4360-9287-1c9bc43161cf",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "f6221007-2701-4b11-85b0-fbd9cebdf114",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.770Z",
+      "updatedAt": "2026-03-07T01:47:28.770Z"
+    },
+    {
+      "id": "40a3f710-0db8-4d81-969d-c35af54fa387",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "0fafe5df-1a87-43f2-9169-400951177e4f",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.782Z",
+      "updatedAt": "2026-03-07T01:47:28.782Z"
+    },
+    {
+      "id": "dc41c775-ba39-40b5-9e3f-c089d4b7a522",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "01358f09-c787-4069-9467-5cd2038ed0d1",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.804Z",
+      "updatedAt": "2026-03-07T01:47:28.804Z"
+    },
+    {
+      "id": "250147a4-0ca0-4ce2-afa2-1c90793e8eaf",
+      "userId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "friendId": "ba7a5621-ddca-4ff3-a635-3d7c12fbb80f",
+      "streak": 5,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:47:28.820Z",
+      "updatedAt": "2026-03-07T01:47:28.820Z"
+    },
+    {
+      "id": "54a4424e-1030-4635-80f4-1d9098515e91",
+      "userId": "5b023b15-0cb1-40b7-ac42-c7e67c82558e",
+      "friendId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "streak": 0,
+      "isActive": false,
+      "createdAt": "2026-03-07T01:52:48.450Z",
+      "updatedAt": "2026-03-07T01:52:48.450Z"
+    },
+    {
+      "id": "2db101f0-369c-4c05-88b5-55fd5b59581d",
+      "userId": "5b023b15-0cb1-40b7-ac42-c7e67c82558e",
+      "friendId": "c30b13a4-386a-4ccd-a748-d9087aa3c987",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T01:54:53.717Z",
+      "updatedAt": "2026-03-07T01:55:19.399Z"
+    },
+    {
+      "id": "ce7bc2a2-7dd0-42bb-8057-0c128c67fbf4",
+      "userId": "fbf7b02d-4add-4752-82b1-9b226dd4d058",
+      "friendId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T13:42:13.583Z",
+      "updatedAt": "2026-03-07T13:42:19.602Z"
+    },
+    {
+      "id": "192a9968-8f24-49ae-9802-b6cb6f8a1de7",
+      "userId": "5d6f9d45-4339-48a8-9028-74e68a0e75e0",
+      "friendId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "streak": 0,
+      "isActive": false,
+      "createdAt": "2026-03-07T14:03:53.642Z",
+      "updatedAt": "2026-03-07T14:03:53.642Z"
+    },
+    {
+      "id": "95704497-c074-405a-839b-d35b06bca11c",
+      "userId": "b50728fd-43da-4e00-a13d-b2d183f436d3",
+      "friendId": "46e5050f-2c06-4a04-8718-2c6c36f50b77",
+      "streak": 0,
+      "isActive": false,
+      "createdAt": "2026-03-07T14:06:00.747Z",
+      "updatedAt": "2026-03-07T14:06:00.747Z"
+    },
+    {
+      "id": "16148966-5881-43a2-927c-85e25ee91ba7",
+      "userId": "d3299871-ba00-4160-acd9-0ec2498ac895",
+      "friendId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T14:25:19.106Z",
+      "updatedAt": "2026-03-07T14:25:26.201Z"
+    },
+    {
+      "id": "8148ae97-4685-45f0-b43c-ea3457277baa",
+      "userId": "87b2f2e7-a6ba-4934-8a07-234b8fa4fbab",
+      "friendId": "24763ead-7db8-4c25-a36d-4a9e726457f4",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T14:42:08.669Z",
+      "updatedAt": "2026-03-07T14:42:46.771Z"
+    },
+    {
+      "id": "42b5175e-50d9-44dc-961c-1073f30b9727",
+      "userId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "friendId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-07T15:26:40.783Z",
+      "updatedAt": "2026-03-07T15:26:44.937Z"
+    },
+    {
+      "id": "4907d4f8-c952-48f2-9d9d-d4b21c382959",
+      "userId": "f3efb675-69dd-4f66-acd0-4924cd5a4d62",
+      "friendId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "streak": 0,
+      "isActive": true,
+      "createdAt": "2026-03-11T17:35:13.556Z",
+      "updatedAt": "2026-03-11T17:35:18.708Z"
+    },
+    {
+      "id": "f819601a-5d0d-4f6d-9188-c6804419e0ea",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "friendId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "streak": 1,
+      "isActive": true,
+      "createdAt": "2026-03-17T02:30:42.507Z",
+      "updatedAt": "2026-03-23T22:56:15.332Z"
+    }
+  ],
+  "hypeLogs": [
+    {
+      "id": "9c2948e2-f5c5-4204-8458-6316bb3fdbf1",
+      "userId": "04143a19-603d-48b0-822b-d73fcad036a7",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-18T23:43:45.182Z"
+    },
+    {
+      "id": "5f313b1c-1cdc-4259-9d31-260a0fdc1bd9",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 100,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-18T23:43:47.476Z"
+    },
+    {
+      "id": "22397b02-74ae-4948-8262-ede64ca52d80",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 10,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-22T23:59:03.902Z"
+    },
+    {
+      "id": "2f9aefe4-2715-4612-9dca-9c864b88be71",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:26:15.763Z"
+    },
+    {
+      "id": "c0a178b9-3575-40ad-bd8f-0add17893161",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:26:15.771Z"
+    },
+    {
+      "id": "52e8eada-0d2a-475a-99c1-b8bdb6086be4",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:51:30.040Z"
+    },
+    {
+      "id": "c38235ae-ac06-4cc9-accd-bfe89e3b03f4",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:51:30.050Z"
+    },
+    {
+      "id": "b988c592-6e1f-43d2-b11e-ab53ecbce246",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:58:23.391Z"
+    },
+    {
+      "id": "2999e463-f002-439d-9b8a-dbe4b9abf96f",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T12:58:23.400Z"
+    },
+    {
+      "id": "89062154-56f6-405e-80eb-131313ef1df7",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T13:36:48.042Z"
+    },
+    {
+      "id": "67cf6dbc-cd44-41c7-8431-179bfcd38545",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T13:56:27.668Z"
+    },
+    {
+      "id": "d5dc6684-8b08-4273-8934-c8abd1f87c33",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T14:05:32.929Z"
+    },
+    {
+      "id": "336f8545-fafe-4bcb-b06d-d0b749e93738",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T15:23:25.067Z"
+    },
+    {
+      "id": "4a5e5630-be34-4a44-97bb-c360b3094a28",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T15:23:25.069Z"
+    },
+    {
+      "id": "007f5c7a-0187-4946-a68d-589f1c46b455",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T15:24:06.648Z"
+    },
+    {
+      "id": "84ae70e2-f080-41ab-8f3e-924b20091113",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T15:24:06.666Z"
+    },
+    {
+      "id": "56cc1ae1-6628-444b-aab2-a3b9e3ede351",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 150,
+      "reason": "Gamble Reward",
+      "createdAt": "2026-03-23T16:03:35.219Z"
+    },
+    {
+      "id": "9939790a-1b87-4cb4-96ef-3c3ef8fb9883",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T16:09:37.446Z"
+    },
+    {
+      "id": "f6c42a20-feb9-4cf4-bca1-b0e92f6a08f0",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T16:09:37.448Z"
+    },
+    {
+      "id": "bc3d35de-dbe3-402d-b11c-1de99156f399",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 75,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T16:10:09.532Z"
+    },
+    {
+      "id": "45050057-c706-4364-a84a-77cf33423976",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 25,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T16:10:09.544Z"
+    },
+    {
+      "id": "29caf7ce-60a1-4a99-8338-b169d1890f71",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": -25,
+      "reason": "Lurker Steal",
+      "createdAt": "2026-03-23T22:56:15.212Z"
+    },
+    {
+      "id": "b9b6fa2b-b668-47f9-89ae-11142b2c2746",
+      "userId": "aa06df44-bce6-483d-858a-7efebda516f2",
+      "points": 125,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T22:56:15.260Z"
+    },
+    {
+      "id": "09ffc9ac-59a9-42eb-af9e-a415ba5b307f",
+      "userId": "016cac67-e78e-4bc8-9d44-985aa8b36c11",
+      "points": 35,
+      "reason": "Order Completion",
+      "createdAt": "2026-03-23T22:56:15.321Z"
+    }
+  ]
+}

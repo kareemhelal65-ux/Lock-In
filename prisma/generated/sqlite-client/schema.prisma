@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/sqlite-client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                   String     @id
+  email                String     @unique
+  username             String     @unique
+  passwordHash         String
+  name                 String
+  avatar               String
+  hypeScore            Int        @default(0)
+  sawaCurrency         Int        @default(0)
+  keysAvailable        Int        @default(0)
+  activeCardId         String?
+  walletBalance        Float      @default(0.0)
+  locksUntilMysteryCop Int        @default(0)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  inventory            UserCard[]
+}
+
+model Card {
+  id          String     @id
+  name        String     @unique
+  description String
+  perkCode    String     @unique
+  rarity      String
+  dropRate    Float      @default(0.1)
+  usage       String     @default("ONE_TIME")
+  users       UserCard[]
+}
+
+model UserCard {
+  id             String   @id
+  userId         String
+  cardId         String
+  isUsed         Boolean  @default(false)
+  remainingValue Float?
+  acquiredAt     DateTime @default(now())
+  card           Card     @relation(fields: [cardId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Vendor {
+  id                    String     @id
+  username              String     @unique
+  passwordHash          String
+  name                  String
+  image                 String
+  bannerImage           String?
+  rating                Float      @default(0.0)
+  ratingCount           Int        @default(0)
+  status                String     @default("LIVE")
+  announcementBanner    String?
+  instapayAddress       String?
+  instapayName          String?
+  commissionOwedBalance Float      @default(0.0)
+  subsidiesOwedBalance  Float      @default(0.0)
+  lifetimeSales         Float      @default(0.0)
+  lifetimeOrders        Int        @default(0)
+  ledgerPinHash         String?
+  hypeMultiplier        Float      @default(1.0)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+  announcementUpdatedAt DateTime?
+  menuItems             MenuItem[]
+  orders                Order[]
+}
+
+model MenuItem {
+  id                String  @id
+  vendorId          String
+  name              String
+  description       String
+  price             Float
+  image             String
+  inStock           Boolean @default(true)
+  requiredHypeLevel Int     @default(0)
+  category          String
+  addOns            String  @default("[]")
+  vendor            Vendor  @relation(fields: [vendorId], references: [id])
+}
+
+model Order {
+  id              String   @id
+  orderNumber     String
+  hostId          String
+  vendorId        String
+  totalAmount     Float
+  sawaSubsidy     Float    @default(0.0)
+  isCoveredByHost Boolean  @default(false)
+  status          String   @default("AWAITING_PAYMENT")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  vendor          Vendor   @relation(fields: [vendorId], references: [id])
+}
+
+model ParticipantOrder {
+  id                   String  @id
+  orderId              String
+  userId               String
+  shareAmount          Float
+  sawaSubsidy          Float   @default(0.0)
+  perkUserCardId       String?
+  hasPaid              Boolean @default(false)
+  paymentScreenshotUrl String?
+  ocrVerificationLog   String?
+}
+
+model OrderItem {
+  id           String  @id
+  orderId      String
+  menuItemId   String?
+  flashDropId  String?
+  name         String
+  price        Float
+  quantity     Int     @default(1)
+  modifiers    String
+  specialNotes String?
+}
+
+model FriendshipStreak {
+  id        String   @id
+  userId    String
+  friendId  String
+  streak    Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HypeLog {
+  id        String   @id
+  userId    String
+  points    Int
+  reason    String?
+  createdAt DateTime @default(now())
+}

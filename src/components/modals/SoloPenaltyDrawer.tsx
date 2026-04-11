@@ -77,7 +77,7 @@ export default function SoloPenaltyDrawer({
   };
 
   const handlePayment = async () => {
-    if (!selectedPayment || isProcessing) return;
+    if (!selectedPayment) return;
 
     if (selectedPayment === 'instapay') {
       // Create the order first, then show dropzone
@@ -440,9 +440,9 @@ export default function SoloPenaltyDrawer({
               <div className="p-4 border-t-2 border-gray-300 shrink-0">
                 <motion.button
                   onClick={handlePayment}
-                  disabled={!selectedPayment || isProcessing}
-                  className={`w-full py-4 rounded-pill font-display font-bold uppercase text-lg border-2 border-gray-400 transition-all ${selectedPayment && !isProcessing ? 'bg-gray-600 text-white cursor-pointer' : 'bg-gray-200 text-gray-400 opacity-50'}`}
-                  whileTap={selectedPayment && !isProcessing ? { scale: 0.95 } : {}}
+                  disabled={!selectedPayment}
+                  className={`w-full py-4 rounded-pill font-display font-bold uppercase text-lg border-2 border-gray-400 transition-all ${selectedPayment ? 'bg-gray-600 text-white cursor-pointer' : 'bg-gray-200 text-gray-400 opacity-50'}`}
+                  whileTap={selectedPayment ? { scale: 0.95 } : {}}
                 >
                   {isProcessing ? 'PROCESSING...' : `PAY ${finalTotal} EGP`}
                 </motion.button>
