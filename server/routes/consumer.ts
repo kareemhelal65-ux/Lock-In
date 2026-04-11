@@ -117,6 +117,34 @@ export const updateHypeScore = async (userId: string, points: number, tx: any = 
     return { updatedUser: formatUserResponse(updatedUser), keysEarned };
 };
 
+// Helper to restore a perk card consistently (handles SAWA_FEAST value and isUsed)
+export const restorePerk = async (perkUserCardId: string, tx: any = prisma, subsidyAmount: number = 0) => {
+    const card = await tx.userCard.findUnique({ 
+        where: { id: perkUserCardId },
+        include: { card: true }
+    });
+    
+    if (card) {
+        await tx.userCard.update({
+            where: { id: perkUserCardId },
+            data: { 
+                isUsed: false,
+                // For SAWA_FEAST, restore the value that was deducted
+                remainingValue: (card.remainingValue ?? 0) + (subsidyAmount || 0)
+            }
+        });
+        
+        // Optionally restore as active if user has no active card
+        const user = await tx.user.findFirst({ where: { userCards: { some: { id: perkUserCardId } } } });
+        if (user && !user.activeCardId) {
+            await tx.user.update({
+                where: { id: user.id },
+                data: { activeCardId: perkUserCardId }
+            });
+        }
+    }
+};
+
 // Ensure uploads directory exists
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -505,59 +533,58 @@ consumerRouter.post('/order', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        // Card logic for Solo/Host order
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        let isZeroFee = false;
-        let sawaSubsidy = 0;
+        const newOrderNumber = await getNextOrderNumber();
 
-        const targetIdsInput = perkUserCardIds || (perkUserCardId ? [perkUserCardId] : []);
-        const targetIds = (targetIdsInput.length > 0) ? targetIdsInput : (user?.activeCardId ? [user.activeCardId] : []);
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Resolve exact perks used
+            const user = await tx.user.findUnique({ where: { id: userId } });
+            if (!user) throw new Error("User not found");
 
-        if (useActivePerk && targetIds.length > 0) {
-            for (const targetId of targetIds) {
-                const activeUserCard = await prisma.userCard.findUnique({
-                    where: { id: targetId },
-                    include: { card: true }
-                });
-                
-                if (activeUserCard && !activeUserCard.isUsed) {
-                    const perk = activeUserCard.card.perkCode;
-                    const standardFeeValue = isSolo ? 10 : 5;
+            let isZeroFee = false;
+            let currentSawaSubsidy = 0;
+            const targetIdsInput = perkUserCardIds || (perkUserCardId ? [perkUserCardId] : []);
+            const targetIds = (targetIdsInput.length > 0) ? targetIdsInput : (user.activeCardId ? [user.activeCardId] : []);
+            const burnedCardIds: string[] = [];
+
+            if (useActivePerk && targetIds.length > 0) {
+                for (const targetId of targetIds) {
+                    const activeUserCard = await tx.userCard.findUnique({
+                        where: { id: targetId },
+                        include: { card: true }
+                    });
                     
-                    if (perk === 'THE01') {
+                    if (activeUserCard && !activeUserCard.isUsed) {
+                        const perk = activeUserCard.card.perkCode;
                         isZeroFee = true;
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                        if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                    } else if (perk === 'SAWA_DISCOUNT') {
-                        isZeroFee = true; // Waive fee if any perk is active
-                        sawaSubsidy += participantShare * 0.15;
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                        if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                    } else if (perk === 'SAWA_FEAST') {
-                        isZeroFee = true; // Waive fee if any perk is active
-                        const availableValue = activeUserCard.remainingValue ?? 150;
-                        const perkSubsidy = Math.min(availableValue, participantShare);
-                        sawaSubsidy += perkSubsidy;
+                        burnedCardIds.push(activeUserCard.id);
                         
-                        if (availableValue - perkSubsidy <= 0) {
-                            await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
-                            if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                        } else {
-                            await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - perkSubsidy } });
+                        if (perk === 'THE01' || perk === 'SAWA_DISCOUNT') {
+                            if (perk === 'SAWA_DISCOUNT') {
+                                currentSawaSubsidy += participantShare * 0.15;
+                            }
+                            await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                            if (user.activeCardId === activeUserCard.id) await tx.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        } else if (perk === 'SAWA_FEAST') {
+                            const availableValue = activeUserCard.remainingValue ?? 150;
+                            const perkSubsidy = Math.min(availableValue, participantShare);
+                            currentSawaSubsidy += perkSubsidy;
+                            
+                            if (availableValue - perkSubsidy <= 0) {
+                                await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                                if (user.activeCardId === activeUserCard.id) await tx.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                            } else {
+                                await tx.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - perkSubsidy } });
+                                // Don't mark as used yet if value remains
+                            }
                         }
                     }
                 }
             }
-        }
 
-        const serviceFee = isZeroFee ? 0 : (isSolo ? 10 : 5);
-        let adjustedTotal = totalAmount + serviceFee;
-        let finalShare = participantShare + serviceFee - sawaSubsidy; 
+            const serviceFee = isZeroFee ? 0 : (isSolo ? 10 : 5);
+            let adjustedTotal = totalAmount + serviceFee;
 
-        const newOrderNumber = await getNextOrderNumber();
-
-        const result = await prisma.$transaction(async (tx) => {
-            // Validate vendorId exists to prevent FK violation from mock data
+            // 2. Validate vendorId exists
             let actualVendorId = vendorId;
             const vendorCheck = await tx.vendor.findUnique({ where: { id: vendorId } });
             if (!vendorCheck) {
@@ -569,23 +596,23 @@ consumerRouter.post('/order', async (req, res) => {
                 }
             }
 
-            // 1. Create Order
-            const order = await tx.order.create({
+            // 3. Create Order
+            const orderCount = await tx.order.create({
                 data: {
                     orderNumber: newOrderNumber,
                     hostId: userId,
                     vendorId: actualVendorId,
                     totalAmount: adjustedTotal,
-                    sawaSubsidy,
+                    sawaSubsidy: currentSawaSubsidy,
                     isCoveredByHost,
                     status: isCoveredByHost ? 'PENDING' : 'AWAITING_PAYMENT',
                 }
             });
 
-            // 2. Create OrderItems
+            // 4. Create OrderItems
             await tx.orderItem.createMany({
                 data: items.map((item: any) => ({
-                    orderId: order.id,
+                    orderId: orderCount.id,
                     menuItemId: item.menuItemId || undefined,
                     name: item.name,
                     price: item.price,
@@ -595,23 +622,24 @@ consumerRouter.post('/order', async (req, res) => {
                 }))
             });
 
-            // 3. Create ParticipantOrder (for the host/solo user)
+            const finalShare = participantShare + serviceFee - currentSawaSubsidy;
+
+            // 5. Create ParticipantOrder (for the host/solo user)
             const participantOrder = await tx.participantOrder.create({
                 data: {
-                    orderId: order.id,
+                    orderId: orderCount.id,
                     userId,
                     shareAmount: finalShare,
-                    sawaSubsidy,
-                    perkUserCardId: targetIds.length > 0 ? targetIds[0] : null,
-                    hasPaid: isCoveredByHost ? true : hasPaid
+                    sawaSubsidy: currentSawaSubsidy,
+                    perkUserCardId: burnedCardIds.length > 0 ? burnedCardIds[0] : null,
+                    hasPaid: isCoveredByHost ? true : false,
                 }
             });
 
-            // Points now awarded upon payment verification in /payment-verification
-            const updatedUser = formatUserResponse(user);
-            const keysEarned = 0;
+            const updatedUserResponse = formatUserResponse(user);
+            const keysEarnedValue = 0;
 
-            return { order, participantOrder, updatedUser, keysEarned };
+            return { order: orderCount, participantOrder, updatedUser: updatedUserResponse, keysEarned: keysEarnedValue };
         });
 
         res.status(201).json(result);
@@ -662,20 +690,9 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
         if (order.hostId === userId) {
             await prisma.$transaction(async (tx) => {
                 // Restore cards for any participants who used them
-                const participantsWithPerks = order.participants.filter(p => p.perkUserCardId);
-                for (const p of participantsWithPerks) {
+                for (const p of order.participants) {
                     if (p.perkUserCardId) {
-                        const card = await tx.userCard.findUnique({ where: { id: p.perkUserCardId } });
-                        if (card) {
-                            await tx.userCard.update({
-                                where: { id: p.perkUserCardId },
-                                data: { 
-                                    isUsed: false,
-                                    // For SAWA_FEAST, restore the value that was deducted (stored in p.sawaSubsidy)
-                                    remainingValue: card.remainingValue + (p.sawaSubsidy || 0)
-                                }
-                            });
-                        }
+                        await restorePerk(p.perkUserCardId, tx, p.sawaSubsidy);
                     }
                 }
 
@@ -695,10 +712,7 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
         await prisma.$transaction(async (tx) => {
             // Restore card for this participant
             if (participantOrder.perkUserCardId) {
-                await tx.userCard.update({
-                    where: { id: participantOrder.perkUserCardId },
-                    data: { isUsed: false }
-                });
+                await restorePerk(participantOrder.perkUserCardId, tx, participantOrder.sawaSubsidy);
             }
             await tx.participantOrder.delete({ where: { id: participantOrder.id } });
         });

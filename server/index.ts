@@ -47,11 +47,41 @@ import fs from 'fs';
 
 const prisma = new PrismaClient();
 
-// Cleanup Old Receipts Every Hour
+// Import perk restoration helper
+import { restorePerk } from './routes/consumer';
+
+// Cleanup Abandoned Orders and Old Receipts Every Hour
 setInterval(async () => {
     try {
+        const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
         const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+        // 1. Restore Perks for Abandoned Orders (6+ hours old, Unpaid)
+        const abandonedOrders = await prisma.order.findMany({
+            where: {
+                status: 'AWAITING_PAYMENT',
+                createdAt: { lt: sixHoursAgo }
+            },
+            include: { participants: true }
+        });
+
+        for (const order of abandonedOrders) {
+            console.log(`[CLEANUP] Restoring perks for abandoned order ${order.orderNumber}`);
+            await prisma.$transaction(async (tx) => {
+                for (const p of order.participants) {
+                    if (p.perkUserCardId && !p.hasPaid) {
+                        await restorePerk(p.perkUserCardId, tx, p.sawaSubsidy);
+                    }
+                }
+                // We keep the order for history but maybe mark it as EXPIRED?
+                await tx.order.update({
+                    where: { id: order.id },
+                    data: { status: 'CANCELLED' }
+                });
+            });
+        }
+
+        // 2. Old Receipts Cleanup (24+ hours old)
         const oldOrders = await prisma.order.findMany({
             where: {
                 updatedAt: { lt: twentyFourHoursAgo }
@@ -77,7 +107,7 @@ setInterval(async () => {
             }
         }
     } catch (error) {
-        console.error('Receipt cleanup error:', error);
+        console.error('Cleanup task error:', error);
     }
 }, 60 * 60 * 1000);
 

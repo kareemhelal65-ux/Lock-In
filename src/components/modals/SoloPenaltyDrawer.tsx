@@ -77,7 +77,7 @@ export default function SoloPenaltyDrawer({
   };
 
   const handlePayment = async () => {
-    if (!selectedPayment) return;
+    if (!selectedPayment || isProcessing) return;
 
     if (selectedPayment === 'instapay') {
       // Create the order first, then show dropzone
