@@ -26,8 +26,10 @@ export default function SoloPenaltyDrawer({
   // Auto-detect any available economy card from inventory
   // Card Logic - Only allow specific perks for Solo orders with amount caps
   const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => {
-    if (uc.isUsed) return false;
+    const economyPerks = ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'];
     const perkCode = uc.card.perkCode;
+    
+    if (uc.isUsed || !economyPerks.includes(perkCode)) return false;
     
     // Base amount for activation checks
     const baseAmount = data.total;
@@ -38,11 +40,8 @@ export default function SoloPenaltyDrawer({
     if (perkCode === 'SAWA_DISCOUNT') {
       return baseAmount <= 200;
     }
-    if (perkCode === 'THE01') {
-      return true; // Zero fee exists for solo
-    }
     
-    return true; // Keep other perks
+    return true; // THE01 always eligible if not used
   });
   const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
   const activePerk = activePerkCard?.card;
@@ -66,8 +65,8 @@ export default function SoloPenaltyDrawer({
   // Subsidies / Final Price Calculation
   let sawaSubsidy = 0;
   if (useActivePerk && activePerkCard) {
-      if (isDiscount) sawaSubsidy = (data.total + standardFee) * 0.15;
-      else if (isFeast) sawaSubsidy = Math.min(150, data.total + standardFee);
+      if (isDiscount) sawaSubsidy = data.total * 0.15;
+      else if (isFeast) sawaSubsidy = Math.min(150, data.total);
   }
 
   const finalServiceFee = isZeroFee && useActivePerk ? 0 : standardFee;

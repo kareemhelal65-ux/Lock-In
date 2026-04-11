@@ -28,8 +28,10 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
 
   // Card Logic - Only allow specific perks for Solo orders with amount caps
   const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => {
-    if (uc.isUsed) return false;
+    const economyPerks = ['THE01', 'SAWA_DISCOUNT', 'SAWA_FEAST'];
     const perkCode = uc.card.perkCode;
+    
+    if (uc.isUsed || !economyPerks.includes(perkCode)) return false;
     
     // Base amount for activation checks (drop price)
     const baseAmount = drop.dropPrice;
@@ -40,11 +42,8 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
     if (perkCode === 'SAWA_DISCOUNT') {
       return (claimType === 'solo') && baseAmount <= 200;
     }
-    if (perkCode === 'THE01') {
-      return (claimType === 'solo');
-    }
     
-    return true; // Keep other perks
+    return true; // THE01 always eligible if not used
   });
   const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
   const activePerk = activePerkCard?.card;
@@ -230,19 +229,19 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
               <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-volt-green">
                 <span className="text-xs font-bold uppercase">{activePerk?.name}</span>
                 <span className="text-xs font-bold">
-                  -{Math.round(isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : Math.min(150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))))} EGP
+                  -{Math.round(isDiscount ? drop.dropPrice * 0.15 : Math.min(150, drop.dropPrice))} EGP
                 </span>
               </div>
             )}
 
             <div className="flex items-center justify-between border-t-2 border-deep-charcoal pt-2">
               <span className="font-display font-black text-deep-charcoal uppercase">Total</span>
-              <span className="font-display font-black text-volt-green text-xl">
-                {Math.max(0, Math.ceil(
-                  (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                  (useActivePerk && activePerkCard ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(activePerkCard.remainingValue ?? 150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
-                ))} EGP
-              </span>
+                <span className="font-display font-black text-volt-green text-xl">
+                  {Math.max(0, Math.ceil(
+                    (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
+                    (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(activePerkCard.remainingValue ?? 150, drop.dropPrice) : 0)) : 0)
+                  ))} EGP
+                </span>
             </div>
           </div>
 
@@ -315,7 +314,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             <Zap className="w-5 h-5 inline mr-2" />
             {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${Math.max(0, Math.ceil(
                   (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                  (useActivePerk && activePerkCard ? (isDiscount ? (drop.dropPrice + (claimType === 'solo' ? 10 : 5)) * 0.15 : (isFeast ? Math.min(150, (drop.dropPrice + (claimType === 'solo' ? 10 : 5))) : 0)) : 0)
+                  (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(150, drop.dropPrice) : 0)) : 0)
                 ))} EGP)` : 'SELECT PAYMENT'}
           </motion.button>
         </div>
