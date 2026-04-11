@@ -86,7 +86,7 @@ export default function CheckoutSheet({
     totalSawaSubsidy = baseTotal * 0.15;
   }
 
-  const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - totalSawaSubsidy);
+  const finalTotal = Math.max(0, Math.ceil(baseTotal - totalDiscount + serviceFee - totalSawaSubsidy));
 
   const selectedPerkIds = [
     useThe01 && the01Card?.id,

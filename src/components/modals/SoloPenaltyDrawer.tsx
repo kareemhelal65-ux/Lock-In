@@ -70,7 +70,7 @@ export default function SoloPenaltyDrawer({
   }
 
   const finalServiceFee = isZeroFee && useActivePerk ? 0 : standardFee;
-  const finalTotal = Math.max(0, data.total + finalServiceFee - sawaSubsidy);
+  const finalTotal = Math.max(0, Math.ceil(data.total + finalServiceFee - sawaSubsidy));
 
   const handleSoloCheckout = () => {
     setShowCheckout(true);

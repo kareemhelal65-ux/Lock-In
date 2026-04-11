@@ -82,7 +82,7 @@ export default function PaymentDropzone({
                 body: JSON.stringify({
                     orderId,
                     userId,
-                    amountExpected: expectedAmount,
+                    amountExpected: Math.ceil(expectedAmount),
                     receiptData: uploadedUrl,
                     perkUserCardIds
                 }),
@@ -143,7 +143,7 @@ export default function PaymentDropzone({
                     </div>
                     <div className="text-right">
                         <p className="text-xs text-deep-charcoal font-bold uppercase tracking-widest mb-1">Amount Due</p>
-                        <p className="font-display font-black text-3xl text-deep-charcoal">{expectedAmount} EGP</p>
+                        <p className="font-display font-black text-3xl text-deep-charcoal">{Math.ceil(expectedAmount)} EGP</p>
                     </div>
                 </div>
             </div>

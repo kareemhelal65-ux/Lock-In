@@ -122,6 +122,11 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
     setTimeout(() => onComplete(createdOrderId), 2500);
   };
 
+  const finalFlashTotal = Math.max(0, Math.ceil(
+    (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
+    (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(150, drop.dropPrice) : 0)) : 0)
+  ));
+
   // ── CHOOSE STEP ──────────────────────────────────────
   if (step === 'choose') {
     return (
@@ -237,10 +242,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             <div className="flex items-center justify-between border-t-2 border-deep-charcoal pt-2">
               <span className="font-display font-black text-deep-charcoal uppercase">Total</span>
                 <span className="font-display font-black text-volt-green text-xl">
-                  {Math.max(0, Math.ceil(
-                    (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                    (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(activePerkCard.remainingValue ?? 150, drop.dropPrice) : 0)) : 0)
-                  ))} EGP
+                  {finalFlashTotal} EGP
                 </span>
             </div>
           </div>
@@ -312,10 +314,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             whileTap={selectedPayment && !isCreatingOrder ? { scale: 0.95 } : {}}
           >
             <Zap className="w-5 h-5 inline mr-2" />
-            {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${Math.max(0, Math.ceil(
-                  (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
-                  (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(150, drop.dropPrice) : 0)) : 0)
-                ))} EGP)` : 'SELECT PAYMENT'}
+            {isCreatingOrder ? 'Creating Order...' : selectedPayment ? `CLAIM DROP (${finalFlashTotal} EGP)` : 'SELECT PAYMENT'}
           </motion.button>
         </div>
       </motion.div>
@@ -340,13 +339,13 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
 
         <div className="flex-1 overflow-y-auto p-4">
           <div className="brutal-card p-4 mb-4 bg-purple-50 border-purple-300">
-            <p className="text-xs font-bold text-purple-700 uppercase mb-1">Send {drop.dropPrice} EGP to:</p>
+            <p className="text-xs font-bold text-purple-700 uppercase mb-1">Send {finalFlashTotal} EGP to:</p>
             <p className="font-display font-black text-2xl text-purple-800">{vendorInstapay}</p>
             <p className="text-sm text-purple-600">{vendorInstapayName}</p>
           </div>
 
           <PaymentDropzone
-            expectedAmount={drop.dropPrice + (claimType === 'solo' ? 10 : 5)}
+            expectedAmount={finalFlashTotal}
             vendorInstapay={vendorInstapay || '@lockin_vendor'}
             vendorInstapayName={vendorInstapayName}
             orderId={createdOrderId}
