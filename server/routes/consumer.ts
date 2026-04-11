@@ -602,6 +602,7 @@ consumerRouter.post('/order', async (req, res) => {
                     userId,
                     shareAmount: finalShare,
                     sawaSubsidy,
+                    perkUserCardId: targetIds.length > 0 ? targetIds[0] : null,
                     hasPaid: isCoveredByHost ? true : hasPaid
                 }
             });
@@ -659,11 +660,22 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
 
         // If host cancels, delete the entire order
         if (order.hostId === userId) {
-            await prisma.$transaction([
-                prisma.participantOrder.deleteMany({ where: { orderId } }),
-                prisma.orderItem.deleteMany({ where: { orderId } }),
-                prisma.order.delete({ where: { id: orderId } })
-            ]);
+            await prisma.$transaction(async (tx) => {
+                // Restore cards for any participants who used them
+                const participantsWithPerks = order.participants.filter(p => p.perkUserCardId);
+                for (const p of participantsWithPerks) {
+                    if (p.perkUserCardId) {
+                        await tx.userCard.update({
+                            where: { id: p.perkUserCardId },
+                            data: { isUsed: false }
+                        });
+                    }
+                }
+
+                await tx.participantOrder.deleteMany({ where: { orderId } });
+                await tx.orderItem.deleteMany({ where: { orderId } });
+                await tx.order.delete({ where: { id: orderId } });
+            });
             return res.json({ message: 'Order cancelled successfully' });
         }
 
@@ -673,7 +685,16 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
             return res.status(403).json({ error: 'You are not a participant in this order' });
         }
 
-        await prisma.participantOrder.delete({ where: { id: participantOrder.id } });
+        await prisma.$transaction(async (tx) => {
+            // Restore card for this participant
+            if (participantOrder.perkUserCardId) {
+                await tx.userCard.update({
+                    where: { id: participantOrder.perkUserCardId },
+                    data: { isUsed: false }
+                });
+            }
+            await tx.participantOrder.delete({ where: { id: participantOrder.id } });
+        });
 
         // Recalculate total after participant leaves
         const remainingParticipants = await prisma.participantOrder.findMany({ where: { orderId } });

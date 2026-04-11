@@ -178,6 +178,22 @@ export default function SoloPenaltyDrawer({
     }
   };
 
+  const handleCancelPayment = async () => {
+    if (orderDbId && currentUser?.id) {
+      try {
+        await fetch(`/api/consumer/order/${orderDbId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.id })
+        });
+      } catch (err) {
+        console.error("Failed to cancel order during payment abandonment", err);
+      }
+    }
+    setShowDropzone(false);
+    onClose();
+  };
+
   const handleInstapaySuccess = () => {
     setShowDropzone(false);
     setShowSuccess(true);
@@ -259,7 +275,7 @@ export default function SoloPenaltyDrawer({
                 orderId={orderDbId}
                 userId={currentUser?.id || ''}
                 onVerifySuccess={handleInstapaySuccess}
-                onCancel={() => setShowDropzone(false)}
+                onCancel={handleCancelPayment}
               />
             </div>
           ) : (

@@ -122,6 +122,21 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
     setTimeout(() => onComplete(createdOrderId), 2500);
   };
 
+  const handleCancelPayment = async () => {
+    if (createdOrderId && currentUser?.id) {
+      try {
+        await fetch(`/api/consumer/order/${createdOrderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.id })
+        });
+      } catch (err) {
+        console.error("Failed to cancel flash drop order during payment abandonment", err);
+      }
+    }
+    setStep('payment');
+  };
+
   const finalFlashTotal = Math.max(0, Math.ceil(
     (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
     (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(150, drop.dropPrice) : 0)) : 0)
@@ -351,7 +366,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
             orderId={createdOrderId}
             userId={currentUser?.id || ''}
             onVerifySuccess={handleScreenshotSuccess}
-            onCancel={() => setStep('payment')}
+            onCancel={handleCancelPayment}
           />
         </div>
       </motion.div>

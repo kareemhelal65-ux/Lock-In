@@ -133,6 +133,22 @@ export default function CheckoutSheet({
     triggerSuccess();
   };
 
+  const handleCancelPayment = async () => {
+    if (orderId && userId) {
+      try {
+        await fetch(`/api/consumer/order/${orderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+      } catch (err) {
+        console.error("Failed to cancel order during payment abandonment", err);
+      }
+    }
+    setShowDropzone(false);
+    onClose();
+  };
+
   const triggerSuccess = async () => {
     setShowDropzone(false);
     // Fetch real order number from backend if we have an order ID
@@ -236,7 +252,7 @@ export default function CheckoutSheet({
               userId={userId || ''}
               perkUserCardIds={selectedPerkIds.length > 0 ? selectedPerkIds : undefined}
               onVerifySuccess={triggerSuccess}
-              onCancel={() => setShowDropzone(false)}
+              onCancel={handleCancelPayment}
             />
           </div>
         ) : (

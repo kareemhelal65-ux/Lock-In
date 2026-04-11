@@ -158,6 +158,7 @@ model ParticipantOrder {
   userId               String
   shareAmount          Float
   sawaSubsidy          Float   @default(0.0)
+  perkUserCardId       String?
   hasPaid              Boolean @default(false)
   paymentScreenshotUrl String?
   ocrVerificationLog   String?
