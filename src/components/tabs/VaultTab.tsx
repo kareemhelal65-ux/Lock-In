@@ -151,7 +151,10 @@ export default function VaultTab() {
     }
   }, [activeTab, fetchLeaderboard]);
 
+  const [isBuying, setIsBuying] = useState<string | null>(null);
+
   const handleBuyCard = async (type: string) => {
+    setIsBuying(type);
     try {
       const res = await fetch('/api/consumer/vault/buy-card', {
         method: 'POST',
@@ -178,6 +181,8 @@ export default function VaultTab() {
       }
     } catch (e) {
       console.error('Buy card error', e);
+    } finally {
+      setIsBuying(null);
     }
   };
 
@@ -259,14 +264,26 @@ export default function VaultTab() {
                    <div className="absolute top-0 right-0 bg-cool-gray/20 text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">1000 SC</div>
                    <h4 className="font-display font-bold text-white text-lg">Hype Hub Discount</h4>
                    <p className="text-cool-gray text-xs mb-3 mt-1">Get 15% off your next SAWA order.</p>
-                   <button onClick={() => handleBuyCard('HYPE_HUB')} disabled={sawaCurrency < 1000} className="w-full bg-volt-green text-deep-charcoal font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
+                   <button 
+                     onClick={() => handleBuyCard('HYPE_HUB')} 
+                     disabled={sawaCurrency < 1000 || !!isBuying} 
+                     className="w-full bg-volt-green text-deep-charcoal font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors"
+                   >
+                     {isBuying === 'HYPE_HUB' ? 'Purchasing...' : 'Purchase'}
+                   </button>
                 </div>
                 
                 <div className="bg-zinc-900 p-4 border-2 border-electric-red/50 rounded-xl relative overflow-hidden">
                    <div className="absolute top-0 right-0 bg-electric-red text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">5000 SC</div>
                    <h4 className="font-display font-bold text-white text-lg">The Feast</h4>
                    <p className="text-cool-gray text-xs mb-3 mt-1">A free SAWA meal (up to 150 EGP off).</p>
-                   <button onClick={() => handleBuyCard('THE_FEAST')} disabled={sawaCurrency < 5000} className="w-full bg-electric-red text-white font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
+                   <button 
+                     onClick={() => handleBuyCard('THE_FEAST')} 
+                     disabled={sawaCurrency < 5000 || !!isBuying} 
+                     className="w-full bg-electric-red text-white font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors"
+                   >
+                     {isBuying === 'THE_FEAST' ? 'Purchasing...' : 'Purchase'}
+                   </button>
                 </div>
               </div>
             </div>
