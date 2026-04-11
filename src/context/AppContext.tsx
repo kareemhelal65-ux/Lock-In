@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import type { Safe, Notification, Order, CardType } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 interface AppContextType {
   // Current User
@@ -77,41 +78,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [currentUser]);
 
-  // Auto-poll user data to instantly update Hype Points, Streaks, and Active Cards
-  React.useEffect(() => {
-    let active = true;
+  // Auto-sync user data to instantly update Hype Points, Streaks, and Inventory
+  useEffect(() => {
     if (!currentUser?.id) return;
 
-    const pollInterval = setInterval(async () => {
+    const fetchUserData = async () => {
       try {
         const res = await fetch(`/api/consumer/user/${currentUser.id}`);
-        if (res.ok && active) {
+        if (res.ok) {
           const data = await res.json();
           if (data.user) {
             setCurrentUser((prev: any) => {
               if (!prev) return data.user;
-              // Only trigger a state update if meaningful gamification data changed
-              if (
+              // Deep comparison to avoid unnecessary re-renders
+              const hasChanged = 
                 prev.hypeScore !== data.user.hypeScore ||
                 prev.sawaCurrency !== data.user.sawaCurrency ||
                 prev.keysAvailable !== data.user.keysAvailable ||
-                JSON.stringify(prev.streaks) !== JSON.stringify(data.user.streaks) ||
-                prev.activeCard?.perkCode !== data.user.activeCard?.perkCode
-              ) {
-                return { ...prev, ...data.user };
-              }
-              return prev;
+                JSON.stringify(prev.inventory) !== JSON.stringify(data.user.inventory) ||
+                prev.activeCardId !== data.user.activeCardId;
+              
+              return hasChanged ? { ...prev, ...data.user } : prev;
             });
           }
         }
-      } catch (err) {
-        // Ignore fetch errors to prevent console spam
-      }
-    }, 5000);
+      } catch (err) { /* silent */ }
+    };
+
+    // Initial fetch
+    fetchUserData();
+
+    // Set up Realtime listener if Supabase is connected
+    let channel: any;
+    if (supabase) {
+      channel = supabase
+        .channel(`user_sync_${currentUser.id}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'User', filter: `id=eq.${currentUser.id}` },
+          () => {
+            fetchUserData(); // Refetch full object on any change
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'UserCard', filter: `userId=eq.${currentUser.id}` },
+          () => {
+            fetchUserData(); // Refetch when inventory (UserCard) changes
+          }
+        )
+        .subscribe();
+    } else {
+      // Fallback for local development (Reduced frequency)
+      const interval = setInterval(fetchUserData, 10000);
+      return () => clearInterval(interval);
+    }
 
     return () => {
-      active = false;
-      clearInterval(pollInterval);
+      if (channel && supabase) supabase.removeChannel(channel);
     };
   }, [currentUser?.id]);
 

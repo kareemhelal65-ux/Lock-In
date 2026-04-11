@@ -8,7 +8,8 @@ import {
   Wallet,
   Smartphone,
   Banknote,
-  CheckCircle2
+  CheckCircle2,
+  TrendingUp
 } from 'lucide-react';
 import type { DeployedCard } from '@/types';
 import PaymentDropzone from '../checkout/PaymentDropzone';
@@ -57,35 +58,15 @@ export default function CheckoutSheet({
   const [localOrderId, setLocalOrderId] = useState('');
   const { currentUser } = useApp();
 
-  // Card Logic
-  // Card Logic - Only allow specific perks for Solo orders with amount caps
-  const eligibleCards = (currentUser?.inventory || []).filter((uc: any) => {
-    if (uc.isUsed) return false;
-    const perkCode = uc.card.perkCode;
-    
-    // Base amount for activation checks (subtotal before fees)
-    const baseAmount = isHostCover && safeTotal ? safeTotal : myTotal;
+  // Perk Logic - Find specific cards in inventory
+  const the01Card = (currentUser?.inventory || []).find((uc: any) => !uc.isUsed && uc.card.perkCode === 'THE01');
+  const hypeHubCard = (currentUser?.inventory || []).find((uc: any) => !uc.isUsed && uc.card.perkCode === 'SAWA_DISCOUNT');
+  const feastCard = (currentUser?.inventory || []).find((uc: any) => !uc.isUsed && uc.card.perkCode === 'SAWA_FEAST');
 
-    if (perkCode === 'SAWA_FEAST') {
-      return isSolo && baseAmount <= 150;
-    }
-    if (perkCode === 'SAWA_DISCOUNT') {
-      return isSolo && baseAmount <= 200;
-    }
-    if (perkCode === 'THE01') {
-      return isSolo;
-    }
-    
-    return true; // Keep other perks
-  });
-  const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
-  const activePerk = activePerkCard?.card;
-  
-  const isZeroFee = activePerk?.perkCode === 'THE01'; // Hub Breach applies to whoever uses it
-  const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
-  const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
-  const hasPerk = !!activePerk;
-  const [useActivePerk, setUseActivePerk] = useState(hasPerk);
+  // Individual toggle states
+  const [useThe01, setUseThe01] = useState(!!the01Card && currentUser?.activeCardId === the01Card.id);
+  const [useHypeHub, setUseHypeHub] = useState(!!hypeHubCard && currentUser?.activeCardId === hypeHubCard.id);
+  const [useFeast, setUseFeast] = useState(!!feastCard && currentUser?.activeCardId === feastCard.id);
 
   // Calculate discounts
   const baseTotal = isHostCover && safeTotal ? safeTotal : myTotal;
@@ -94,16 +75,51 @@ export default function CheckoutSheet({
   // Apply discounts (mock calculations)
   const squadSpinnerDiscount = hasSquadSpinner ? Math.round(baseTotal * 0.10) : 0; // 10% for demo
   const totalDiscount = squadSpinnerDiscount;
+  const isAnyPerkActive = useThe01 || useHypeHub || useFeast;
   const standardFee = isHostCover ? (participantCount || 1) * 5 : (isSolo ? 10 : 5);
-  const serviceFee = isZeroFee && useActivePerk ? 0 : standardFee;
+  const serviceFee = isAnyPerkActive ? 0 : standardFee;
   
-  let sawaSubsidy = 0;
-  if (useActivePerk && activePerkCard) {
-    if (isDiscount) sawaSubsidy = (baseTotal + serviceFee) * 0.15;
-    else if (isFeast) sawaSubsidy = Math.min(150, baseTotal + serviceFee);
+  let totalSawaSubsidy = 0;
+  if (useFeast && feastCard) {
+    totalSawaSubsidy = Math.min(150, baseTotal);
+  } else if (useHypeHub && hypeHubCard) {
+    totalSawaSubsidy = baseTotal * 0.15;
   }
 
-  const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - sawaSubsidy);
+  const finalTotal = Math.max(0, baseTotal - totalDiscount + serviceFee - totalSawaSubsidy);
+
+  const selectedPerkIds = [
+    useThe01 && the01Card?.id,
+    useHypeHub && hypeHubCard?.id,
+    useFeast && feastCard?.id
+  ].filter(Boolean) as string[];
+
+  const handleToggleThe01 = () => {
+    const nextValue = !useThe01;
+    setUseThe01(nextValue);
+    if (nextValue) {
+      setUseHypeHub(false);
+      setUseFeast(false);
+    }
+  };
+
+  const handleToggleHypeHub = () => {
+    const nextValue = !useHypeHub;
+    setUseHypeHub(nextValue);
+    if (nextValue) {
+      setUseThe01(false);
+      setUseFeast(false);
+    }
+  };
+
+  const handleToggleFeast = () => {
+    const nextValue = !useFeast;
+    setUseFeast(nextValue);
+    if (nextValue) {
+      setUseThe01(false);
+      setUseHypeHub(false);
+    }
+  };
 
 
   const handlePayment = () => {
@@ -218,7 +234,7 @@ export default function CheckoutSheet({
               vendorInstapay={vendorInstapay || "@lockin_vendor"}
               orderId={orderId || ''}
               userId={userId || ''}
-              perkUserCardId={useActivePerk && activePerkCard ? activePerkCard.id : undefined}
+              perkUserCardIds={selectedPerkIds.length > 0 ? selectedPerkIds : undefined}
               onVerifySuccess={triggerSuccess}
               onCancel={() => setShowDropzone(false)}
             />
@@ -232,10 +248,10 @@ export default function CheckoutSheet({
                   <h2 className="font-display font-extrabold text-2xl uppercase">
                     Pay Your Share
                   </h2>
-                  <div className={`flex justify-between text-sm ${isZeroFee && useActivePerk ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
-                  <span>Service Fee {isZeroFee && useActivePerk && `(${activePerk?.name})`}</span>
-                  <span className={isZeroFee && useActivePerk ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
-                  {isZeroFee && useActivePerk && <span>0 EGP</span>}
+                  <div className={`flex justify-between text-sm ${isAnyPerkActive ? 'text-volt-green font-bold' : 'text-cool-gray'}`}>
+                  <span>Service Fee {isAnyPerkActive && '(FREE WITH PERK)'}</span>
+                  <span className={isAnyPerkActive ? 'line-through opacity-50' : ''}>{standardFee} EGP</span>
+                  {isAnyPerkActive && <span>0 EGP</span>}
                 </div>
                   <p className="text-cool-gray text-sm mt-1">
                     The Drop Point
@@ -331,28 +347,83 @@ export default function CheckoutSheet({
                   </div>
                 )}
 
-                {/* Perk Toggle */}
-                {hasPerk && !isHostCover && (
-                  <div 
-                    onClick={() => setUseActivePerk(!useActivePerk)}
-                    className={`brutal-card p-4 mt-4 flex items-center justify-between cursor-pointer transition-all ${useActivePerk ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full border-2 border-black flex items-center justify-center ${useActivePerk ? 'bg-white' : 'bg-gray-100'}`}>
-                        <Zap className={`w-5 h-5 ${useActivePerk ? 'text-volt-green' : 'text-gray-400'}`} />
+                {/* Perk Toggles */}
+                {!isHostCover && (
+                  <div className="space-y-3 mt-4">
+                    {/* The 0.1% */}
+                    {the01Card && (
+                      <div 
+                        onClick={handleToggleThe01}
+                        className={`brutal-card p-3 flex items-center justify-between cursor-pointer transition-all ${useThe01 ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center ${useThe01 ? 'bg-white' : 'bg-gray-100'}`}>
+                            <Zap className={`w-4 h-4 ${useThe01 ? 'text-volt-green' : 'text-gray-400'}`} />
+                          </div>
+                          <div>
+                            <p className="font-display font-black text-[10px] uppercase tracking-tight">{the01Card.card.name}</p>
+                            <p className="text-[9px] font-bold text-black/60 uppercase">Zero Fees</p>
+                          </div>
+                        </div>
+                        <div className={`w-10 h-5 rounded-full border-2 border-black relative transition-colors ${useThe01 ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
+                          <motion.div 
+                            initial={false}
+                            animate={{ x: useThe01 ? 20 : 2 }}
+                            className="absolute top-0.5 w-3 h-3 bg-white rounded-full border-2 border-black"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-display font-black text-xs uppercase tracking-tight">{activePerk?.name}</p>
-                        <p className="text-[10px] font-bold text-black/60 uppercase">{activePerk?.description}</p>
+                    )}
+
+                    {/* Hype Hub Discount */}
+                    {hypeHubCard && (
+                      <div 
+                        onClick={handleToggleHypeHub}
+                        className={`brutal-card p-3 flex items-center justify-between cursor-pointer transition-all ${useHypeHub ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center ${useHypeHub ? 'bg-white' : 'bg-gray-100'}`}>
+                            <TrendingUp className={`w-4 h-4 ${useHypeHub ? 'text-volt-green' : 'text-gray-400'}`} />
+                          </div>
+                          <div>
+                            <p className="font-display font-black text-[10px] uppercase tracking-tight">Hype Hub Discount</p>
+                            <p className="text-[9px] font-bold text-black/60 uppercase">15% Off Your Share</p>
+                          </div>
+                        </div>
+                        <div className={`w-10 h-5 rounded-full border-2 border-black relative transition-colors ${useHypeHub ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
+                          <motion.div 
+                            initial={false}
+                            animate={{ x: useHypeHub ? 20 : 2 }}
+                            className="absolute top-0.5 w-3 h-3 bg-white rounded-full border-2 border-black"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className={`w-12 h-6 rounded-full border-2 border-black relative transition-colors ${useActivePerk ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
-                      <motion.div 
-                        initial={false}
-                        animate={{ x: useActivePerk ? 24 : 2 }}
-                        className="absolute top-0.5 w-4 h-4 bg-white rounded-full border-2 border-black"
-                      />
-                    </div>
+                    )}
+
+                    {/* The Feast */}
+                    {feastCard && (
+                      <div 
+                        onClick={handleToggleFeast}
+                        className={`brutal-card p-3 flex items-center justify-between cursor-pointer transition-all ${useFeast ? 'bg-volt-green border-black' : 'bg-white border-gray-300 opacity-60'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full border-2 border-black flex items-center justify-center ${useFeast ? 'bg-white' : 'bg-gray-100'}`}>
+                            <ShoppingBag className={`w-4 h-4 ${useFeast ? 'text-volt-green' : 'text-gray-400'}`} />
+                          </div>
+                          <div>
+                            <p className="font-display font-black text-[10px] uppercase tracking-tight">The Feast</p>
+                            <p className="text-[9px] font-bold text-black/60 uppercase">Free Meal (Up to 150 EGP)</p>
+                          </div>
+                        </div>
+                        <div className={`w-10 h-5 rounded-full border-2 border-black relative transition-colors ${useFeast ? 'bg-deep-charcoal' : 'bg-gray-200'}`}>
+                          <motion.div 
+                            initial={false}
+                            animate={{ x: useFeast ? 20 : 2 }}
+                            className="absolute top-0.5 w-3 h-3 bg-white rounded-full border-2 border-black"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -360,12 +431,12 @@ export default function CheckoutSheet({
                 <div className="border-t-2 border-deep-charcoal pt-3 mt-3">
                   <div className="flex items-center justify-between mt-1 pt-2 border-t border-deep-charcoal/10">
                     <span className="text-cool-gray text-sm">Service Fee</span>
-                    <span className={`font-display font-medium ${isZeroFee && useActivePerk ? 'text-volt-green' : 'text-cool-gray'}`}>{isZeroFee && useActivePerk ? '0' : `+${serviceFee}`} EGP</span>
+                    <span className={`font-display font-medium ${isAnyPerkActive ? 'text-volt-green' : 'text-cool-gray'}`}>{isAnyPerkActive ? '0' : `+${standardFee}`} EGP</span>
                   </div>
-                  {useActivePerk && (isDiscount || isFeast) && (
+                  {totalSawaSubsidy > 0 && (
                     <div className="flex items-center justify-between mt-1 text-volt-green">
-                      <span className="text-sm font-bold uppercase">{activePerk?.name}</span>
-                      <span className="font-display font-bold">-{Math.round(sawaSubsidy)} EGP</span>
+                      <span className="text-sm font-bold uppercase">Sawa Subsidies</span>
+                      <span className="font-display font-bold">-{Math.round(totalSawaSubsidy)} EGP</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between mt-1">

@@ -497,7 +497,8 @@ consumerRouter.post('/order', async (req, res) => {
             participantShare = totalAmount, 
             hasPaid = false,
             useActivePerk = false,
-            perkUserCardId
+            perkUserCardId,
+            perkUserCardIds
         } = req.body;
 
         if (!userId || !vendorId || !items || items.length === 0) {
@@ -509,33 +510,41 @@ consumerRouter.post('/order', async (req, res) => {
         let isZeroFee = false;
         let sawaSubsidy = 0;
 
-        const targetCardId = perkUserCardId || user?.activeCardId;
+        const targetIdsInput = perkUserCardIds || (perkUserCardId ? [perkUserCardId] : []);
+        const targetIds = (targetIdsInput.length > 0) ? targetIdsInput : (user?.activeCardId ? [user.activeCardId] : []);
 
-        if (targetCardId && useActivePerk) {
-            const activeUserCard = await prisma.userCard.findUnique({
-                where: { id: targetCardId },
-                include: { card: true }
-            });
-            
-            if (activeUserCard && !activeUserCard.isUsed) {
-                const perk = activeUserCard.card.perkCode;
+        if (useActivePerk && targetIds.length > 0) {
+            for (const targetId of targetIds) {
+                const activeUserCard = await prisma.userCard.findUnique({
+                    where: { id: targetId },
+                    include: { card: true }
+                });
                 
-                if (perk === 'THE01') {
-                    isZeroFee = true;
-                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                    await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                } else if (perk === 'SAWA_DISCOUNT') {
-                    sawaSubsidy = (participantShare + (isSolo ? 10 : 5)) * 0.15;
-                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                    await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                } else if (perk === 'SAWA_FEAST') {
-                    const availableValue = activeUserCard.remainingValue ?? 150;
-                    sawaSubsidy = Math.min(availableValue, participantShare + (isSolo ? 10 : 5));
-                    if (availableValue - sawaSubsidy <= 0) {
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                if (activeUserCard && !activeUserCard.isUsed) {
+                    const perk = activeUserCard.card.perkCode;
+                    const standardFeeValue = isSolo ? 10 : 5;
+                    
+                    if (perk === 'THE01') {
+                        isZeroFee = true;
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
                         if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                    } else {
-                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - sawaSubsidy } });
+                    } else if (perk === 'SAWA_DISCOUNT') {
+                        isZeroFee = true; // Waive fee if any perk is active
+                        sawaSubsidy += participantShare * 0.15;
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                        if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                    } else if (perk === 'SAWA_FEAST') {
+                        isZeroFee = true; // Waive fee if any perk is active
+                        const availableValue = activeUserCard.remainingValue ?? 150;
+                        const perkSubsidy = Math.min(availableValue, participantShare);
+                        sawaSubsidy += perkSubsidy;
+                        
+                        if (availableValue - perkSubsidy <= 0) {
+                            await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                            if (user?.activeCardId === activeUserCard.id) await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        } else {
+                            await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { remainingValue: availableValue - perkSubsidy } });
+                        }
                     }
                 }
             }
@@ -687,7 +696,7 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
 // 6. Payment Verification (OCR Simulator processing)
 consumerRouter.post('/payment-verification', async (req, res) => {
     try {
-        const { orderId, userId, amountExpected, receiptData, perkUserCardId } = req.body;
+        const { orderId, userId, amountExpected, receiptData, perkUserCardId, perkUserCardIds } = req.body;
 
         if (!orderId || !userId || !amountExpected) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -707,40 +716,43 @@ consumerRouter.post('/payment-verification', async (req, res) => {
 
         let newSawaSubsidy = participantOrder.sawaSubsidy;
 
-        // Process perk on checkout if provided
-        if (perkUserCardId) {
-            const activeUserCard = await prisma.userCard.findUnique({
-                where: { id: perkUserCardId },
-                include: { card: true }
-            });
+        const targetIds = perkUserCardIds || (perkUserCardId ? [perkUserCardId] : []);
 
-            if (activeUserCard && !activeUserCard.isUsed) {
-                const perk = activeUserCard.card.perkCode;
+        // Process perks on checkout if provided
+        if (targetIds.length > 0) {
+            for (const targetId of targetIds) {
+                const activeUserCard = await prisma.userCard.findUnique({
+                    where: { id: targetId },
+                    include: { card: true }
+                });
 
-                if (perk === 'SAWA_DISCOUNT') {
-                    // 15% discount
-                    newSawaSubsidy = participantOrder.shareAmount * 0.15;
-                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                    // Detach from user if it was their primary
-                    const u = await prisma.user.findUnique({ where: { id: userId } });
-                    if (u?.activeCardId === activeUserCard.id) {
-                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                    }
-                } else if (perk === 'SAWA_FEAST') {
-                    // Single use Feast card: covers share up to 150 EGP once
-                    newSawaSubsidy = Math.min(150, participantOrder.shareAmount);
-                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
-                    const u = await prisma.user.findUnique({ where: { id: userId } });
-                    if (u?.activeCardId === activeUserCard.id) {
-                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
-                    }
-                } else if (perk === 'THE01') {
-                    // Legendary card: Zero fees, covering the entire share if needed (acting as a 100% subsidy for the participant share)
-                    newSawaSubsidy = participantOrder.shareAmount;
-                    await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                    const u = await prisma.user.findUnique({ where: { id: userId } });
-                    if (u?.activeCardId === activeUserCard.id) {
-                        await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                if (activeUserCard && !activeUserCard.isUsed) {
+                    const perk = activeUserCard.card.perkCode;
+
+                    if (perk === 'SAWA_DISCOUNT') {
+                        // 15% discount on item share only
+                        newSawaSubsidy += participantOrder.shareAmount * 0.15;
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                        const u = await prisma.user.findUnique({ where: { id: userId } });
+                        if (u?.activeCardId === activeUserCard.id) {
+                            await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        }
+                    } else if (perk === 'SAWA_FEAST') {
+                        // Covers share up to 150 EGP once
+                        newSawaSubsidy += Math.min(150, participantOrder.shareAmount);
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true, remainingValue: 0 } });
+                        const u = await prisma.user.findUnique({ where: { id: userId } });
+                        if (u?.activeCardId === activeUserCard.id) {
+                            await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        }
+                    } else if (perk === 'THE01') {
+                        // Covers the entire share if needed (waives fee and item part)
+                        newSawaSubsidy += participantOrder.shareAmount;
+                        await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                        const u = await prisma.user.findUnique({ where: { id: userId } });
+                        if (u?.activeCardId === activeUserCard.id) {
+                            await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
+                        }
                     }
                 }
             }
@@ -2082,8 +2094,8 @@ consumerRouter.get('/my-deliveries/:userId', async (req, res) => {
 consumerRouter.post('/vault/buy-card', async (req, res) => {
     try {
         const { userId, cardType } = req.body;
-        const cost = cardType === 'THE_FEAST' ? 5000 : (cardType === 'HUB_BREACH' ? 2500 : 1000);
-        const perkCode = cardType === 'THE_FEAST' ? 'SAWA_FEAST' : (cardType === 'HUB_BREACH' ? 'THE01' : 'SAWA_DISCOUNT');
+        const cost = cardType === 'THE_FEAST' ? 5000 : 1000;
+        const perkCode = cardType === 'THE_FEAST' ? 'SAWA_FEAST' : 'SAWA_DISCOUNT';
         
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user || user.sawaCurrency < cost) {
@@ -2094,10 +2106,10 @@ consumerRouter.post('/vault/buy-card', async (req, res) => {
         if (!card) {
             card = await prisma.card.create({
                 data: {
-                    name: cardType === 'THE_FEAST' ? 'The Feast' : (cardType === 'HUB_BREACH' ? 'Hub Breach' : 'Hype Hub Discount'),
-                    description: cardType === 'THE_FEAST' ? 'Free 150 EGP Meal' : (cardType === 'HUB_BREACH' ? 'Zero Service Fees' : '15% Off Your Next Order'),
+                    name: cardType === 'THE_FEAST' ? 'The Feast' : 'Hype Hub Discount',
+                    description: cardType === 'THE_FEAST' ? 'Free 150 EGP Meal' : '15% Off Your Next Order',
                     perkCode,
-                    rarity: cardType === 'HUB_BREACH' ? 'Exotic' : 'Legendary',
+                    rarity: 'Legendary',
                     usage: 'ONE_TIME'
                 }
             });

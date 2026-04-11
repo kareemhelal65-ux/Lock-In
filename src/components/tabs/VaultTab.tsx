@@ -268,13 +268,6 @@ export default function VaultTab() {
                    <p className="text-cool-gray text-xs mb-3 mt-1">A free SAWA meal (up to 150 EGP off).</p>
                    <button onClick={() => handleBuyCard('THE_FEAST')} disabled={sawaCurrency < 5000} className="w-full bg-electric-red text-white font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
                 </div>
-
-                <div className="bg-zinc-900 p-4 border-2 border-volt-green/30 rounded-xl relative overflow-hidden">
-                   <div className="absolute top-0 right-0 bg-volt-green/20 text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">2500 SC</div>
-                   <h4 className="font-display font-bold text-white text-lg">Hub Breach</h4>
-                   <p className="text-cool-gray text-xs mb-3 mt-1">Experimental: Zero service fees on your next order.</p>
-                   <button onClick={() => handleBuyCard('HUB_BREACH')} disabled={sawaCurrency < 2500} className="w-full bg-white text-deep-charcoal font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors">Purchase</button>
-                </div>
               </div>
             </div>
           </div>

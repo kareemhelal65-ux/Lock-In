@@ -56,6 +56,12 @@ const cards = [
     perkCode: "SAWA_FEAST",
     rarity: "Exotic",
   },
+  {
+    name: "Squad Spinner",
+    description: "Deployment into a Safe grants 10% off the total bill for everyone.",
+    perkCode: "SQUAD_SPINNER",
+    rarity: "Exotic",
+  },
 ];
 
 async function main() {
