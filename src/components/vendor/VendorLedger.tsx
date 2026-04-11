@@ -106,16 +106,16 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
     }
 
     return (
-        <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar pb-24 h-full bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 text-white custom-scrollbar pb-24 h-full bg-deep-charcoal" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <div className="max-w-6xl mx-auto space-y-6">
 
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
-                        <h2 className="font-display font-black text-4xl uppercase tracking-tighter mb-1 flex items-center gap-3">
-                            <BarChart3 className="text-volt-green w-8 h-8" />
+                        <h2 className="font-display font-black text-3xl md:text-4xl uppercase tracking-tighter mb-1 flex items-center gap-3">
+                            <BarChart3 className="text-volt-green w-6 h-6 md:w-8 md:h-8" />
                             {activeTab === 'overview' ? t.ledgerAnalytics : t.theClerk}
                         </h2>
-                        <p className="text-cool-gray">{activeTab === 'overview' ? t.ledgerSub : t.settlementHub}</p>
+                        <p className="text-xs md:text-sm text-cool-gray">{activeTab === 'overview' ? t.ledgerSub : t.settlementHub}</p>
                     </div>
                     <select
                         value={period}
@@ -131,16 +131,16 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                 </div>
 
                 {/* Tab Switcher */}
-                <div className="flex gap-2 mb-8 bg-zinc-900/50 p-1.5 rounded-xl border-2 border-cool-gray/20 max-w-fit">
+                <div className="flex gap-1 md:gap-2 mb-8 bg-zinc-900/50 p-1 md:p-1.5 rounded-xl border-2 border-cool-gray/20 w-full md:w-fit overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => setActiveTab('overview')}
-                        className={`px-6 py-2.5 rounded-lg font-display font-black uppercase tracking-widest text-sm transition-all ${activeTab === 'overview' ? 'bg-volt-green text-deep-charcoal shadow-brutal-sm' : 'text-cool-gray hover:text-white'}`}
+                        className={`flex-1 md:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-lg font-display font-black uppercase tracking-widest text-[10px] md:text-sm transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-volt-green text-deep-charcoal shadow-brutal-sm' : 'text-cool-gray hover:text-white'}`}
                     >
                         {t.overview}
                     </button>
                     <button
                         onClick={() => setActiveTab('clerk')}
-                        className={`px-6 py-2.5 rounded-lg font-display font-black uppercase tracking-widest text-sm transition-all ${activeTab === 'clerk' ? 'bg-volt-green text-deep-charcoal shadow-brutal-sm' : 'text-cool-gray hover:text-white'}`}
+                        className={`flex-1 md:flex-none px-4 md:px-6 py-2 md:py-2.5 rounded-lg font-display font-black uppercase tracking-widest text-[10px] md:text-sm transition-all whitespace-nowrap ${activeTab === 'clerk' ? 'bg-volt-green text-deep-charcoal shadow-brutal-sm' : 'text-cool-gray hover:text-white'}`}
                     >
                         {t.theClerk}
                     </button>
@@ -153,10 +153,10 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                             <div className="bg-zinc-900 border-2 border-cool-gray/30 p-6 rounded-2xl relative overflow-hidden group hover:border-volt-green/50 transition-colors">
                                 <div className="absolute right-[-10%] top-[-10%] w-32 h-32 bg-volt-green/5 rounded-full blur-2xl group-hover:bg-volt-green/10 transition-colors" />
                                 <div className="flex items-start justify-between mb-4 relative z-10">
-                                    <h3 className="font-bold text-cool-gray uppercase text-sm tracking-widest">{t.grossVolume}</h3>
+                                    <h3 className="font-bold text-cool-gray uppercase text-[10px] md:text-sm tracking-widest">{t.grossVolume}</h3>
                                     <DollarSign className="w-5 h-5 text-volt-green" />
                                 </div>
-                                <p className="font-display font-black text-5xl relative z-10 tracking-tighter">{stats.totalVolume.toLocaleString()} <span className="text-xl text-cool-gray">EGP</span></p>
+                                <p className="font-display font-black text-3xl md:text-5xl relative z-10 tracking-tighter">{stats.totalVolume.toLocaleString()} <span className="text-lg md:text-xl text-cool-gray">EGP</span></p>
                                 <p className={`text-sm flex items-center gap-1 mt-3 font-bold relative z-10 ${stats.volumeChange >= 0 ? 'text-volt-green' : 'text-electric-red'}`}>
                                     <TrendingUp className={`w-3 h-3 ${stats.volumeChange < 0 ? 'transform rotate-180' : ''}`} />
                                     {stats.volumeChange > 0 ? '+' : ''}{stats.volumeChange.toFixed(1)}% {t.vsYesterday}
@@ -166,10 +166,10 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                             <div className="bg-zinc-900 border-2 border-cool-gray/30 p-6 rounded-2xl relative overflow-hidden group hover:border-electric-red/50 transition-colors">
                                 <div className="absolute right-[-10%] top-[-10%] w-32 h-32 bg-electric-red/5 rounded-full blur-2xl group-hover:bg-electric-red/10 transition-colors" />
                                 <div className="flex items-start justify-between mb-4 relative z-10">
-                                    <h3 className="font-bold text-cool-gray uppercase text-sm tracking-widest">{t.totalOrdersStat}</h3>
+                                    <h3 className="font-bold text-cool-gray uppercase text-[10px] md:text-sm tracking-widest">{t.totalOrdersStat}</h3>
                                     <Activity className="w-5 h-5 text-electric-red" />
                                 </div>
-                                <p className="font-display font-black text-5xl relative z-10 tracking-tighter">{stats.totalOrders}</p>
+                                <p className="font-display font-black text-4xl md:text-5xl relative z-10 tracking-tighter">{stats.totalOrders}</p>
                                 <p className={`text-sm flex items-center gap-1 mt-3 font-bold relative z-10 ${stats.ordersChange >= 0 ? 'text-volt-green' : 'text-electric-red'}`}>
                                     <TrendingUp className={`w-3 h-3 ${stats.ordersChange < 0 ? 'transform rotate-180' : ''}`} />
                                     {stats.ordersChange > 0 ? '+' : ''}{stats.ordersChange.toFixed(1)}% {t.vsYesterday}
@@ -180,8 +180,8 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                         {/* Charts & Breakdown */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Peak Hours (Mocked Chart) */}
-                            <div className="bg-zinc-900 border-2 border-cool-gray/30 p-8 rounded-2xl shadow-brutal-sm">
-                                <h3 className="font-display font-black text-xl uppercase tracking-widest mb-8 flex items-center gap-2">
+                            <div className="bg-zinc-900 border-2 border-cool-gray/30 p-4 md:p-8 rounded-2xl shadow-brutal-sm overflow-x-auto no-scrollbar">
+                                <h3 className="font-display font-black text-lg md:text-xl uppercase tracking-widest mb-6 md:mb-8 flex items-center gap-2">
                                     <Activity className="w-5 h-5 text-volt-green" />
                                     {t.peakHours}
                                 </h3>
@@ -202,8 +202,8 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                             </div>
 
                             {/* Item Popularity */}
-                            <div className="bg-zinc-900 border-2 border-cool-gray/30 p-8 rounded-2xl shadow-brutal-sm">
-                                <h3 className="font-display font-black text-xl uppercase tracking-widest mb-8 flex items-center gap-2">
+                            <div className="bg-zinc-900 border-2 border-cool-gray/30 p-4 md:p-8 rounded-2xl shadow-brutal-sm">
+                                <h3 className="font-display font-black text-lg md:text-xl uppercase tracking-widest mb-6 md:mb-8 flex items-center gap-2">
                                     <TrendingUp className="w-5 h-5 text-volt-green" />
                                     {t.itemPopularity}
                                 </h3>
@@ -234,7 +234,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Balance Due (to SAWA) */}
-                        <div className="bg-zinc-900 border-2 border-cool-gray/30 p-8 rounded-2xl relative overflow-hidden shadow-brutal-sm">
+                        <div className="bg-zinc-900 border-2 border-cool-gray/30 p-6 md:p-8 rounded-2xl relative overflow-hidden shadow-brutal-sm">
                             <div className="absolute right-[-10%] top-[-10%] w-48 h-48 bg-volt-green/5 rounded-full blur-3xl pointer-events-none" />
                             <div className="flex items-start justify-between mb-6 relative z-10">
                                 <div>
@@ -243,7 +243,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                                 </div>
                                 <Activity className="w-6 h-6 text-volt-green" />
                             </div>
-                            <p className="font-display font-black text-6xl relative z-10 tracking-tighter mb-8">{stats.commissionOwed.toLocaleString()} <span className="text-2xl text-cool-gray">EGP</span></p>
+                            <p className="font-display font-black text-4xl md:text-6xl relative z-10 tracking-tighter mb-8">{stats.commissionOwed.toLocaleString()} <span className="text-lg md:text-2xl text-cool-gray">EGP</span></p>
                             
                             <button 
                                 onClick={handleClearBalance}
@@ -254,7 +254,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                         </div>
 
                         {/* Balance Owed (by SAWA) */}
-                        <div className="bg-zinc-900 border-2 border-cool-gray/30 p-8 rounded-2xl relative overflow-hidden shadow-brutal-sm border-dashed">
+                        <div className="bg-zinc-900 border-2 border-cool-gray/30 p-6 md:p-8 rounded-2xl relative overflow-hidden shadow-brutal-sm border-dashed">
                              <div className="absolute right-[-10%] top-[-10%] w-48 h-48 bg-electric-red/5 rounded-full blur-3xl pointer-events-none" />
                             <div className="flex items-start justify-between mb-6 relative z-10">
                                 <div>
@@ -263,7 +263,7 @@ export default function VendorLedger({ correctPin = '1234', vendorId, lang }: Ve
                                 </div>
                                 <BarChart3 className="w-6 h-6 text-white" />
                             </div>
-                            <p className="font-display font-black text-6xl relative z-10 tracking-tighter mb-2">{stats.subsidiesOwed.toLocaleString()} <span className="text-2xl text-cool-gray">EGP</span></p>
+                            <p className="font-display font-black text-4xl md:text-6xl relative z-10 tracking-tighter mb-2">{stats.subsidiesOwed.toLocaleString()} <span className="text-lg md:text-2xl text-cool-gray">EGP</span></p>
                             <p className="text-cool-gray font-bold text-xs uppercase tracking-widest relative z-10">
                                 Total from SAWA_DISCOUNT & FEAST
                             </p>

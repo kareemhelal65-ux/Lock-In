@@ -119,24 +119,24 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar pb-24" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 text-white custom-scrollbar pb-24" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <div className="max-w-5xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
-                        <h2 className="font-display font-black text-4xl uppercase tracking-tighter mb-1">{t.menuRoster}</h2>
-                        <p className="text-cool-gray">{t.rosterSub}</p>
+                        <h2 className="font-display font-black text-3xl md:text-4xl uppercase tracking-tighter mb-1">{t.menuRoster}</h2>
+                        <p className="text-cool-gray text-xs md:text-sm">{t.rosterSub}</p>
                     </div>
                     <button 
                         onClick={() => startEdit({ id: 'new', name: '', description: '', category: 'Mains', price: 0, inStock: true, hypeGated: false, reqHype: 0, addOns: [] })} 
-                        className="bg-volt-green text-deep-charcoal font-display font-black uppercase px-6 py-3 rounded-xl hover:bg-[#b0f200] transition-colors flex items-center gap-2"
+                        className="w-full md:w-auto bg-volt-green text-deep-charcoal font-display font-black uppercase px-6 py-3 rounded-xl hover:bg-[#b0f200] transition-colors flex items-center justify-center gap-2 shadow-brutal-sm"
                     >
                         <Plus className="w-5 h-5" /> {t.newItem}
                     </button>
                 </div>
 
                 <div className="bg-zinc-900 border-2 border-cool-gray/30 rounded-2xl overflow-hidden">
-                    {/* Header */}
-                    <div className="grid grid-cols-12 gap-4 p-4 border-b-2 border-cool-gray/30 bg-black/20 font-display font-bold uppercase text-xs tracking-widest text-cool-gray">
+                    {/* Header - Hidden on mobile */}
+                    <div className="hidden md:grid grid-cols-12 gap-4 p-4 border-b-2 border-cool-gray/30 bg-black/20 font-display font-bold uppercase text-xs tracking-widest text-cool-gray">
                         <div className="col-span-4">{t.tableItem}</div>
                         <div className="col-span-2">{t.tableCategory}</div>
                         <div className="col-span-2">{t.tablePrice}</div>
@@ -154,13 +154,13 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                     <motion.div
                                         layout
                                         key={item.id}
-                                        className={`grid grid-cols-12 gap-4 p-4 items-center transition-colors ${!item.inStock && !isEditing ? 'opacity-50 bg-black/40' : 'hover:bg-white/5'
+                                        className={`flex flex-col md:grid md:grid-cols-12 gap-4 p-4 items-stretch md:items-center transition-colors ${!item.inStock && !isEditing ? 'opacity-50 bg-black/40' : 'hover:bg-white/5'
                                             } ${isEditing ? 'bg-white/10' : ''}`}
                                     >
                                         {/* Name & Hype */}
-                                        <div className="col-span-4">
+                                        <div className="md:col-span-4">
                                             {isEditing ? (
-                                                <div className="space-y-2 relative pr-4 flex gap-4">
+                                                <div className="space-y-4 relative pr-4 flex flex-col md:flex-row gap-4">
                                                     <div
                                                         className="w-16 h-16 bg-black rounded-lg border-2 border-cool-gray/50 flex items-center justify-center shrink-0 cursor-pointer overflow-hidden"
                                                         onClick={() => fileInputRef.current?.click()}
@@ -249,7 +249,8 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         </div>
 
                                         {/* Category */}
-                                        <div className="col-span-2">
+                                        <div className="md:col-span-2 flex justify-between items-center md:block">
+                                            <span className="md:hidden text-[10px] font-black uppercase tracking-widest text-cool-gray">{t.tableCategory}</span>
                                             {isEditing ? (
                                                 <select
                                                     className="w-full bg-black border-2 border-cool-gray/50 rounded p-2 text-white text-sm focus:border-volt-green focus:outline-none"
@@ -269,7 +270,8 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         </div>
 
                                         {/* Price */}
-                                        <div className="col-span-2 font-display font-bold">
+                                        <div className="md:col-span-2 flex justify-between items-center md:block font-display font-bold">
+                                            <span className="md:hidden text-[10px] font-black uppercase tracking-widest text-cool-gray">{t.tablePrice}</span>
                                             {isEditing ? (
                                                 <input
                                                     type="number"
@@ -285,7 +287,8 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         </div>
 
                                         {/* Stock */}
-                                        <div className="col-span-2">
+                                        <div className="md:col-span-2 flex justify-between items-center md:block">
+                                            <span className="md:hidden text-[10px] font-black uppercase tracking-widest text-cool-gray">{t.tableStock}</span>
                                             <button
                                                 onClick={() => !isEditing && toggleStock(item.id, item.inStock)}
                                                 disabled={isEditing || stockTogglingId === item.id}
@@ -305,7 +308,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="col-span-2 flex justify-end gap-2">
+                                        <div className="md:col-span-2 flex justify-end gap-2 pt-2 md:pt-0 border-t-2 border-white/5 md:border-none">
                                             {isEditing ? (
                                                 <div className="flex gap-2">
                                                     <button

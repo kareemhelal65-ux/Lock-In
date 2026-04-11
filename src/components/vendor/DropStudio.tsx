@@ -80,22 +80,22 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto p-6 text-white custom-scrollbar pb-24 items-center flex justify-center bg-deep-charcoal relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 text-white custom-scrollbar pb-24 items-center flex justify-center bg-deep-charcoal relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-electric-red/10 rounded-full blur-[100px]" />
             </div>
 
             <div className="max-w-xl w-full relative z-10">
                 <div className="text-center mb-10">
-                    <div className="w-20 h-20 bg-electric-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-brutal-sm">
-                        <Zap className="w-10 h-10 text-white" />
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-electric-red rounded-full flex items-center justify-center mx-auto mb-6 shadow-brutal-sm">
+                        <Zap className="w-8 h-8 md:w-10 md:h-10 text-white" />
                     </div>
-                    <h2 className="font-display font-black text-5xl uppercase tracking-tighter mb-2">{t.dropStudio}</h2>
+                    <h2 className="font-display font-black text-3xl md:text-5xl uppercase tracking-tighter mb-2">{t.dropStudio}</h2>
                     <p className="text-cool-gray">{t.studioSub}</p>
                 </div>
 
                 {/* Announcements Section */}
-                <div className="bg-zinc-900 border-2 border-volt-green/30 rounded-2xl p-6 shadow-2xl mb-8">
+                <div className="bg-zinc-900 border-2 border-volt-green/30 rounded-2xl p-4 md:p-6 shadow-2xl mb-8">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 bg-volt-green rounded-full flex items-center justify-center">
                             <Megaphone className="w-5 h-5 text-deep-charcoal" />
@@ -151,7 +151,7 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
                     </div>
                 </div>
 
-                <div className="bg-zinc-900 border-2 border-cool-gray/30 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                <div className="bg-zinc-900 border-2 border-cool-gray/30 rounded-2xl p-5 md:p-8 shadow-2xl relative overflow-hidden">
                     <AnimatePresence>
                         {isSuccess && (
                             <motion.div
@@ -187,7 +187,7 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
                         </div>
 
                         {/* Pricing */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.dropPrice}</label>
                                 <div className="relative">
@@ -217,7 +217,7 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
                         </div>
 
                         {/* Scarcity Settings */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-cool-gray mb-2">{t.dropQuantity}</label>
                                 <input
@@ -236,6 +236,7 @@ export default function DropStudio({ vendorId, lang }: DropStudioProps) {
                                         className={`w-full bg-black border-2 border-cool-gray/30 rounded-xl py-4 ${lang === 'ar' ? 'pr-12 pl-4' : 'pl-12 pr-4'} text-white text-lg font-bold focus:border-electric-red focus:outline-none transition-colors appearance-none`}
                                         value={form.duration}
                                         onChange={e => setForm({ ...form, duration: e.target.value })}
+                                        title={t.durationMin}
                                     >
                                         <option value="15">{t.min15}</option>
                                         <option value="30">{t.min30}</option>
