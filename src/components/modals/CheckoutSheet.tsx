@@ -149,6 +149,14 @@ export default function CheckoutSheet({
     onClose();
   };
 
+  const handleClose = () => {
+    if (showDropzone) {
+      handleCancelPayment();
+    } else {
+      onClose();
+    }
+  };
+
   const triggerSuccess = async () => {
     setShowDropzone(false);
     // Fetch real order number from backend if we have an order ID
@@ -227,7 +235,7 @@ export default function CheckoutSheet({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-deep-charcoal/80 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Drawer */}
@@ -274,7 +282,7 @@ export default function CheckoutSheet({
                   </p>
                 </div>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center"
                 >
                   <X className="w-5 h-5" />

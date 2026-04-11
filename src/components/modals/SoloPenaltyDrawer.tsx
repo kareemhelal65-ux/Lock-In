@@ -194,6 +194,15 @@ export default function SoloPenaltyDrawer({
     onClose();
   };
 
+  const handleClose = () => {
+    if (showDropzone) {
+      handleCancelPayment();
+    } else {
+      setShowCheckout(false);
+      onClose();
+    }
+  };
+
   const handleInstapaySuccess = () => {
     setShowDropzone(false);
     setShowSuccess(true);
@@ -251,7 +260,7 @@ export default function SoloPenaltyDrawer({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex flex-col md:items-center p-0 md:p-4"
       >
-        <div className="absolute inset-0 bg-gray-600/90 backdrop-blur-sm" onClick={() => { setShowCheckout(false); setShowDropzone(false); }} />
+        <div className="absolute inset-0 bg-gray-600/90 backdrop-blur-sm" onClick={handleClose} />
 
         <motion.div
           initial={{ y: '100%' }}

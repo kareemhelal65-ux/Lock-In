@@ -137,6 +137,13 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
     setStep('payment');
   };
 
+  const handleClose = () => {
+    if (createdOrderId) {
+      handleCancelPayment();
+    }
+    onClose();
+  };
+
   const finalFlashTotal = Math.max(0, Math.ceil(
     (drop.dropPrice + (isZeroFee && useActivePerk ? 0 : (claimType === 'solo' ? 10 : 5))) - 
     (useActivePerk && activePerkCard ? (isDiscount ? drop.dropPrice * 0.15 : (isFeast ? Math.min(150, drop.dropPrice) : 0)) : 0)
@@ -149,7 +156,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
         className="fixed inset-0 z-50 flex flex-col bg-electric-red"
       >
         <div className="px-4 py-4 border-b-2 border-white/20 flex items-center gap-3">
-          <button onClick={onClose} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
+          <button onClick={handleClose} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
@@ -219,7 +226,7 @@ export default function FlashDropCheckout({ drop, onClose, onComplete }: FlashDr
         className="fixed inset-0 z-50 flex flex-col bg-electric-red"
       >
         <div className="px-4 py-4 border-b-2 border-white/20 flex items-center gap-3">
-          <button onClick={() => setStep('choose')} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
+          <button onClick={handleClose} className="w-10 h-10 bg-white border-2 border-deep-charcoal rounded-full flex items-center justify-center">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>

@@ -665,10 +665,17 @@ consumerRouter.post('/order/:orderId/cancel', async (req, res) => {
                 const participantsWithPerks = order.participants.filter(p => p.perkUserCardId);
                 for (const p of participantsWithPerks) {
                     if (p.perkUserCardId) {
-                        await tx.userCard.update({
-                            where: { id: p.perkUserCardId },
-                            data: { isUsed: false }
-                        });
+                        const card = await tx.userCard.findUnique({ where: { id: p.perkUserCardId } });
+                        if (card) {
+                            await tx.userCard.update({
+                                where: { id: p.perkUserCardId },
+                                data: { 
+                                    isUsed: false,
+                                    // For SAWA_FEAST, restore the value that was deducted (stored in p.sawaSubsidy)
+                                    remainingValue: card.remainingValue + (p.sawaSubsidy || 0)
+                                }
+                            });
+                        }
                     }
                 }
 
@@ -1347,10 +1354,12 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
             // Add service fee
             const hostUserForFee = await prisma.user.findUnique({ where: { id: safe.hostId } });
             let isZeroFeeSafe = false;
+            let hostPerkCardId: string | null = null;
             if (hostUserForFee?.activeCardId) {
                 const activeUserCard = await prisma.userCard.findUnique({ where: { id: hostUserForFee.activeCardId }, include: { card: true } });
-                if (activeUserCard?.card.perkCode === 'THE01') {
+                if (activeUserCard?.card.perkCode === 'THE01' || activeUserCard?.card.perkCode === 'MAGNET') {
                     isZeroFeeSafe = true;
+                    hostPerkCardId = activeUserCard.id;
                 }
             }
 
@@ -1405,12 +1414,15 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                 }
 
                 let totalSawaSubsidy = 0;
+                const participantPerks: Record<string, string> = {};
+
                 for (const participant of participants) {
                     const baseShare = participantShares[participant.userId] || (totalAmount / participants.length);
                     let shareWithFee = isZeroFeeSafe ? baseShare : baseShare + 5;
                     let sawaSubsidy = 0; // Will be set during actual payment verification
+                    let currentParticipantPerkId: string | null = (participant.userId === safe.hostId) ? hostPerkCardId : null;
 
-                    await tx.participantOrder.create({
+                    const pOrder = await tx.participantOrder.create({
                         data: { 
                             orderId: orderDoc.id, 
                             userId: participant.userId, 
@@ -1418,9 +1430,14 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                                 ? (participant.userId === safe.hostId ? totalAmount : 0)
                                 : shareWithFee, 
                             sawaSubsidy, 
+                            perkUserCardId: currentParticipantPerkId,
                             hasPaid: participant.userId === safe.hostId ? false : isCoveredByHost 
                         }
                     });
+
+                    if (currentParticipantPerkId) {
+                        participantPerks[participant.userId] = currentParticipantPerkId;
+                    }
                 }
                 
                 if (totalSawaSubsidy > 0) {
@@ -1436,10 +1453,16 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                             let points = 25;
                             if (i === 1 && pUser?.activeCardId) {
                                 const activeUserCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
-                                if (activeUserCard?.card.perkCode === 'EARLYBIRD') {
+                                if (activeUserCard?.card.perkCode === 'EARLYBIRD' || activeUserCard?.card.perkCode === 'MARKET_MAKER') {
                                     points *= 2;
                                     await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
                                     await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
+                                    
+                                    // Update the ParticipantOrder we just created with the perk ID
+                                    await tx.participantOrder.updateMany({
+                                        where: { orderId: orderDoc.id, userId: participant.userId },
+                                        data: { perkUserCardId: activeUserCard.id }
+                                    });
                                 }
                             }
                             await updateHypeScore(participant.userId, points, tx, undefined, 25);
