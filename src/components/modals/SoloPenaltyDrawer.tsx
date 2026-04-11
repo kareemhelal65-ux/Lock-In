@@ -46,7 +46,7 @@ export default function SoloPenaltyDrawer({
   const activePerkCard = eligibleCards.find((uc: any) => uc.id === currentUser?.activeCardId) || eligibleCards[0];
   const activePerk = activePerkCard?.card;
   
-  const isZeroFee = activePerk?.perkCode === 'THE01';
+  const isZeroFee = !!activePerk;
   const isDiscount = activePerk?.perkCode === 'SAWA_DISCOUNT';
   const isFeast = activePerk?.perkCode === 'SAWA_FEAST';
   const hasPerk = !!activePerk;
