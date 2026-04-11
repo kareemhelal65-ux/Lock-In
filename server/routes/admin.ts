@@ -179,7 +179,8 @@ adminRouter.get('/operations/vendors', async (req, res) => {
             ordersToday: v.orders.length,
             rating: v.rating,
             hypeMultiplier: v.hypeMultiplier,
-            commissionOwedBalance: v.commissionOwedBalance
+            commissionOwedBalance: v.commissionOwedBalance,
+            subsidiesOwedBalance: v.subsidiesOwedBalance
         }));
         res.json({ scorecards });
     } catch (e: any) {
@@ -521,6 +522,19 @@ adminRouter.post('/payouts/collect', async (req, res) => {
         const vendor = await prisma.vendor.update({
             where: { id: vendorId },
             data: { commissionOwedBalance: 0 }
+        });
+        res.json(vendor);
+    } catch (e: any) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+adminRouter.post('/subsidies/collect', async (req, res) => {
+    try {
+        const { vendorId } = req.body;
+        const vendor = await prisma.vendor.update({
+            where: { id: vendorId },
+            data: { subsidiesOwedBalance: 0 }
         });
         res.json(vendor);
     } catch (e: any) {

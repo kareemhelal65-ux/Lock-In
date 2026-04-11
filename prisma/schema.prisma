@@ -92,6 +92,7 @@ model Vendor {
   instapayAddress       String?
   instapayName          String?
   commissionOwedBalance Float       @default(0.0)
+  subsidiesOwedBalance  Float       @default(0.0)
   lifetimeSales         Float       @default(0.0)
   lifetimeOrders        Int         @default(0)
   ledgerPinHash         String?

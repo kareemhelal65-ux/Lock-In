@@ -152,6 +152,7 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                 where: { id },
                 data: {
                     commissionOwedBalance: { increment: feeToAdd },
+                    subsidiesOwedBalance: { increment: order.sawaSubsidy },
                     lifetimeSales: { increment: order.totalAmount },
                     lifetimeOrders: { increment: 1 }
                 }
@@ -312,7 +313,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         const { period } = req.query as { period?: string };
         const vendor = await prisma.vendor.findUnique({
             where: { id },
-            select: { commissionOwedBalance: true, lifetimeSales: true, lifetimeOrders: true }
+            select: { commissionOwedBalance: true, subsidiesOwedBalance: true, lifetimeSales: true, lifetimeOrders: true }
         });
 
         if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
@@ -343,6 +344,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
             },
             select: {
                 totalAmount: true,
+                sawaSubsidy: true,
                 createdAt: true,
                 items: { select: { name: true, quantity: true } },
                 participants: { select: { id: true } }
@@ -353,6 +355,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         let previousVolume = 0;
         let currentOrdersCount = 0;
         let previousOrdersCount = 0;
+        let totalSubsidies = 0;
         const currentOrders: typeof orders = [];
 
         orders.forEach(order => {
@@ -363,6 +366,7 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
             } else if (orderDate >= startOfCurrent) {
                 currentVolume += order.totalAmount;
                 currentOrdersCount++;
+                totalSubsidies += order.sawaSubsidy;
                 currentOrders.push(order);
             } else if (orderDate >= startOfPrevious && orderDate < startOfCurrent) {
                 previousVolume += order.totalAmount;
@@ -417,6 +421,8 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         const stats = {
             totalVolume,
             commissionOwed: vendor.commissionOwedBalance,
+            subsidiesOwed: vendor.subsidiesOwedBalance,
+            totalSubsidies, // keep period-specific sum for charts if needed
             totalOrders,
             peakHours,
             itemPopularity,
@@ -427,6 +433,21 @@ vendorDataRouter.get('/:id/ledger', async (req, res) => {
         res.json({ stats });
     } catch (error) {
         console.error('Error fetching ledger data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 3.0 Collect Subsidies
+vendorDataRouter.post('/:id/subsidies/collect', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const vendor = await prisma.vendor.update({
+            where: { id },
+            data: { subsidiesOwedBalance: 0 }
+        });
+        res.json({ message: 'Subsidies cleared', subsidiesOwedBalance: vendor.subsidiesOwedBalance });
+    } catch (error) {
+        console.error('Error collecting subsidies:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

@@ -108,6 +108,47 @@ export default function OperationsHub() {
                                         <div className={`font-black text-sm uppercase ${v.status === 'LIVE' ? 'text-green-600' : 'text-electric-red'}`}>{v.status}</div>
                                     </div>
                                 </div>
+                                <div className="mt-4 grid grid-cols-2 gap-2 text-center text-[10px] font-black uppercase">
+                                    <div className="bg-volt-green/10 p-2 rounded border border-volt-green/30">
+                                        <div className="text-gray-500 mb-1">Commission Due</div>
+                                        <div className="text-volt-green">{v.commissionOwedBalance.toLocaleString()} EGP</div>
+                                        <button 
+                                            onClick={async () => {
+                                                if (confirm(`Clear commission for ${v.name}?`)) {
+                                                    await fetch('/api/admin/payouts/collect', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ vendorId: v.id })
+                                                    });
+                                                    window.location.reload();
+                                                }
+                                            }}
+                                            className="mt-2 w-full py-1 bg-volt-green text-deep-charcoal rounded hover:bg-[#b0f200]"
+                                        >
+                                            Collect
+                                        </button>
+                                    </div>
+                                    <div className="bg-electric-red/10 p-2 rounded border border-electric-red/30 text-electric-red">
+                                        <div className="text-gray-500 mb-1">Subsidies Owed</div>
+                                        <div>{v.subsidiesOwedBalance.toLocaleString()} EGP</div>
+                                        <button 
+                                            onClick={async () => {
+                                                if (confirm(`Pay subsidies to ${v.name}?`)) {
+                                                    await fetch('/api/admin/subsidies/collect', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ vendorId: v.id })
+                                                    });
+                                                    window.location.reload();
+                                                }
+                                            }}
+                                            className="mt-2 w-full py-1 bg-electric-red text-white rounded hover:bg-red-700"
+                                        >
+                                            Pay
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div className="mt-4 flex gap-2">
                                     <button 
                                         onClick={() => alert(`Routing to ${v.name}'s complete data history ledger...`)}
