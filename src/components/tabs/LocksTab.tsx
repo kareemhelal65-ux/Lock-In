@@ -296,7 +296,7 @@ export default function LocksTab({ onOpenSafe }: LocksTabProps) {
         const interval = setInterval(() => {
             fetchOrders();
             fetchActiveSafes();
-        }, 10000);
+        }, 3000);
         return () => clearInterval(interval);
     }, [currentUser?.id]);
 

@@ -47,7 +47,7 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
     useEffect(() => {
         if (!vendorId) return;
         fetchDashboard();
-        const interval = setInterval(fetchDashboard, 8000);
+        const interval = setInterval(fetchDashboard, 3000);
         return () => clearInterval(interval);
     }, [vendorId]);
 

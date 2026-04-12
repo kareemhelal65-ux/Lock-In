@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .subscribe();
     } else {
       // Fallback for local development (Reduced frequency)
-      const interval = setInterval(fetchUserData, 10000);
+      const interval = setInterval(fetchUserData, 3000);
       return () => clearInterval(interval);
     }
 

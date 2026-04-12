@@ -103,7 +103,7 @@ export default function RadarTab({ onJoinSafe }: RadarTabProps) {
     const pollInterval = setInterval(() => {
       fetchInvites();
       fetchDeliveryRequests();
-    }, 10000);
+    }, 3000);
     return () => clearInterval(pollInterval);
   }, [fetchInvites, fetchDeliveryRequests]);
 
