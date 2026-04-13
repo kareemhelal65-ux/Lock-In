@@ -15,7 +15,6 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     const [editForm, setEditForm] = useState<any>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [stockTogglingId, setStockTogglingId] = useState<string | null>(null);
     const [savingId, setSavingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);

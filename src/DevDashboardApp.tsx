@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    LayoutDashboard, Activity, Target, Zap, 
+    LayoutDashboard, Activity, Target, 
     CreditCard, Trophy, Users, TrendingUp, 
     Clock, DollarSign, ArrowLeft, ShieldAlert
 } from 'lucide-react';
