@@ -70,7 +70,7 @@ export default function LandingSwitcher({ onSelectMode }: LandingSwitcherProps) 
                     >
                         <div>
                             <h2 className="font-display font-black text-2xl uppercase mb-1 flex items-center gap-2">
-                                God Mode
+                                War Room
                             </h2>
                             <p className="text-sm font-bold text-gray-500 group-hover:text-gray-300">Dev Dashboard & Analytics</p>
                         </div>

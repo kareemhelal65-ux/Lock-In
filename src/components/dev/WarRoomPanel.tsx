@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Power, RotateCcw, ShieldAlert, Cpu } from 'lucide-react';
 
-export default function GodModePanel() {
+export default function WarRoomPanel() {
     const [vendors, setVendors] = useState<any[]>([]);
     const [networkDensity, setNetworkDensity] = useState<any>(null);
 
@@ -9,27 +9,55 @@ export default function GodModePanel() {
         // Fetch vendors for freeze toggle
         fetch('/api/admin/operations/vendors')
             .then(res => res.json())
-            .then(data => setVendors(data.scorecards))
-            .catch(console.error);
+            .then(data => {
+                if (data && data.scorecards) {
+                    setVendors(data.scorecards);
+                } else {
+                    console.error('Failed to load vendors:', data?.error);
+                    setVendors([]);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                setVendors([]);
+            });
 
         // Fetch network density
         fetch('/api/admin/god-mode/network-effect')
             .then(res => res.json())
-            .then(data => setNetworkDensity(data.density))
-            .catch(console.error);
+            .then(data => {
+                if (data && data.density) {
+                    setNetworkDensity(data.density);
+                } else {
+                    console.error('Failed to load density:', data?.error);
+                    setNetworkDensity(null);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                setNetworkDensity(null);
+            });
     }, []);
 
     const handleFreeze = async (vendorId: string, willFreeze: boolean) => {
         if (!confirm(`Are you sure you want to ${willFreeze ? 'FREEZE' : 'UNFREEZE'} this vendor?`)) return;
+        
+        // Optimistic update
+        const previousVendors = [...vendors];
+        setVendors(vendors.map(v => v.id === vendorId ? { ...v, status: willFreeze ? 'FROZEN' : 'LIVE' } : v));
+
         try {
-            await fetch('/api/admin/god-mode/freeze-vendor', {
+            const res = await fetch('/api/admin/god-mode/freeze-vendor', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ vendorId, freeze: willFreeze })
             });
-            setVendors(vendors.map(v => v.id === vendorId ? { ...v, status: willFreeze ? 'FROZEN' : 'LIVE' } : v));
+            if (!res.ok) throw new Error('Freeze operation failed');
         } catch (e) {
             console.error(e);
+            // Rollback on failure
+            setVendors(previousVendors);
+            alert("Administrative error: Failed to sync freeze command with core database.");
         }
     };
 
@@ -73,7 +101,7 @@ export default function GodModePanel() {
                         <h3 className="font-display font-black text-2xl uppercase tracking-wider">Mass Override</h3>
                     </div>
                     <p className="font-bold opacity-90 mb-6 uppercase text-sm">Force global app states</p>
-                    <button 
+                    <button
                         onClick={handleForceRelease}
                         className="w-full bg-white text-black font-black uppercase tracking-widest p-4 border-2 border-black rounded-lg brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all"
                     >
@@ -131,13 +159,13 @@ export default function GodModePanel() {
                                             </span>
                                         </td>
                                         <td className="p-4 flex gap-2 justify-end">
-                                            <button 
+                                            <button
                                                 onClick={() => handleFreeze(v.id, v.status === 'LIVE')}
                                                 className={`px-4 py-2 text-xs uppercase border-2 border-black rounded-lg brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all ${v.status === 'LIVE' ? 'bg-gray-800 text-white hover:bg-black' : 'bg-white hover:bg-gray-100'}`}
                                             >
                                                 {v.status === 'LIVE' ? 'Freeze Queue' : 'Unfreeze'}
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => handleMassRefund(v.id)}
                                                 className="px-4 py-2 text-xs uppercase border-2 border-black rounded-lg bg-electric-red text-white hover:bg-red-600 brutal-shadow-sm active:translate-y-1 active:shadow-none transition-all flex items-center gap-1"
                                             >

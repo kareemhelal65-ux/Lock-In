@@ -35,22 +35,24 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     }, [vendorId]);
 
     const toggleStock = async (id: string, currentStatus: boolean) => {
-        setStockTogglingId(id);
+        // Optimistic update
+        const previousItems = [...menuItems];
+        setMenuItems(prev => prev.map(item =>
+            item.id === id ? { ...item, inStock: !currentStatus } : item
+        ));
+
         try {
             const res = await fetch(`/api/vendorData/${vendorId}/menu/${id}/stock`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ inStock: !currentStatus })
             });
-            if (res.ok) {
-                setMenuItems(prev => prev.map(item =>
-                    item.id === id ? { ...item, inStock: !currentStatus } : item
-                ));
-            }
+            if (!res.ok) throw new Error('Failed to toggle stock');
         } catch (err) {
             console.error("Failed to toggle stock", err);
-        } finally {
-            setStockTogglingId(null);
+            // Rollback on failure
+            setMenuItems(previousItems);
+            alert("Connection error: Failed to update stock status.");
         }
     };
 
@@ -147,7 +149,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                     {/* Rows */}
                     <div className="divide-y-2 divide-cool-gray/10">
                         <AnimatePresence>
-                            {menuItems.map(item => {
+                            {(editingId === 'new' ? [editForm, ...menuItems] : menuItems).map(item => {
                                 const isEditing = editingId === item.id;
 
                                 return (

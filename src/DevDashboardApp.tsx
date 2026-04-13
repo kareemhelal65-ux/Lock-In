@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     LayoutDashboard, Activity, Target, Zap, 
     CreditCard, Trophy, Users, TrendingUp, 
-    Clock, DollarSign, ArrowLeft
+    Clock, DollarSign, ArrowLeft, ShieldAlert
 } from 'lucide-react';
 
-import GodModePanel from './components/dev/GodModePanel';
+import WarRoomPanel from './components/dev/WarRoomPanel';
 import OperationsHub from './components/dev/OperationsHub';
 import StrategicAnalytics from './components/dev/StrategicAnalytics';
 import HypeEngine from './components/dev/HypeEngine';
@@ -23,8 +23,14 @@ interface DevDashboardProps {
 }
 
 export default function DevDashboardApp({ onBack }: DevDashboardProps) {
+    const [isAuthorized, setIsAuthorized] = useState(() => {
+        return sessionStorage.getItem('dev_auth') === 'true';
+    });
+    const [passkey, setPasskey] = useState('');
+    const [authError, setAuthError] = useState(false);
+
     const [activeTab, setActiveTab] = useState(() => {
-        return localStorage.getItem('devActiveTab') || 'god-mode';
+        return localStorage.getItem('devActiveTab') || 'war-room';
     });
     
     useEffect(() => {
@@ -34,14 +40,92 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
     const [morningCoffee, setMorningCoffee] = useState<any>(null);
 
     useEffect(() => {
-        fetch('/api/admin/morning-coffee')
-            .then(res => res.json())
-            .then(data => setMorningCoffee(data))
-            .catch(console.error);
-    }, []);
+        if (isAuthorized) {
+            fetch('/api/admin/morning-coffee')
+                .then(res => res.json())
+                .then(data => setMorningCoffee(data))
+                .catch(console.error);
+        }
+    }, [isAuthorized]);
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (passkey === 'e7naexecutivessawa@2026') {
+            setIsAuthorized(true);
+            sessionStorage.setItem('dev_auth', 'true');
+            setAuthError(false);
+        } else {
+            setAuthError(true);
+            setPasskey('');
+        }
+    };
+
+    if (!isAuthorized) {
+        return (
+            <div className="min-h-screen bg-deep-charcoal flex items-center justify-center p-6 bg-[url('/grid.svg')] bg-repeat pt-safe">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="max-w-md w-full bg-white border-8 border-black p-8 brutal-shadow-lg"
+                >
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="w-16 h-16 bg-electric-red text-white flex items-center justify-center border-4 border-black shrink-0">
+                            <ShieldAlert className="w-10 h-10" />
+                        </div>
+                        <div>
+                            <h1 className="font-display font-black text-3xl uppercase leading-none">WAR ROOM</h1>
+                            <p className="font-bold text-xs mt-1 uppercase text-gray-500">Nuclear Access Only</p>
+                        </div>
+                    </div>
+
+                    <p className="text-sm font-bold uppercase mb-6 leading-relaxed">
+                        This center regulates core platform mechanics. Unauthorized access is strictly prohibited.
+                    </p>
+
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div>
+                            <label className="block text-[10px] font-black uppercase mb-1 tracking-widest">Executive Passkey</label>
+                            <input 
+                                type="password" 
+                                value={passkey}
+                                onChange={(e) => setPasskey(e.target.value)}
+                                placeholder="••••••••••••"
+                                className={`w-full bg-gray-100 border-4 border-black p-4 font-black text-xl tracking-[0.2em] focus:outline-none focus:bg-volt-green/10 transition-colors ${authError ? 'border-electric-red' : ''}`}
+                                autoFocus
+                            />
+                            {authError && (
+                                <p className="text-electric-red text-[10px] font-black uppercase mt-2 animate-bounce">Access Denied: Invalid Passkey</p>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button 
+                                type="submit"
+                                className="w-full bg-black text-white p-4 font-display font-black text-xl uppercase tracking-widest brutal-shadow-sm hover:-translate-y-1 active:translate-y-1 active:shadow-none transition-all"
+                            >
+                                Authorize
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={onBack}
+                                className="w-full bg-white text-black p-3 font-bold text-sm uppercase border-2 border-black hover:bg-gray-100 transition-colors"
+                            >
+                                Abandon Control
+                            </button>
+                        </div>
+                    </form>
+
+                    <div className="mt-8 pt-6 border-t-2 border-dashed border-gray-300 flex justify-between items-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        <span>Shield v2.04</span>
+                        <span>IP Encrypted</span>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     const tabs = [
-        { id: 'god-mode', label: 'God Mode', icon: Zap },
+        { id: 'war-room', label: 'War Room', icon: ShieldAlert },
         { id: 'operations', label: 'Operations Hub', icon: Activity },
         { id: 'analytics', label: 'Strategic Analytics', icon: Target },
         { id: 'hype', label: 'Hype Engine', icon: TrendingUp },
@@ -156,7 +240,7 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                                 {tabs.find(t => t.id === activeTab)?.label}
                             </h2>
                             
-                            {activeTab === 'god-mode' && <GodModePanel />}
+                            {activeTab === 'war-room' && <WarRoomPanel />}
                             {activeTab === 'operations' && <OperationsHub />}
                             {activeTab === 'analytics' && <StrategicAnalytics />}
                             {activeTab === 'hype' && <HypeEngine />}
@@ -168,12 +252,6 @@ export default function DevDashboardApp({ onBack }: DevDashboardProps) {
                             {activeTab === 'financial' && <FinancialHealth />}
                             {activeTab === 'payouts' && <PayoutsTab />}
 
-                            {(activeTab !== 'god-mode' && activeTab !== 'operations' && activeTab !== 'analytics' && activeTab !== 'hype' && activeTab !== 'payouts') && (
-                                <div className="text-gray-500 font-bold uppercase tracking-widest mt-12 text-center items-center justify-center flex flex-col opacity-50">
-                                    <Activity className="w-16 h-16 mb-4" />
-                                    Module Under Construction
-                                </div>
-                            )}
                         </motion.div>
                     </AnimatePresence>
                 </div>

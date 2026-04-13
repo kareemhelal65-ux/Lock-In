@@ -169,16 +169,21 @@ export default function VendorApp({ onBack }: VendorAppProps) {
     };
 
     const handleStatusChange = async (newStatus: 'live' | 'swamped' | 'offline') => {
+        const previousStatus = vendorStatus;
         setVendorStatus(newStatus);
+        
         if (currentVendorId) {
             try {
-                await fetch(`/api/vendorData/${currentVendorId}/status`, {
+                const res = await fetch(`/api/vendorData/${currentVendorId}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus.toUpperCase() })
                 });
+                if (!res.ok) throw new Error('Status update failed');
             } catch (e) {
                 console.error('Failed to update status', e);
+                setVendorStatus(previousStatus);
+                alert("Critical: Failed to sync status with server. Reverting.");
             }
         }
     };

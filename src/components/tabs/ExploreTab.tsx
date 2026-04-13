@@ -27,7 +27,7 @@ export default function ExploreTab({ onSoloOrder, onOpenVendor }: ExploreTabProp
     const res = await fetch('/api/consumer/explore');
     if (!res.ok) throw new Error('Fetch failed');
     return res.json();
-  }, { dedupingInterval: 60000 });
+  }, { dedupingInterval: 2000, refreshInterval: 3000 });
 
   useEffect(() => {
     if (swrData?.vendors) {
