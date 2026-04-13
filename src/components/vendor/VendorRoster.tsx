@@ -292,19 +292,13 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                             <span className="md:hidden text-[10px] font-black uppercase tracking-widest text-cool-gray">{t.tableStock}</span>
                                             <button
                                                 onClick={() => !isEditing && toggleStock(item.id, item.inStock)}
-                                                disabled={isEditing || stockTogglingId === item.id}
+                                                disabled={isEditing}
                                                 className={`px-3 py-1.5 rounded text-xs font-black uppercase w-24 flex items-center justify-center text-center border-2 transition-colors disabled:opacity-50 ${item.inStock
                                                     ? 'bg-volt-green/20 border-volt-green text-volt-green hover:bg-volt-green hover:text-deep-charcoal'
                                                     : 'bg-electric-red/20 border-electric-red text-electric-red hover:bg-electric-red hover:text-white'
                                                     }`}
                                             >
-                                                {stockTogglingId === item.id ? (
-                                                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-                                                        <Sparkles className="w-3 h-3" />
-                                                    </motion.div>
-                                                ) : (
-                                                    item.inStock ? t.inStock : t.soldOut
-                                                )}
+                                                {item.inStock ? t.inStock : t.soldOut}
                                             </button>
                                         </div>
 
