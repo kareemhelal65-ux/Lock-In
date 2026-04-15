@@ -325,7 +325,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHostSuccess]);
 
-  const canLockIn = myOrder.length > 0 || sharedItems.length > 0 || myServerSharedTotal > 0;
+  const canLockIn = (myOrder.length > 0 || sharedItems.length > 0 || myServerSharedTotal > 0) && safe.participants.length >= 2;
 
   const handleLockIn = async () => {
     if (!canLockIn || isLockingIn) return;
