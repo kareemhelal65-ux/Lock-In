@@ -9,6 +9,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
@@ -33,6 +34,10 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         onLogin(data.user);
       } else {
         // Signup
+        if (password !== confirmPassword) {
+            throw new Error('PASSWORDS DO NOT MATCH');
+        }
+        
         // Generate a temporary username from email to satisfy DB unique constraint
         // User will set their real username in Onboarding
         const tempUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Math.random().toString(36).substring(7);
@@ -99,6 +104,17 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             required
           />
 
+          {!isLogin && (
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              placeholder="CONFIRM PASSWORD"
+              className="w-full p-4 font-bold border-2 border-deep-charcoal rounded-none bg-white focus:outline-none focus:shadow-brutal-sm transition-shadow placeholder:text-cool-gray/50 uppercase"
+              required
+            />
+          )}
+
           <button
             type="submit"
             className="brutal-btn-primary w-full mt-4 py-4 text-lg disabled:opacity-50 flex items-center justify-center gap-3"
@@ -119,6 +135,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
           onClick={() => {
             setIsLogin(!isLogin);
             setError('');
+            setConfirmPassword('');
           }}
           className="mt-8 w-full text-center font-bold text-sm text-cool-gray uppercase hover:text-deep-charcoal transition-colors underline decoration-2 underline-offset-4"
         >
