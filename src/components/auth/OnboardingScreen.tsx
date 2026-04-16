@@ -2,12 +2,13 @@ import { useState } from 'react';
 
 interface OnboardingScreenProps {
     onComplete: (data: any) => void;
+    initialUsername?: string;
 }
 
-export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
-    const [username, setUsername] = useState('');
+export default function OnboardingScreen({ onComplete, initialUsername = '' }: OnboardingScreenProps) {
+    const [username, setUsername] = useState(initialUsername);
     const [name, setName] = useState('');
-    const [avatarUrl, setAvatarUrl] = useState('https://api.dicebear.com/7.x/avataaars/svg?seed=hype');
+    const [avatarUrl, setAvatarUrl] = useState(`https://api.dicebear.com/7.x/avataaars/svg?seed=${initialUsername || 'hype'}`);
 
     const randomizeAvatar = () => {
         const seed = Math.random().toString(36).substring(7);
@@ -22,8 +23,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     return (
         <div className="min-h-screen bg-volt-green flex flex-col items-center justify-center p-6 bg-[radial-gradient(#1A1A1A_1px,transparent_1px)] [background-size:20px_20px]">
             <div className="w-full max-w-sm brutal-card p-8 bg-white shadow-brutal-lg">
-                <h2 className="text-3xl font-display font-bold uppercase mb-1 tracking-tight">Set Your Vibe</h2>
-                <p className="text-cool-gray mb-8 text-sm font-bold uppercase tracking-wider">Who are you in the squad?</p>
+                <h2 className="text-3xl font-display font-bold uppercase mb-1 tracking-tight">Setup To Order Sawa</h2>
+                <p className="text-cool-gray mb-8 text-sm font-bold uppercase tracking-wider">Who are you?</p>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     {/* Avatar Selection */}

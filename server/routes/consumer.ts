@@ -161,11 +161,19 @@ const upload = multer({
 // 1. Consumer Signup
 consumerRouter.post('/signup', async (req, res) => {
     try {
-        const { email, username, password, name } = req.body;
+        const { email, password, name } = req.body;
+        let { username } = req.body;
 
         // Basic validation
-        if (!email || !username || !password) {
+        if (!email || !password) {
             return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        // Auto-generate username if not provided
+        if (!username) {
+            username = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+            // Append random suffix to ensure higher chance of uniqueness initially
+            username += '_' + Math.random().toString(36).substring(7);
         }
 
         // Check for existing user

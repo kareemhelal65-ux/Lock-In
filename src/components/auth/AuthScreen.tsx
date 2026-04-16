@@ -33,10 +33,14 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
         onLogin(data.user);
       } else {
         // Signup
+        // Generate a temporary username from email to satisfy DB unique constraint
+        // User will set their real username in Onboarding
+        const tempUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '') + '_' + Math.random().toString(36).substring(7);
+        
         const res = await fetch('/api/consumer/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, username, password })
+          body: JSON.stringify({ email, username: tempUsername, password })
         });
         const data = await res.json();
 
@@ -62,7 +66,7 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
           <h1 className="text-6xl font-display font-bold text-deep-charcoal italic tracking-tighter uppercase transform -skew-x-6 drop-shadow-md">
             SAWA.
           </h1>
-          <p className="mt-2 text-cool-gray font-bold tracking-widest text-sm">THE HYPE IS REAL.</p>
+          <p className="mt-2 text-cool-gray font-bold tracking-widest text-sm uppercase">FOOD TASTES BETTER SAWA</p>
         </div>
 
         <form onSubmit={handleSubmit} className="brutal-card p-8 flex flex-col gap-5">
@@ -85,16 +89,6 @@ export default function AuthScreen({ onLogin }: AuthScreenProps) {
             required
           />
 
-          {!isLogin && (
-            <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="USERNAME"
-              className="w-full p-4 font-bold border-2 border-deep-charcoal rounded-none bg-white focus:outline-none focus:shadow-brutal-sm transition-shadow placeholder:text-cool-gray/50 uppercase"
-              required
-            />
-          )}
 
           <input
             type="password"

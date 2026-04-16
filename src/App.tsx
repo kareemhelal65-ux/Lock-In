@@ -364,7 +364,10 @@ function AppContent() {
   // If needs onboarding (has priority over main content)
   if (needsOnboarding) {
     return (
-      <OnboardingScreen onComplete={handleOnboardingComplete} />
+      <OnboardingScreen 
+        onComplete={handleOnboardingComplete} 
+        initialUsername={currentUser?.username}
+      />
     );
   }
 
