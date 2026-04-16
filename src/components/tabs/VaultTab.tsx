@@ -130,7 +130,7 @@ export default function VaultTab() {
 
 // Leaderboard state
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
-  const [leaderboardPeriod, setLeaderboardPeriod] = useState<'monthly' | 'all'>('monthly');
+  const [leaderboardPeriod] = useState<'monthly' | 'all'>('monthly');
   const [leaderboardScope, setLeaderboardScope] = useState<'friends' | 'global'>('global');
 
   const fetchLeaderboard = useCallback(async () => {
