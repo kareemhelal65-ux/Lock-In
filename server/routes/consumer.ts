@@ -843,7 +843,7 @@ consumerRouter.get('/friends/search', async (req, res) => {
 // 8b. Leaderboard (Global — with period filter)
 consumerRouter.get('/leaderboard', async (req, res) => {
     try {
-        const period = (req.query.period as string) || 'weekly';
+        const period = (req.query.period as string) || 'monthly';
 
         if (period === 'weekly' || period === 'monthly') {
             const dateFilter = new Date(Date.now() - (period === 'weekly' ? 7 : 30) * 24 * 60 * 60 * 1000);

@@ -130,7 +130,7 @@ export default function VaultTab() {
 
 // Leaderboard state
   const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
-  const [leaderboardPeriod, setLeaderboardPeriod] = useState<'weekly' | 'monthly' | 'all'>('weekly');
+  const [leaderboardPeriod, setLeaderboardPeriod] = useState<'monthly' | 'all'>('monthly');
   const [leaderboardScope, setLeaderboardScope] = useState<'friends' | 'global'>('global');
 
   const fetchLeaderboard = useCallback(async () => {
@@ -437,19 +437,9 @@ export default function VaultTab() {
             {/* Period Tabs (Only for Global) */}
             {leaderboardScope === 'global' && (
               <div className="flex gap-2 mb-3">
-                {(['weekly', 'monthly'] as const).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setLeaderboardPeriod(p)}
-                    className={`flex-1 py-2 px-3 rounded-pill font-display font-bold text-[10px] uppercase tracking-wider border-2 transition-all ${
-                      leaderboardPeriod === p
-                        ? 'bg-volt-green text-deep-charcoal border-deep-charcoal'
-                        : 'bg-white text-deep-charcoal border-deep-charcoal/30'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                <div className="flex-1 py-2 px-3 rounded-pill font-display font-bold text-[10px] uppercase tracking-wider border-2 bg-volt-green text-deep-charcoal border-deep-charcoal text-center">
+                  Monthly Global
+                </div>
               </div>
             )}
 
