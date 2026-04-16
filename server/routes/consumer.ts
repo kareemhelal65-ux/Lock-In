@@ -16,13 +16,13 @@ const lockInviteStore: Record<string, any[]> = {};
 const getNextOrderNumber = async (): Promise<string> => {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
-    
+
     const latestOrder = await prisma.order.findFirst({
         where: { createdAt: { gte: todayStart } },
         orderBy: { orderNumber: 'desc' },
         select: { orderNumber: true }
     });
-    
+
     let nextNum = 100;
     if (latestOrder?.orderNumber) {
         const parsed = parseInt(latestOrder.orderNumber.replace('#', ''));
@@ -85,11 +85,11 @@ export const updateHypeScore = async (userId: string, points: number, tx: any = 
 
     const oldScore = user.hypeScore;
     const newScore = Math.max(0, oldScore + points);
-    
+
     // Key reward every 250 points (only for positive gains)
     const oldMilestone = Math.floor(oldScore / 250);
     const newMilestone = Math.floor(newScore / 250);
-    
+
     let keysEarned = 0;
     if (newMilestone > oldMilestone) {
         keysEarned = newMilestone - oldMilestone;
@@ -119,21 +119,21 @@ export const updateHypeScore = async (userId: string, points: number, tx: any = 
 
 // Helper to restore a perk card consistently (handles SAWA_FEAST value and isUsed)
 export const restorePerk = async (perkUserCardId: string, tx: any = prisma, subsidyAmount: number = 0) => {
-    const card = await tx.userCard.findUnique({ 
+    const card = await tx.userCard.findUnique({
         where: { id: perkUserCardId },
         include: { card: true }
     });
-    
+
     if (card) {
         await tx.userCard.update({
             where: { id: perkUserCardId },
-            data: { 
+            data: {
                 isUsed: false,
                 // For SAWA_FEAST, restore the value that was deducted
                 remainingValue: (card.remainingValue ?? 0) + (subsidyAmount || 0)
             }
         });
-        
+
         // Optionally restore as active if user has no active card
         const user = await tx.user.findFirst({ where: { userCards: { some: { id: perkUserCardId } } } });
         if (user && !user.activeCardId) {
@@ -153,7 +153,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 
 // Multer Setup (Memory Storage is better for Vercel/Serverless)
 const storage = multer.memoryStorage();
-const upload = multer({ 
+const upload = multer({
     storage,
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
@@ -360,9 +360,9 @@ consumerRouter.post('/upload-receipt', upload.single('receipt'), async (req, res
 
         // Default / Fallback: Local Storage (Works for localhost/dev)
         if (process.env.VERCEL) {
-             return res.status(400).json({ 
-                error: 'Supabase Storage keys missing on Vercel. Production uploads require cloud storage.' 
-             });
+            return res.status(400).json({
+                error: 'Supabase Storage keys missing on Vercel. Production uploads require cloud storage.'
+            });
         }
 
         const fileName = `receipt-${Date.now()}${path.extname(req.file.originalname)}`;
@@ -389,19 +389,19 @@ consumerRouter.get('/user/:id', async (req, res) => {
             }
         });
         if (!user) return res.status(404).json({ error: 'User not found' });
-        
+
         const formattedUser = formatUserResponse(user);
-        
+
         // Find active card from inventory if needed
-        const activeUserCard = user.activeCardId 
+        const activeUserCard = user.activeCardId
             ? user.inventory.find((uc: any) => uc.id === user.activeCardId)
             : null;
-            
-        res.json({ 
-            user: { 
-                ...formattedUser, 
-                activeCard: activeUserCard?.card || null 
-            } 
+
+        res.json({
+            user: {
+                ...formattedUser,
+                activeCard: activeUserCard?.card || null
+            }
         });
     } catch (error) {
         console.error('Fetch user error:', error);
@@ -482,7 +482,7 @@ consumerRouter.get('/explore', async (req, res) => {
         const mappedVendors = vendors.map(v => {
             let deliveryTime = '25 min';
             const times = deliveryTimesByVendor[v.id];
-            
+
             if (times && times.length > 0) {
                 const totalMs = times.reduce((sum, ms) => sum + ms, 0);
                 const avgMins = Math.round((totalMs / times.length) / 60000);
@@ -515,14 +515,14 @@ consumerRouter.get('/explore', async (req, res) => {
 // 5. Create Order
 consumerRouter.post('/order', async (req, res) => {
     try {
-        const { 
-            userId, 
-            vendorId, 
-            totalAmount, 
-            items, 
-            isSolo = true, 
-            isCoveredByHost = false, 
-            participantShare = totalAmount, 
+        const {
+            userId,
+            vendorId,
+            totalAmount,
+            items,
+            isSolo = true,
+            isCoveredByHost = false,
+            participantShare = totalAmount,
             hasPaid = false,
             useActivePerk = false,
             perkUserCardId,
@@ -574,8 +574,8 @@ consumerRouter.post('/order', async (req, res) => {
             }
         });
 
-        // Award Hype Points
-        await updateHypeScore(userId, 25, prisma, 'Order Placed', 20);
+        // Award Hype Points + Sawa Currency (50 SC per solo order — Economy v2)
+        await updateHypeScore(userId, 25, prisma, 'Order Placed', 50);
 
         res.status(201).json({ message: 'Order created successfully', order });
     } catch (error: any) {
@@ -722,8 +722,16 @@ consumerRouter.post('/payment-verification', async (req, res) => {
                             await prisma.user.update({ where: { id: userId }, data: { activeCardId: null } });
                         }
                     } else if (perk === 'THE01') {
-                        // Covers the entire share if needed (waives fee and item part)
-                        newSawaSubsidy += participantOrder.shareAmount;
+                        // Waives ONLY the service fee (5 or 10 EGP)
+                        // Fetch order to check if it's solo or group
+                        const order = await prisma.order.findUnique({
+                            where: { id: orderId },
+                            include: { participants: true }
+                        });
+                        const isSolo = order ? order.participants.length <= 1 : true;
+                        const feePortion = isSolo ? 10 : 5;
+
+                        newSawaSubsidy += feePortion;
                         await prisma.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
                         const u = await prisma.user.findUnique({ where: { id: userId } });
                         if (u?.activeCardId === activeUserCard.id) {
@@ -769,12 +777,12 @@ consumerRouter.post('/payment-verification', async (req, res) => {
                 where: { id: orderId },
                 data: { status: 'AWAITING_VERIFICATION' }
             });
-            
+
             // Auto-mark safe as COMPLETED in DB when all participants have paid
             await (prisma as any).safeSession.updateMany({
                 where: { orderId },
                 data: { status: 'COMPLETED' }
-            }).catch(() => {}); // non-critical
+            }).catch(() => { }); // non-critical
         }
 
         // 4. Hype Score awarding is now deferred until the vendor approves & fires the order.
@@ -798,12 +806,12 @@ consumerRouter.post('/ocr', upload.single('receipt'), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
         }
-        
+
         // This is a mock endpoint for testing. We just return a success message.
         // Tesseract.js could be used here if real OCR was needed from the buffer.
-        
-        res.json({ 
-            status: 'ok', 
+
+        res.json({
+            status: 'ok',
             text: 'MOCK OCR RESULT: 150 EGP detected',
             confidence: 0.95
         });
@@ -836,10 +844,10 @@ consumerRouter.get('/friends/search', async (req, res) => {
 consumerRouter.get('/leaderboard', async (req, res) => {
     try {
         const period = (req.query.period as string) || 'weekly';
-        
+
         if (period === 'weekly' || period === 'monthly') {
             const dateFilter = new Date(Date.now() - (period === 'weekly' ? 7 : 30) * 24 * 60 * 60 * 1000);
-            
+
             // Real Periodic Data: Sum points from HypeLog within the window
             const aggregations = await prisma.hypeLog.groupBy({
                 by: ['userId'],
@@ -883,7 +891,7 @@ consumerRouter.get('/leaderboard/friends/:userId', async (req, res) => {
             select: { userId: true, friendId: true }
         });
         const friendIds = [...new Set(streaks.flatMap(s => [s.userId, s.friendId]))];
-        
+
         const users = await prisma.user.findMany({
             where: { id: { in: friendIds } },
             orderBy: { hypeScore: 'desc' },
@@ -1371,15 +1379,15 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     let currentParticipantPerkId: string | null = (participant.userId === safe.hostId) ? hostPerkCardId : null;
 
                     const pOrder = await tx.participantOrder.create({
-                        data: { 
-                            orderId: orderDoc.id, 
-                            userId: participant.userId, 
-                            shareAmount: isCoveredByHost 
+                        data: {
+                            orderId: orderDoc.id,
+                            userId: participant.userId,
+                            shareAmount: isCoveredByHost
                                 ? (participant.userId === safe.hostId ? totalAmount : 0)
-                                : shareWithFee, 
-                            sawaSubsidy, 
+                                : shareWithFee,
+                            sawaSubsidy,
                             perkUserCardId: currentParticipantPerkId,
-                            hasPaid: participant.userId === safe.hostId ? false : isCoveredByHost 
+                            hasPaid: participant.userId === safe.hostId ? false : isCoveredByHost
                         }
                     });
 
@@ -1387,7 +1395,7 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                         participantPerks[participant.userId] = currentParticipantPerkId;
                     }
                 }
-                
+
                 if (totalSawaSubsidy > 0) {
                     await tx.order.update({ where: { id: orderDoc.id }, data: { sawaSubsidy: totalSawaSubsidy } });
                 }
@@ -1405,7 +1413,7 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                                     points *= 2;
                                     await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
                                     await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
-                                    
+
                                     // Update the ParticipantOrder we just created with the perk ID
                                     await tx.participantOrder.updateMany({
                                         where: { orderId: orderDoc.id, userId: participant.userId },
@@ -1413,7 +1421,7 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                                     });
                                 }
                             }
-                            await updateHypeScore(participant.userId, points, tx, undefined, 25);
+                            await updateHypeScore(participant.userId, points, tx, undefined, 50);
                         }
                     }
                 }
@@ -1562,7 +1570,7 @@ consumerRouter.get('/feed/:userId', async (req, res) => {
             orderBy: { expiresAt: 'asc' }, take: 10
         });
         const announcements = await prisma.vendor.findMany({
-            where: { 
+            where: {
                 announcementBanner: { not: null },
                 announcementUpdatedAt: { gte: since }
             },
@@ -1741,13 +1749,13 @@ consumerRouter.post('/gamble/spin', async (req, res) => {
             // Card Rewards (35% remaining total)
             let rarityQuery: string[] = [];
             let poolRandom = (random - 65) / 35 * 100; // Recalculate within the 35% card pool
-            
+
             // Re-evaluating the user's specific weighted requirements:
             // 20%: Random Common/Uncommon
             // 10%: Random Rare
             // 4%: Legendary
             // 1%: Exotic
-            
+
             // Wait, the user provided exact % for the WHOLE spin originally:
             // Now: 5% Dud, 60% HypeBoost, 20% Common/Uncommon, 10% Rare, 4% Legendary, 1% Exotic
 
@@ -1760,15 +1768,15 @@ consumerRouter.post('/gamble/spin', async (req, res) => {
 
             if (rarityQuery.length > 0) {
                 const availableCards = await prisma.card.findMany({
-                    where: { 
+                    where: {
                         rarity: { in: rarityQuery },
-                        perkCode: { notIn: ['SAWA_DISCOUNT', 'SAWA_FEAST'] }
+                        perkCode: { notIn: ['SAWA_DISCOUNT', 'SAWA_FEAST', 'THE01'] }
                     }
                 });
 
                 if (availableCards.length > 0) {
                     const selectedItem = availableCards[Math.floor(Math.random() * availableCards.length)];
-                    
+
                     // Add to user inventory
                     const userCard = await prisma.userCard.create({
                         data: {
@@ -1778,11 +1786,11 @@ consumerRouter.post('/gamble/spin', async (req, res) => {
                         include: { card: true }
                     });
 
-                    result = { 
-                        type: 'CARD', 
-                        card: userCard.card, 
+                    result = {
+                        type: 'CARD',
+                        card: userCard.card,
                         userCardId: userCard.id,
-                        message: `Congratulations! You won: ${userCard.card.name}` 
+                        message: `Congratulations! You won: ${userCard.card.name}`
                     };
                 } else {
                     // Fallback to hype boost if no cards found (shouldn't happen with proper seeding)
@@ -2027,8 +2035,8 @@ consumerRouter.post('/delivery-requests/:requestId/cancel', async (req, res) => 
 
         if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
-        const dr = await prisma.deliveryRequest.findUnique({ 
-            where: { id: requestId } 
+        const dr = await prisma.deliveryRequest.findUnique({
+            where: { id: requestId }
         });
 
         if (!dr) return res.status(404).json({ error: 'Request not found' });
@@ -2086,9 +2094,10 @@ consumerRouter.get('/my-deliveries/:userId', async (req, res) => {
 consumerRouter.post('/vault/buy-card', async (req, res) => {
     try {
         const { userId, cardType } = req.body;
-        const cost = cardType === 'THE_FEAST' ? 5000 : 1000;
-        const perkCode = cardType === 'THE_FEAST' ? 'SAWA_FEAST' : 'SAWA_DISCOUNT';
-        
+        const cost = cardType === 'THE_FEAST' ? 5000 : cardType === 'NO_SERVICE_FEES' ? 800 : 1000;
+        const perkCode = cardType === 'THE_FEAST' ? 'SAWA_FEAST' :
+            cardType === 'NO_SERVICE_FEES' ? 'THE01' : 'SAWA_DISCOUNT';
+
         const user = await prisma.user.findUnique({ where: { id: userId } });
         if (!user || user.sawaCurrency < cost) {
             return res.status(400).json({ error: 'Insufficient SAWA Currency' });
@@ -2106,7 +2115,7 @@ consumerRouter.post('/vault/buy-card', async (req, res) => {
                 }
             });
         }
-        
+
         await prisma.$transaction([
             prisma.user.update({
                 where: { id: userId },

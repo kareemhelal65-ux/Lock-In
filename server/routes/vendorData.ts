@@ -200,9 +200,9 @@ vendorDataRouter.patch('/:id/order/:orderId/status', async (req, res) => {
                 const activeUserCard = userObj?.activeCardId ? userObj.inventory.find((uc: any) => uc.id === userObj.activeCardId) : null;
                 const perkCode = (activeUserCard && !activeUserCard.isUsed) ? activeUserCard.card.perkCode : null;
 
-                let points = 25; // Default for joiner
+                let points = 50; // Default for joiner (boosted per Economy v2)
                 if (isHost) {
-                    points = isSolo ? 15 : 100;
+                    points = isSolo ? 50 : 75; // Solo Host: 50 SC, Group Host: 75 SC
                 }
                 const baseSCPoints = points;
 

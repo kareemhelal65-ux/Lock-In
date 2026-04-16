@@ -40,10 +40,10 @@ const cards = [
     rarity: "Legendary",
   },
   {
-    name: "The 0.1%",
-    description: "Zero fees on your Solo orders and the entire Safe if you are the Host.",
+    name: "No Service Fees",
+    description: "Waives the service fee for your Solo orders and the entire Safe if you are the Host.",
     perkCode: "THE01",
-    rarity: "Exotic",
+    rarity: "Uncommon",
   },
 ];
 

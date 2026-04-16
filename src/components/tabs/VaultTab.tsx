@@ -272,6 +272,19 @@ export default function VaultTab() {
                      {isBuying === 'HYPE_HUB' ? 'Purchasing...' : 'Purchase'}
                    </button>
                 </div>
+
+                <div className="bg-zinc-900 p-4 border-2 border-indigo-500/50 rounded-xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 bg-indigo-500 text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">800 SC</div>
+                   <h4 className="font-display font-bold text-white text-lg">No Service Fees</h4>
+                   <p className="text-cool-gray text-xs mb-3 mt-1">Waives the solo or group service fees (5-10 EGP).</p>
+                   <button 
+                     onClick={() => handleBuyCard('NO_SERVICE_FEES')} 
+                     disabled={sawaCurrency < 800 || !!isBuying} 
+                     className="w-full bg-indigo-500 text-white font-black uppercase py-3 rounded-lg disabled:opacity-50 disabled:bg-cool-gray/30 transition-colors"
+                   >
+                     {isBuying === 'NO_SERVICE_FEES' ? 'Purchasing...' : 'Purchase'}
+                   </button>
+                </div>
                 
                 <div className="bg-zinc-900 p-4 border-2 border-electric-red/50 rounded-xl relative overflow-hidden">
                    <div className="absolute top-0 right-0 bg-electric-red text-white px-3 py-1 text-[10px] font-black tracking-widest rounded-bl-xl">5000 SC</div>
