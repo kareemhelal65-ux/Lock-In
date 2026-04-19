@@ -13,7 +13,7 @@ interface VendorAppProps {
 }
 
 export default function VendorApp({ onBack }: VendorAppProps) {
-    const [appState, setAppState] = useState<'login' | 'signup' | 'onboarding' | 'terminal'>(() => {
+    const [appState, setAppState] = useState<'login' | 'onboarding' | 'terminal'>(() => {
         const saved = localStorage.getItem('vendorAppState');
         return (saved as any) || 'login';
     });
@@ -60,7 +60,7 @@ export default function VendorApp({ onBack }: VendorAppProps) {
 
     // Auth Forms
     const [loginForm, setLoginForm] = useState({ vendorId: '', password: '' });
-    const [signupForm, setSignupForm] = useState({ vendorId: '', password: '', confirmPassword: '' });
+
 
     // Status
     const [isLoading, setIsLoading] = useState(false);
@@ -82,30 +82,6 @@ export default function VendorApp({ onBack }: VendorAppProps) {
         }
     };
 
-    const handleSignup = async () => {
-        setErrorMessage('');
-        if (signupForm.password !== signupForm.confirmPassword) {
-            setErrorMessage("Passwords do not match.");
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const res = await fetch('/api/vendor/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ vendorId: signupForm.vendorId, password: signupForm.password })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Signup failed');
-            setCurrentVendorId(data.vendorId);
-            setAppState('onboarding');
-        } catch (error: any) {
-            setErrorMessage(error.message);
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleLogin = async () => {
         setErrorMessage('');
@@ -232,75 +208,13 @@ export default function VendorApp({ onBack }: VendorAppProps) {
                         >
                             {isLoading ? 'Authenticating...' : 'Enter Terminal'}
                         </button>
-                        <button onClick={() => { setErrorMessage(''); setAppState('signup'); }} className="w-full text-cool-gray font-display font-bold uppercase text-sm mt-4 hover:text-white transition-colors">
-                            Apply for a Vendor Account
-                        </button>
+
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (appState === 'signup') {
-        return (
-            <div className="min-h-screen bg-deep-charcoal text-white p-6 flex flex-col pt-safe">
-                <button onClick={() => { setErrorMessage(''); setAppState('login'); }} title="Go to Login" className="self-start p-2 hover:bg-white/10 rounded-full transition-colors mb-8">
-                    <ArrowLeft className="w-6 h-6" />
-                </button>
-                <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
-                    <h1 className="font-display font-black text-5xl uppercase mb-2 text-white">Join Sawa</h1>
-                    <p className="text-cool-gray mb-8">Setup your merchant account credentials.</p>
-
-                    {errorMessage && (
-                        <div className="bg-electric-red/20 border-2 border-electric-red text-electric-red p-4 rounded-xl mb-6 font-bold">
-                            {errorMessage}
-                        </div>
-                    )}
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-bold uppercase text-cool-gray mb-2">Requested Vendor ID</label>
-                            <input
-                                type="text"
-                                value={signupForm.vendorId}
-                                onChange={(e) => setSignupForm(prev => ({ ...prev, vendorId: e.target.value }))}
-                                className="w-full bg-zinc-900 border-2 border-cool-gray/30 rounded-xl p-4 font-display font-bold text-lg focus:border-volt-green focus:outline-none transition-colors"
-                                placeholder="e.g. hype_kitchen"
-                            />
-                            <p className="text-xs text-cool-gray mt-2">Lowercase letters, numbers, and underscores only. (3-20 chars)</p>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold uppercase text-cool-gray mb-2">Password</label>
-                            <input
-                                type="password"
-                                value={signupForm.password}
-                                onChange={(e) => setSignupForm(prev => ({ ...prev, password: e.target.value }))}
-                                className="w-full bg-zinc-900 border-2 border-cool-gray/30 rounded-xl p-4 font-display font-bold text-lg focus:border-volt-green focus:outline-none transition-colors"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold uppercase text-cool-gray mb-2">Confirm Password</label>
-                            <input
-                                type="password"
-                                value={signupForm.confirmPassword}
-                                onChange={(e) => setSignupForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                                className="w-full bg-zinc-900 border-2 border-cool-gray/30 rounded-xl p-4 font-display font-bold text-lg focus:border-volt-green focus:outline-none transition-colors"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <button
-                            onClick={handleSignup}
-                            disabled={isLoading}
-                            className="w-full bg-volt-green text-deep-charcoal font-display font-black uppercase tracking-widest text-xl p-4 rounded-xl mt-4 hover:bg-[#b0f200] transition-colors disabled:opacity-50"
-                        >
-                            {isLoading ? 'Processing...' : 'Create Account'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     if (appState === 'onboarding') {
         return (
