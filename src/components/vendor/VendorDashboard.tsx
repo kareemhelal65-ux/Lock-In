@@ -11,7 +11,7 @@ import {
     Loader2,
     X
 } from 'lucide-react';
-import { translations } from './translations';
+import { translations, menuItemNamesAr, choiceOptionNamesAr } from './translations';
 
 interface VendorDashboardProps {
     vendorId: string | null;
@@ -25,6 +25,18 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
     const [processingOrder, setProcessingOrder] = useState<{ id: string, action: string } | null>(null);
 
     const t = translations[lang];
+
+    const tgOption = (text: string) => {
+        if (!text) return '';
+        if (lang !== 'ar') return text;
+        return choiceOptionNamesAr[text as keyof typeof choiceOptionNamesAr] || text;
+    };
+
+    const tgItemName = (name: string) => {
+        if (!name) return t.unknownItem;
+        if (lang !== 'ar') return name;
+        return menuItemNamesAr[name as keyof typeof menuItemNamesAr] || name;
+    };
 
     const fetchDashboard = async () => {
         if (!vendorId) return;
@@ -214,16 +226,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                             <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
                                                 <p className="font-bold text-white text-lg">
                                                     <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
-                                                    {item?.name || t.unknownItem}
+                                                    {tgItemName(item?.name)}
                                                 </p>
                                                 
                                                 {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
                                                     <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                                                        {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => (
-                                                            <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
-                                                                +{mod.name}
-                                                            </span>
-                                                        ))}
+                                                        {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => {
+                                                            const modStr = mod.option?.name || mod.name || (typeof mod === 'string' ? mod : '');
+                                                            return modStr ? (
+                                                                <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
+                                                                    +{tgOption(modStr)}
+                                                                </span>
+                                                            ) : null;
+                                                        })}
                                                     </div>
                                                 )}
                                                 {item.specialNotes && (
@@ -327,16 +342,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                                 <div key={idx} className={`border-cool-gray/30 ${lang === 'ar' ? 'border-r-2 pr-3' : 'border-l-2 pl-3'}`}>
                                                     <p className="font-bold text-white text-lg">
                                                         <span className={`text-cool-gray ${lang === 'ar' ? 'ml-2' : 'mr-2'}`}>{item?.quantity || 1}x</span>
-                                                        {item?.name || t.unknownItem}
+                                                        {tgItemName(item?.name)}
                                                     </p>
                                                     
                                                     {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-1 mb-2">
-                                                            {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => (
-                                                                <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
-                                                                    +{mod.name}
-                                                                </span>
-                                                            ))}
+                                                            {getItemModifiers(item.modifiers).map((mod: any, mIdx: number) => {
+                                                                const modStr = mod.option?.name || mod.name || (typeof mod === 'string' ? mod : '');
+                                                                return modStr ? (
+                                                                    <span key={mIdx} className="bg-volt-green/20 text-volt-green text-[9px] font-black uppercase px-1.5 py-0.5 rounded border border-volt-green/30">
+                                                                        +{tgOption(modStr)}
+                                                                    </span>
+                                                                ) : null;
+                                                            })}
                                                         </div>
                                                     )}
                                                     {item.specialNotes && (
@@ -439,16 +457,19 @@ export default function VendorDashboard({ vendorId, lang }: VendorDashboardProps
                                     {reviewingOrder.items?.map((item: any, i: number) => (
                                         <div key={i} className="border-b border-cool-gray/20 py-2 last:border-0">
                                             <div className="flex justify-between text-white">
-                                                <span className="font-bold">{item?.quantity || 1}x {item?.name || t.unknownItem}</span>
+                                                <span className="font-bold">{item?.quantity || 1}x {tgItemName(item?.name)}</span>
                                                 <span className="font-display">{(item?.price || 0) * (item?.quantity || 1)} EGP</span>
                                             </div>
                                             {item?.modifiers && getItemModifiers(item.modifiers).length > 0 && (
                                                 <div className="flex flex-wrap gap-1 mt-1">
-                                                    {getItemModifiers(item.modifiers).map((mod: any, j: number) => (
-                                                        <span key={j} className="text-[10px] uppercase font-black text-volt-green bg-volt-green/10 px-1.5 rounded">
-                                                            +{mod.name || mod}
-                                                        </span>
-                                                    ))}
+                                                    {getItemModifiers(item.modifiers).map((mod: any, j: number) => {
+                                                        const modStr = mod.option?.name || mod.name || (typeof mod === 'string' ? mod : '');
+                                                        return modStr ? (
+                                                            <span key={j} className="text-[10px] uppercase font-black text-volt-green bg-volt-green/10 px-1.5 rounded">
+                                                                +{tgOption(modStr)}
+                                                            </span>
+                                                        ) : null;
+                                                    })}
                                                 </div>
                                             )}
                                             {item?.specialNotes && (
