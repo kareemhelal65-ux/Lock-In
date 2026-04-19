@@ -56,6 +56,7 @@ export default function CheckoutSheet({
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDropzone, setShowDropzone] = useState(false);
   const [localOrderId, setLocalOrderId] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   const { currentUser } = useApp();
 
   // Perk Logic - Find specific cards in inventory
@@ -124,9 +125,11 @@ export default function CheckoutSheet({
 
   const handlePayment = () => {
     if (!selectedPayment) return;
+    setIsProcessing(true);
 
     if (selectedPayment === 'instapay') {
       setShowDropzone(true);
+      setIsProcessing(false);
       return;
     }
 
@@ -569,15 +572,15 @@ export default function CheckoutSheet({
             <div className="p-4 border-t-2 border-deep-charcoal/10">
               <motion.button
                 onClick={handlePayment}
-                disabled={!selectedPayment}
-                className={`w-full py-4 rounded-pill font-display font-bold uppercase text-lg border-2 border-deep-charcoal transition-all ${selectedPayment
+                disabled={!selectedPayment || isProcessing}
+                className={`w-full py-4 rounded-pill font-display font-bold uppercase text-lg border-2 border-deep-charcoal transition-all ${(selectedPayment && !isProcessing)
                   ? 'bg-electric-red text-white shadow-brutal-sm'
                   : 'bg-gray-200 text-cool-gray border-gray-300'
                   }`}
-                whileTap={selectedPayment ? { scale: 0.95 } : {}}
+                whileTap={(selectedPayment && !isProcessing) ? { scale: 0.95 } : {}}
               >
                 <Wallet className="w-5 h-5 inline mr-2" />
-                {selectedPayment ? `PAY ${finalTotal} EGP` : 'SELECT PAYMENT'}
+                {isProcessing ? 'PROCESSING...' : (selectedPayment ? `PAY ${finalTotal} EGP` : 'SELECT PAYMENT')}
               </motion.button>
             </div>
           </>
