@@ -36,6 +36,7 @@ export default function VendorProfile({
   const isOnFeed = vendorsOnLock.includes(restaurant.id);
   const [cart, setCart] = useState<{ id: string; item: MenuItem; quantity: number; selectedChoices: SelectedChoice[]; specialNotes: string }[]>([]);
   const [itemWithOptions, setItemWithOptions] = useState<MenuItem | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
 
   const handleToggleOnLock = () => {
@@ -220,100 +221,165 @@ export default function VendorProfile({
       </div>
 
 
+      {/* Category Filter Tabs */}
+      {(() => {
+        const categories = Array.from(new Set(restaurant.menu?.map(i => i.category).filter(Boolean) || []));
+        return categories.length > 1 ? (
+          <div className="sticky top-0 z-30 bg-sneaker-white border-b-2 border-deep-charcoal/10 px-4 py-3">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-pill text-xs font-display font-black uppercase border-2 transition-all ${
+                  selectedCategory === null
+                    ? 'bg-deep-charcoal text-white border-deep-charcoal'
+                    : 'bg-white text-deep-charcoal border-deep-charcoal/30 hover:border-deep-charcoal'
+                }`}
+              >
+                All
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
+                  className={`flex-shrink-0 px-4 py-1.5 rounded-pill text-xs font-display font-black uppercase border-2 transition-all whitespace-nowrap ${
+                    selectedCategory === cat
+                      ? 'bg-volt-green text-deep-charcoal border-deep-charcoal'
+                      : 'bg-white text-deep-charcoal border-deep-charcoal/30 hover:border-deep-charcoal'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      })()}
+
       {/* Menu */}
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-        <h2 className="font-display font-bold text-lg uppercase text-deep-charcoal mb-4">
-          Menu
-        </h2>
+        {(() => {
+          const menu = restaurant.menu || [];
+          const categories = Array.from(new Set(menu.map(i => i.category).filter(Boolean)));
+          const filteredCategories = selectedCategory ? [selectedCategory] : categories;
+          const uncategorized = menu.filter(i => !i.category);
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {restaurant.menu?.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className={`brutal-card p-3 ${item.isLocked ? 'opacity-70' : 'brutal-card-hover'}`}
-            >
-              <div className="flex gap-3">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-20 h-20 rounded-lg object-cover border-2 border-deep-charcoal"
-                />
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-display font-bold text-deep-charcoal">
-                        {item.name}
-                      </h3>
-                      <p className="text-xs text-cool-gray line-clamp-2">
-                        {item.description}
-                      </p>
+          const renderItem = (item: MenuItem, index: number) => {
+            const hasRealImage = item.image && !item.image.includes('placeholder');
+            const categoryEmojis: Record<string, string> = {
+              'Crepes': '🥞', 'Sandwiches': '🥙', 'Platters & Fattah': '🍽️',
+              'Pasta': '🍝', 'Traditional': '🫘', 'Traditional - Beans': '🫘',
+              'Traditional - Falafel': '🧆', 'Traditional - Potatoes': '🥔',
+              'Traditional - Eggs': '🍳', 'Rolls & Boxes': '🌯',
+              'Salads & Sides': '🥗', 'Drinks': '🥤'
+            };
+            const emoji = categoryEmojis[item.category] || '🍴';
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                className={`brutal-card p-3 ${item.isLocked ? 'opacity-70' : 'brutal-card-hover'}`}
+              >
+                <div className="flex gap-3">
+                  {/* Image or Placeholder */}
+                  {hasRealImage ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-20 h-20 rounded-lg object-cover border-2 border-deep-charcoal flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg border-2 border-deep-charcoal flex-shrink-0 bg-gradient-to-br from-volt-green/20 to-deep-charcoal/10 flex flex-col items-center justify-center">
+                      <span className="text-3xl leading-none">{emoji}</span>
+                      <span className="text-[9px] font-black text-deep-charcoal/40 uppercase tracking-wider mt-1">Photo</span>
+                      <span className="text-[8px] font-bold text-deep-charcoal/30 uppercase">Soon</span>
                     </div>
-
-                    {item.isLocked && (
-                      <div className="w-8 h-8 bg-deep-charcoal rounded-full flex items-center justify-center">
-                        <Lock className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-display font-bold">{item.price} EGP</span>
-
-                    {item.isLocked ? (
-                      <div className="text-right">
-                        <p className="text-xs font-display text-electric-red">
-                          Requires Hype Level {item.requiredHypeLevel}
-                        </p>
-                      </div>
-                    ) : !item.inStock ? (
-                      <div className="bg-electric-red/10 border-2 border-electric-red px-3 py-1 rounded-pill">
-                        <span className="text-[10px] font-display font-black text-electric-red uppercase tracking-widest">
-                          Sold Out
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                          {cart.filter(c => c.item.id === item.id).length > 0 ? (
-                          <div className="flex items-center gap-2 bg-volt-green rounded-pill border-2 border-deep-charcoal px-2 py-1">
-                            <button
-                              onClick={() => {
-                                const variant = cart.find(c => c.item.id === item.id);
-                                if (variant) removeFromCart(item.id, variant.selectedChoices, variant.specialNotes);
-                              }}
-                              className="w-8 h-8 flex items-center justify-center"
-                            >
-                              <Minus className="w-5 h-5" />
-                            </button>
-                            <span className="font-display font-bold w-4 text-center">
-                              {cart.filter(c => c.item.id === item.id).reduce((sum, c) => sum + c.quantity, 0)}
-                            </span>
-                            <button
-                              onClick={() => addToCart(item)}
-                              className="w-8 h-8 flex items-center justify-center"
-                            >
-                              <Plus className="w-5 h-5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <motion.button
-                            onClick={() => addToCart(item)}
-                            className="w-10 h-10 bg-volt-green rounded-full border-2 border-deep-charcoal flex items-center justify-center"
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Plus className="w-5 h-5" />
-                          </motion.button>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-display font-bold text-deep-charcoal leading-tight">{item.name}</h3>
+                        {item.description && (
+                          <p className="text-xs text-cool-gray line-clamp-2 mt-0.5">{item.description}</p>
                         )}
                       </div>
-                    )}
+                      {item.isLocked && (
+                        <div className="w-8 h-8 bg-deep-charcoal rounded-full flex items-center justify-center flex-shrink-0">
+                          <Lock className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="font-display font-bold">{item.price} EGP</span>
+                      {item.isLocked ? (
+                        <p className="text-xs font-display text-electric-red">Hype {item.requiredHypeLevel}+</p>
+                      ) : !item.inStock ? (
+                        <div className="bg-electric-red/10 border-2 border-electric-red px-3 py-1 rounded-pill">
+                          <span className="text-[10px] font-display font-black text-electric-red uppercase tracking-widest">Sold Out</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          {cart.filter(c => c.item.id === item.id).length > 0 ? (
+                            <div className="flex items-center gap-2 bg-volt-green rounded-pill border-2 border-deep-charcoal px-2 py-1">
+                              <button onClick={() => { const v = cart.find(c => c.item.id === item.id); if (v) removeFromCart(item.id, v.selectedChoices, v.specialNotes); }} className="w-8 h-8 flex items-center justify-center">
+                                <Minus className="w-5 h-5" />
+                              </button>
+                              <span className="font-display font-bold w-4 text-center">
+                                {cart.filter(c => c.item.id === item.id).reduce((sum, c) => sum + c.quantity, 0)}
+                              </span>
+                              <button onClick={() => addToCart(item)} className="w-8 h-8 flex items-center justify-center">
+                                <Plus className="w-5 h-5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <motion.button
+                              onClick={() => addToCart(item)}
+                              className="w-10 h-10 bg-volt-green rounded-full border-2 border-deep-charcoal flex items-center justify-center"
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Plus className="w-5 h-5" />
+                            </motion.button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            );
+          };
+
+          return (
+            <div className="space-y-8">
+              {filteredCategories.map(cat => {
+                const items = menu.filter(i => i.category === cat);
+                if (items.length === 0) return null;
+                return (
+                  <div key={cat}>
+                    <h2 className="font-display font-black text-lg uppercase text-deep-charcoal mb-3 pb-2 border-b-4 border-deep-charcoal">
+                      {cat}
+                    </h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {items.map((item, i) => renderItem(item, i))}
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Uncategorized fallback */}
+              {!selectedCategory && uncategorized.length > 0 && (
+                <div>
+                  <h2 className="font-display font-black text-lg uppercase text-deep-charcoal mb-3 pb-2 border-b-4 border-deep-charcoal">Menu</h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {uncategorized.map((item, i) => renderItem(item, i))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Cart Bar */}
