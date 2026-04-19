@@ -616,8 +616,8 @@ consumerRouter.post('/order', async (req, res) => {
             }
         });
 
-        // Award Hype Points + Sawa Currency (50 SC per solo order — Economy v2)
-        await updateHypeScore(userId, 25, prisma, 'Order Placed', 50);
+        // Award Hype Points + Sawa Currency (50 SC + 50 Hype per solo order — Economy v2)
+        await updateHypeScore(userId, 50, prisma, 'Order Placed', 50);
 
         res.status(201).json({ message: 'Order created successfully', order });
     } catch (error: any) {
@@ -1442,29 +1442,28 @@ consumerRouter.post('/safes/:safeId/trigger-checkout', async (req, res) => {
                     await tx.order.update({ where: { id: orderDoc.id }, data: { sawaSubsidy: totalSawaSubsidy } });
                 }
 
-                if (isCoveredByHost) {
-                    await updateHypeScore(safe.hostId, 75, tx, undefined, 75);
-                    for (let i = 0; i < participants.length; i++) {
-                        const participant = participants[i];
-                        if (participant.userId !== safe.hostId) {
-                            const pUser = await tx.user.findUnique({ where: { id: participant.userId } });
-                            let points = 25;
-                            if (i === 1 && pUser?.activeCardId) {
-                                const activeUserCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
-                                if (activeUserCard?.card.perkCode === 'EARLYBIRD' || activeUserCard?.card.perkCode === 'MARKET_MAKER') {
-                                    points *= 2;
-                                    await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
-                                    await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
+                // Unconditionally award 50 Hype Points & 50 SC for hosting and participating
+                await updateHypeScore(safe.hostId, 50, tx, 'Hosted Sawa', 50);
+                for (let i = 0; i < participants.length; i++) {
+                    const participant = participants[i];
+                    if (participant.userId !== safe.hostId) {
+                        const pUser = await tx.user.findUnique({ where: { id: participant.userId } });
+                        let points = 50;
+                        if (i === 1 && pUser?.activeCardId) {
+                            const activeUserCard = await tx.userCard.findUnique({ where: { id: pUser.activeCardId }, include: { card: true } });
+                            if (activeUserCard?.card.perkCode === 'EARLYBIRD' || activeUserCard?.card.perkCode === 'MARKET_MAKER') {
+                                points *= 2;
+                                await tx.userCard.update({ where: { id: activeUserCard.id }, data: { isUsed: true } });
+                                await tx.user.update({ where: { id: participant.userId }, data: { activeCardId: null } });
 
-                                    // Update the ParticipantOrder we just created with the perk ID
-                                    await tx.participantOrder.updateMany({
-                                        where: { orderId: orderDoc.id, userId: participant.userId },
-                                        data: { perkUserCardId: activeUserCard.id }
-                                    });
-                                }
+                                // Update the ParticipantOrder we just created with the perk ID
+                                await tx.participantOrder.updateMany({
+                                    where: { orderId: orderDoc.id, userId: participant.userId },
+                                    data: { perkUserCardId: activeUserCard.id }
+                                });
                             }
-                            await updateHypeScore(participant.userId, points, tx, undefined, 50);
                         }
+                        await updateHypeScore(participant.userId, points, tx, 'Joined Sawa', 50);
                     }
                 }
 
