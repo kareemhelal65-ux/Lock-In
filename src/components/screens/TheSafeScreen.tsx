@@ -798,14 +798,14 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                             {(() => {
                               const addons = typeof item.addOns === 'string' ? JSON.parse(item.addOns) : item.addOns;
                               return addons.map((addon: any, idx: number) => {
-                                const isSelected = cardSelectedChoices[item.id]?.some(a => a.name === addon.name);
+                                const isSelected = cardSelectedChoices[item.id]?.some(a => a.option.name === addon.name);
                                 return (
                                   <button
                                     key={idx}
                                     onClick={() => {
                                       const current = cardSelectedChoices[item.id] || [];
                                       if (isSelected) {
-                                        setCardSelectedChoices({ ...cardSelectedChoices, [item.id]: current.filter(a => a.name !== addon.name) });
+                                        setCardSelectedChoices({ ...cardSelectedChoices, [item.id]: current.filter(a => a.option.name !== addon.name) });
                                       } else {
                                         setCardSelectedChoices({ ...cardSelectedChoices, [item.id]: [...current, addon] });
                                       }
@@ -1024,7 +1024,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             onCoverLock={async () => {
               if (currentUser) {
                 const fullOrderItems = myOrder.map(c => {
-                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.price || 0), 0);
+                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.option.price || 0), 0);
                   return {
                     menuItemId: c.item.id,
                     name: c.item.name,
@@ -1066,7 +1066,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             onPayShare={async () => {
               if (currentUser) {
                 const fullOrderItems = myOrder.map(c => {
-                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.price || 0), 0);
+                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.option.price || 0), 0);
                   return {
                     menuItemId: c.item.id,
                     name: c.item.name,
