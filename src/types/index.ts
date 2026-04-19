@@ -1,5 +1,46 @@
 // LOCK IN. - Type Definitions
 
+// ── Add-On System ─────────────────────────────────────────────────────────────
+
+/** A single selectable option within an add-on group (new format) */
+export interface AddOnOption {
+  name: string;
+  price: number;
+  inStock?: boolean;
+}
+
+/**
+ * A named group of options from which the user selects.
+ * - required: true  → user MUST pick at least one option before confirming
+ * - maxSelect: 1    → radio (only one option allowed)
+ * - maxSelect: N>1  → multi-select checkbox up to N
+ */
+export interface AddOnGroup {
+  groupName: string;
+  required: boolean;
+  minSelect?: number; // defaults to 0 (or 1 if required)
+  maxSelect: number;  // 1 = radio, N = multi-select
+  options: AddOnOption[];
+}
+
+/** Legacy flat add-on (old format — treated as a single optional group) */
+export interface LegacyAddOn {
+  name: string;
+  price: number;
+  inStock?: boolean;
+}
+
+/**
+ * A user's selection within a single group, stored in the cart
+ * and serialised into OrderItem.modifiers.
+ */
+export interface SelectedChoice {
+  groupName: string;
+  option: AddOnOption;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface User {
   id: string;
   name: string;
@@ -51,7 +92,8 @@ export interface MenuItem {
   isLocked: boolean;
   requiredHypeLevel: number;
   category: string;
-  addOns?: string | any[];
+  /** Serialised JSON: either LegacyAddOn[] OR AddOnGroup[] */
+  addOns?: string | AddOnGroup[] | LegacyAddOn[];
 }
 
 export interface Order {

@@ -359,70 +359,156 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                             )}
                                         </div>
 
-                                        {/* Add-Ons (only in edit mode) */}
+                                        {/* Choice Groups (only in edit mode) */}
                                         {isEditing && (
-                                            <div className="col-span-full mt-2 p-3 bg-black/50 rounded-xl border border-cool-gray/20">
-                                                <p className="text-xs font-bold text-volt-green uppercase tracking-wider mb-2">{t.addOns}</p>
-                                                 {(editForm.addOns || []).map((addon: any, idx: number) => (
-                                                     <div key={idx} className="flex flex-col md:flex-row md:items-center gap-3 md:gap-2 mb-4 md:mb-2 p-3 md:p-0 bg-black/30 md:bg-transparent rounded-lg border md:border-none border-cool-gray/10">
-                                                         <div className="flex-1 flex flex-col gap-1">
-                                                             <span className="md:hidden text-[9px] font-black uppercase tracking-widest text-cool-gray">Option Name</span>
-                                                             <input
-                                                                 type="text" placeholder="e.g. Extra Cheese"
-                                                                 className="w-full bg-black border border-cool-gray/40 rounded px-2 py-1.5 md:py-1 text-white text-xs focus:border-volt-green focus:outline-none"
-                                                                 value={addon.name}
-                                                                 onChange={e => {
-                                                                     const updated = [...editForm.addOns];
-                                                                     updated[idx] = { ...updated[idx], name: e.target.value };
-                                                                     setEditForm({ ...editForm, addOns: updated });
-                                                                 }}
-                                                             />
-                                                         </div>
-                                                         <div className="flex items-center gap-3">
-                                                             <div className="w-24 md:w-20">
-                                                                 <span className="md:hidden text-[9px] font-black uppercase tracking-widest text-cool-gray block mb-1">Price</span>
-                                                                 <input
-                                                                     type="number" placeholder="Price"
-                                                                     className="w-full bg-black border border-cool-gray/40 rounded px-2 py-1.5 md:py-1 text-volt-green text-xs font-bold focus:border-volt-green focus:outline-none"
-                                                                     value={addon.price}
-                                                                     onChange={e => {
-                                                                         const updated = [...editForm.addOns];
-                                                                         updated[idx] = { ...updated[idx], price: parseFloat(e.target.value) || 0 };
-                                                                         setEditForm({ ...editForm, addOns: updated });
-                                                                     }}
-                                                                 />
-                                                             </div>
-                                                             <div className="flex-1 flex flex-col items-start md:items-center">
-                                                                 <span className="text-[9px] text-cool-gray font-black uppercase mb-1 md:mb-0.5">{t.tableStock}</span>
-                                                                 <button
-                                                                     onClick={() => {
-                                                                         const updated = [...editForm.addOns];
-                                                                         updated[idx] = { ...updated[idx], inStock: !addon.hasOwnProperty('inStock') ? false : !addon.inStock };
-                                                                         setEditForm({ ...editForm, addOns: updated });
-                                                                     }}
-                                                                     type="button"
-                                                                     title={lang === 'ar' ? "تغيير حالة المخزون" : "Toggle Stock"}
-                                                                     className={`px-4 md:px-3 py-1.5 md:py-1 rounded-pill text-[10px] font-black uppercase border-2 transition-all ${
-                                                                         (addon.inStock !== false)
-                                                                             ? 'bg-volt-green/10 border-volt-green/50 text-volt-green'
-                                                                             : 'bg-electric-red/10 border-electric-red/50 text-electric-red'
-                                                                     }`}
-                                                                 >
-                                                                     {(addon.inStock !== false) ? t.inStock : t.soldOut}
-                                                                 </button>
-                                                             </div>
-                                                             <button
-                                                                 onClick={() => setEditForm({ ...editForm, addOns: editForm.addOns.filter((_: any, i: number) => i !== idx) })}
-                                                                 type="button"
-                                                                 className="w-8 h-8 md:w-auto md:h-auto flex items-center justify-center bg-electric-red/10 md:bg-transparent rounded-full text-electric-red text-xs font-bold hover:underline"
-                                                             >✕</button>
-                                                         </div>
-                                                     </div>
-                                                 ))}
-                                                <button
-                                                    onClick={() => setEditForm({ ...editForm, addOns: [...(editForm.addOns || []), { name: '', price: 0, inStock: true }] })}
-                                                    className="text-xs text-volt-green font-bold uppercase hover:underline"
-                                                >{t.addOption}</button>
+                                            <div className="col-span-full mt-2 p-4 bg-black/50 rounded-xl border border-cool-gray/20 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-xs font-bold text-volt-green uppercase tracking-wider">Choice Groups</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditForm({
+                                                            ...editForm,
+                                                            addOns: [
+                                                                ...(editForm.addOns || []),
+                                                                { groupName: '', required: false, maxSelect: 1, options: [{ name: '', price: 0, inStock: true }] }
+                                                            ]
+                                                        })}
+                                                        className="text-xs text-volt-green font-bold uppercase hover:underline flex items-center gap-1"
+                                                    >
+                                                        <Plus className="w-3 h-3" /> Add Group
+                                                    </button>
+                                                </div>
+
+                                                {(editForm.addOns || []).map((group: any, gIdx: number) => {
+                                                    // Detect legacy flat format and skip rendering as group UI (won't happen on new items)
+                                                    const isGroup = 'groupName' in group;
+                                                    if (!isGroup) return null; // skip legacy items (handled below)
+
+                                                    return (
+                                                        <div key={gIdx} className="p-3 bg-white/5 rounded-xl border border-cool-gray/20 space-y-3">
+                                                            {/* Group header row */}
+                                                            <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Group name (e.g. Bread Type)"
+                                                                    className="flex-1 bg-black border border-cool-gray/40 rounded px-2 py-1.5 text-white text-xs font-bold focus:border-volt-green focus:outline-none"
+                                                                    value={group.groupName}
+                                                                    onChange={e => {
+                                                                        const updated = [...editForm.addOns];
+                                                                        updated[gIdx] = { ...updated[gIdx], groupName: e.target.value };
+                                                                        setEditForm({ ...editForm, addOns: updated });
+                                                                    }}
+                                                                />
+                                                                {/* Required toggle */}
+                                                                <label className="flex items-center gap-1.5 text-xs text-cool-gray cursor-pointer whitespace-nowrap">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={group.required}
+                                                                        className="accent-electric-red"
+                                                                        onChange={e => {
+                                                                            const updated = [...editForm.addOns];
+                                                                            updated[gIdx] = { ...updated[gIdx], required: e.target.checked };
+                                                                            setEditForm({ ...editForm, addOns: updated });
+                                                                        }}
+                                                                    />
+                                                                    <span className={group.required ? 'text-electric-red font-black' : ''}>Required</span>
+                                                                </label>
+                                                                {/* Max select */}
+                                                                <div className="flex items-center gap-1 text-xs text-cool-gray whitespace-nowrap">
+                                                                    <span>Max pick:</span>
+                                                                    <input
+                                                                        type="number"
+                                                                        min={1}
+                                                                        className="w-14 bg-black border border-cool-gray/40 rounded px-2 py-1 text-volt-green text-xs font-bold focus:border-volt-green focus:outline-none"
+                                                                        value={group.maxSelect}
+                                                                        onChange={e => {
+                                                                            const updated = [...editForm.addOns];
+                                                                            updated[gIdx] = { ...updated[gIdx], maxSelect: parseInt(e.target.value) || 1 };
+                                                                            setEditForm({ ...editForm, addOns: updated });
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-[10px] text-cool-gray/60 whitespace-nowrap">{group.maxSelect === 1 ? '→ Radio' : `→ Multi (max ${group.maxSelect})`}</span>
+                                                                {/* Delete group */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setEditForm({ ...editForm, addOns: editForm.addOns.filter((_: any, i: number) => i !== gIdx) })}
+                                                                    className="w-7 h-7 flex items-center justify-center bg-electric-red/10 rounded-full text-electric-red hover:bg-electric-red/30 transition-colors"
+                                                                >
+                                                                    <X className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Options */}
+                                                            <div className="space-y-2 pl-2 border-l-2 border-cool-gray/20">
+                                                                {(group.options || []).map((opt: any, oIdx: number) => (
+                                                                    <div key={oIdx} className="flex flex-col md:flex-row gap-2 items-start md:items-center">
+                                                                        <input
+                                                                            type="text"
+                                                                            placeholder="Option name (e.g. Syrian Bread)"
+                                                                            className="flex-1 bg-black border border-cool-gray/40 rounded px-2 py-1 text-white text-xs focus:border-volt-green focus:outline-none"
+                                                                            value={opt.name}
+                                                                            onChange={e => {
+                                                                                const updated = [...editForm.addOns];
+                                                                                const opts = [...updated[gIdx].options];
+                                                                                opts[oIdx] = { ...opts[oIdx], name: e.target.value };
+                                                                                updated[gIdx] = { ...updated[gIdx], options: opts };
+                                                                                setEditForm({ ...editForm, addOns: updated });
+                                                                            }}
+                                                                        />
+                                                                        <div className="flex items-center gap-1 text-xs text-cool-gray">
+                                                                            <span>+</span>
+                                                                            <input
+                                                                                type="number"
+                                                                                min={0}
+                                                                                placeholder="0"
+                                                                                className="w-16 bg-black border border-cool-gray/40 rounded px-2 py-1 text-volt-green text-xs font-bold focus:border-volt-green focus:outline-none"
+                                                                                value={opt.price}
+                                                                                onChange={e => {
+                                                                                    const updated = [...editForm.addOns];
+                                                                                    const opts = [...updated[gIdx].options];
+                                                                                    opts[oIdx] = { ...opts[oIdx], price: parseFloat(e.target.value) || 0 };
+                                                                                    updated[gIdx] = { ...updated[gIdx], options: opts };
+                                                                                    setEditForm({ ...editForm, addOns: updated });
+                                                                                }}
+                                                                            />
+                                                                            <span>EGP</span>
+                                                                        </div>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                const updated = [...editForm.addOns];
+                                                                                const opts = updated[gIdx].options.filter((_: any, i: number) => i !== oIdx);
+                                                                                updated[gIdx] = { ...updated[gIdx], options: opts };
+                                                                                setEditForm({ ...editForm, addOns: updated });
+                                                                            }}
+                                                                            className="w-6 h-6 flex items-center justify-center text-electric-red/60 hover:text-electric-red transition-colors"
+                                                                        >✕</button>
+                                                                    </div>
+                                                                ))}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const updated = [...editForm.addOns];
+                                                                        updated[gIdx] = {
+                                                                            ...updated[gIdx],
+                                                                            options: [...(updated[gIdx].options || []), { name: '', price: 0, inStock: true }]
+                                                                        };
+                                                                        setEditForm({ ...editForm, addOns: updated });
+                                                                    }}
+                                                                    className="text-[10px] text-volt-green/60 font-bold uppercase hover:text-volt-green transition-colors"
+                                                                >+ Add Option</button>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+
+                                                {/* If completely empty, show a helpful hint */}
+                                                {(editForm.addOns || []).length === 0 && (
+                                                    <p className="text-xs text-cool-gray/40 text-center py-2">
+                                                        No choice groups yet. Add a group to let customers customize this item.
+                                                    </p>
+                                                )}
                                             </div>
                                         )}
                                     </motion.div>

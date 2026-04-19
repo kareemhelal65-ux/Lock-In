@@ -14,7 +14,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import type { Restaurant, MenuItem } from '@/types';
+import type { Restaurant, MenuItem, SelectedChoice } from '@/types';
 import ItemOptionsModal from '@/components/modals/ItemOptionsModal';
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -34,7 +34,7 @@ export default function VendorProfile({
 }: VendorProfileProps) {
   const { vendorsOnLock, toggleVendorOnLock } = useApp();
   const isOnFeed = vendorsOnLock.includes(restaurant.id);
-  const [cart, setCart] = useState<{ id: string; item: MenuItem; quantity: number; selectedAddOns: any[]; specialNotes: string }[]>([]);
+  const [cart, setCart] = useState<{ id: string; item: MenuItem; quantity: number; selectedChoices: SelectedChoice[]; specialNotes: string }[]>([]);
   const [itemWithOptions, setItemWithOptions] = useState<MenuItem | null>(null);
 
 
@@ -46,11 +46,11 @@ export default function VendorProfile({
     setItemWithOptions(item);
   };
 
-  const confirmAddToCart = (item: MenuItem, selectedAddOns: any[], specialNotes: string) => {
+  const confirmAddToCart = (item: MenuItem, selectedChoices: SelectedChoice[], specialNotes: string) => {
     setCart(prev => {
-      const existingIdx = prev.findIndex(c => 
-        c.item.id === item.id && 
-        JSON.stringify(c.selectedAddOns) === JSON.stringify(selectedAddOns) &&
+      const existingIdx = prev.findIndex(c =>
+        c.item.id === item.id &&
+        JSON.stringify(c.selectedChoices) === JSON.stringify(selectedChoices) &&
         c.specialNotes === specialNotes
       );
       if (existingIdx !== -1) {
@@ -58,16 +58,16 @@ export default function VendorProfile({
         updated[existingIdx] = { ...updated[existingIdx], quantity: updated[existingIdx].quantity + 1 };
         return updated;
       }
-      return [...prev, { id: generateId(), item, quantity: 1, selectedAddOns, specialNotes }];
+      return [...prev, { id: generateId(), item, quantity: 1, selectedChoices, specialNotes }];
     });
     onAddToCart(item);
   };
 
-  const removeFromCart = (itemId: string, selectedAddOns: any[] = [], specialNotes: string = '') => {
+  const removeFromCart = (itemId: string, selectedChoices: SelectedChoice[] = [], specialNotes: string = '') => {
     setCart(prev => {
-      const existingIdx = prev.findIndex(c => 
-        c.item.id === itemId && 
-        JSON.stringify(c.selectedAddOns) === JSON.stringify(selectedAddOns) &&
+      const existingIdx = prev.findIndex(c =>
+        c.item.id === itemId &&
+        JSON.stringify(c.selectedChoices) === JSON.stringify(selectedChoices) &&
         c.specialNotes === specialNotes
       );
       if (existingIdx !== -1) {
@@ -87,16 +87,21 @@ export default function VendorProfile({
 
     if (cart.length === 0) return;
 
-    const total = cart.reduce((sum, { item, quantity, selectedAddOns }) => {
-      const addonsPrice = selectedAddOns.reduce((s: number, a: any) => s + (a.price || 0), 0);
+    const total = cart.reduce((sum, { item, quantity, selectedChoices }) => {
+      const addonsPrice = selectedChoices.reduce((s, c) => s + (c.option.price || 0), 0);
       return sum + ((item.price + addonsPrice) * quantity);
     }, 0);
 
     const soloServiceFee = 10;
-    
+
     onCheckout({
       restaurant,
-      cart: cart.map(c => ({ item: c.item, quantity: c.quantity, modifiers: JSON.stringify(c.selectedAddOns), specialNotes: c.specialNotes })),
+      cart: cart.map(c => ({
+        item: c.item,
+        quantity: c.quantity,
+        modifiers: JSON.stringify(c.selectedChoices),
+        specialNotes: c.specialNotes
+      })),
       total: total,
       serviceFee: soloServiceFee,
       discountedTotal: total
@@ -105,7 +110,7 @@ export default function VendorProfile({
 
   const cartItemCount = cart.reduce((sum, c) => sum + c.quantity, 0);
   const cartTotalAmount = cart.reduce((sum, c) => {
-    const addonsPrice = c.selectedAddOns.reduce((s: number, a: any) => s + (a.price || 0), 0);
+    const addonsPrice = c.selectedChoices.reduce((s, ch) => s + (ch.option.price || 0), 0);
     return sum + ((c.item.price + addonsPrice) * c.quantity);
   }, 0);
 
@@ -271,12 +276,12 @@ export default function VendorProfile({
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        {cart.filter(c => c.item.id === item.id).length > 0 ? (
+                          {cart.filter(c => c.item.id === item.id).length > 0 ? (
                           <div className="flex items-center gap-2 bg-volt-green rounded-pill border-2 border-deep-charcoal px-2 py-1">
                             <button
                               onClick={() => {
                                 const variant = cart.find(c => c.item.id === item.id);
-                                if (variant) removeFromCart(item.id, variant.selectedAddOns, variant.specialNotes);
+                                if (variant) removeFromCart(item.id, variant.selectedChoices, variant.specialNotes);
                               }}
                               className="w-8 h-8 flex items-center justify-center"
                             >
@@ -343,11 +348,11 @@ export default function VendorProfile({
           </motion.div>
         )}
       </AnimatePresence>
-      <ItemOptionsModal 
+      <ItemOptionsModal
         isOpen={!!itemWithOptions}
         onClose={() => setItemWithOptions(null)}
         item={itemWithOptions}
-        onConfirm={(addons, notes) => itemWithOptions && confirmAddToCart(itemWithOptions, addons, notes)}
+        onConfirm={(choices, notes) => itemWithOptions && confirmAddToCart(itemWithOptions, choices, notes)}
       />
     </motion.div>
   );

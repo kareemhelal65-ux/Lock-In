@@ -541,6 +541,40 @@ consumerRouter.post('/order', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        // ── Server-side Required Choice Validation (Zero-Trust) ───────────────
+        for (const item of items) {
+            if (!item.menuItemId) continue; // flash-drop or unnamed item, skip
+            const dbItem = await prisma.menuItem.findUnique({ where: { id: item.menuItemId } });
+            if (!dbItem) continue;
+
+            let addOnGroups: any[] = [];
+            try {
+                const parsed = JSON.parse(dbItem.addOns || '[]');
+                if (Array.isArray(parsed) && parsed.length > 0 && 'groupName' in parsed[0]) {
+                    addOnGroups = parsed;
+                }
+            } catch { /* old format or non-JSON - skip group validation */ }
+
+            let submitted: any[] = [];
+            try { submitted = JSON.parse(item.modifiers || '[]'); } catch { submitted = []; }
+
+            for (const group of addOnGroups) {
+                if (group.required) {
+                    const hasSelection = submitted.some((s: any) =>
+                        s.groupName === group.groupName &&
+                        group.options.some((o: any) => o.name === s.option?.name)
+                    );
+                    if (!hasSelection) {
+                        return res.status(400).json({
+                            error: `Missing required choice: "${group.groupName}" for item "${dbItem.name}"`,
+                            field: group.groupName
+                        });
+                    }
+                }
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         const newOrderNumber = await getNextOrderNumber();
 
         // Resolve vendorId

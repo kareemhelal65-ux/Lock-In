@@ -13,7 +13,7 @@ import {
   Users
 } from 'lucide-react';
 // Removed mockRestaurants for backend-authoritative state
-import type { MenuItem } from '@/types';
+import type { MenuItem, SelectedChoice } from '@/types';
 import { useApp } from '@/context/AppContext';
 import CheckoutSheet from '@/components/modals/CheckoutSheet';
 import HostFlexDrawer from '@/components/modals/HostFlexDrawer';
@@ -65,7 +65,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const isHost = userRole === 'host';
 
   const [timeRemaining, setTimeRemaining] = useState(safe.timeRemaining);
-  const [myOrder, setMyOrder] = useState<{ item: MenuItem; quantity: number; selectedAddOns: any[]; specialNotes?: string }[]>([]);
+  const [myOrder, setMyOrder] = useState<{ item: MenuItem; quantity: number; selectedChoices: SelectedChoice[]; specialNotes?: string }[]>([]);
   const [sharedItems, setSharedItems] = useState<{ item: MenuItem; includedUserIds: string[] }[]>([]);
   const [itemToSplit, setItemToSplit] = useState<MenuItem | null>(null);
   const [splitWith, setSplitWith] = useState<string[]>([]);
@@ -189,38 +189,38 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     setItemWithOptions(item);
   };
 
-  const confirmAddToOrder = (item: MenuItem, selectedAddOns: any[], specialNotes: string) => {
+  const confirmAddToOrder = (item: MenuItem, selectedChoices: SelectedChoice[], specialNotes: string) => {
     setMyOrder(prev => {
-      const existing = prev.find(o => 
-        o.item.id === item.id && 
-        JSON.stringify(o.selectedAddOns) === JSON.stringify(selectedAddOns) &&
+      const existing = prev.find(o =>
+        o.item.id === item.id &&
+        JSON.stringify(o.selectedChoices) === JSON.stringify(selectedChoices) &&
         o.specialNotes === specialNotes
       );
       if (existing) {
         return prev.map(o =>
-          (o.item.id === item.id && JSON.stringify(o.selectedAddOns) === JSON.stringify(selectedAddOns) && o.specialNotes === specialNotes)
+          (o.item.id === item.id && JSON.stringify(o.selectedChoices) === JSON.stringify(selectedChoices) && o.specialNotes === specialNotes)
             ? { ...o, quantity: o.quantity + 1 }
             : o
         );
       }
-      return [...prev, { item, quantity: 1, selectedAddOns, specialNotes }];
+      return [...prev, { item, quantity: 1, selectedChoices, specialNotes }];
     });
   };
 
-  const removeFromOrderWithAddons = (itemId: string, selectedAddOns: any[]) => {
+  const removeFromOrderWithAddons = (itemId: string, selectedChoices: SelectedChoice[]) => {
     setMyOrder(prev => {
-      const existing = prev.find(o => 
-        o.item.id === itemId && 
-        JSON.stringify(o.selectedAddOns) === JSON.stringify(selectedAddOns)
+      const existing = prev.find(o =>
+        o.item.id === itemId &&
+        JSON.stringify(o.selectedChoices) === JSON.stringify(selectedChoices)
       );
       if (existing && existing.quantity > 1) {
         return prev.map(o =>
-          (o.item.id === itemId && JSON.stringify(o.selectedAddOns) === JSON.stringify(selectedAddOns))
+          (o.item.id === itemId && JSON.stringify(o.selectedChoices) === JSON.stringify(selectedChoices))
             ? { ...o, quantity: o.quantity - 1 }
             : o
         );
       }
-      return prev.filter(o => !(o.item.id === itemId && JSON.stringify(o.selectedAddOns) === JSON.stringify(selectedAddOns)));
+      return prev.filter(o => !(o.item.id === itemId && JSON.stringify(o.selectedChoices) === JSON.stringify(selectedChoices)));
     });
   };
 
@@ -238,8 +238,8 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     });
   };
 
-  const myTotal = myOrder.reduce((sum, { item, quantity, selectedAddOns }) => {
-    const addOnsTotal = selectedAddOns.reduce((s, a) => s + (a.price || 0), 0);
+  const myTotal = myOrder.reduce((sum, { item, quantity, selectedChoices }) => {
+    const addOnsTotal = selectedChoices.reduce((s, c) => s + (c.option.price || 0), 0);
     return sum + (item.price + addOnsTotal) * quantity;
   }, 0);
 
@@ -339,13 +339,13 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
     try {
       if (currentUser?.id) {
         const orderItems = myOrder.map(c => {
-          const addOnsTotal = c.selectedAddOns.reduce((s, a) => s + (a.price || 0), 0);
+          const addOnsTotal = c.selectedChoices.reduce((s, ch) => s + (ch.option.price || 0), 0);
           return {
             menuItemId: c.item.id,
             name: c.item.name,
             price: c.item.price + addOnsTotal,
             quantity: c.quantity,
-            modifiers: JSON.stringify(c.selectedAddOns),
+            modifiers: JSON.stringify(c.selectedChoices),
             specialNotes: c.specialNotes
           };
         });
@@ -1188,28 +1188,28 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
         )}
       </AnimatePresence>
 
-      <ItemOptionsModal 
+      <ItemOptionsModal
         isOpen={!!itemWithOptions}
-  onClose={() => {
-    setItemWithOptions(null);
-    setIsSplitting(false);
-  }}
-  item={itemWithOptions}
-  onConfirm={(addons, notes) => {
-    if (itemWithOptions) {
-      const addOnsTotal = addons.reduce((sum, a) => sum + (a.price || 0), 0);
-      if (isSplitting) {
-        const modifiedItem = { ...itemWithOptions, price: itemWithOptions.price + addOnsTotal };
-        setItemToSplit(modifiedItem);
-        setItemWithOptions(null);
-        setIsSplitting(false);
-      } else {
-        confirmAddToOrder(itemWithOptions, addons, notes);
-        setItemWithOptions(null);
-      }
-    }
-  }}
-/>
+        onClose={() => {
+          setItemWithOptions(null);
+          setIsSplitting(false);
+        }}
+        item={itemWithOptions}
+        onConfirm={(choices, notes) => {
+          if (itemWithOptions) {
+            const addOnsTotal = choices.reduce((sum, c) => sum + (c.option.price || 0), 0);
+            if (isSplitting) {
+              const modifiedItem = { ...itemWithOptions, price: itemWithOptions.price + addOnsTotal };
+              setItemToSplit(modifiedItem);
+              setItemWithOptions(null);
+              setIsSplitting(false);
+            } else {
+              confirmAddToOrder(itemWithOptions, choices, notes);
+              setItemWithOptions(null);
+            }
+          }
+        }}
+      />
 </motion.div>
 );
 }
