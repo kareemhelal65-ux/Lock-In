@@ -69,7 +69,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
   const [sharedItems, setSharedItems] = useState<{ item: MenuItem; includedUserIds: string[] }[]>([]);
   const [itemToSplit, setItemToSplit] = useState<MenuItem | null>(null);
   const [splitWith, setSplitWith] = useState<string[]>([]);
-  const [cardSelectedAddOns, setCardSelectedAddOns] = useState<Record<string, any[]>>({});
+  const [cardSelectedChoices, setCardSelectedChoices] = useState<Record<string, SelectedChoice[]>>({});
   const [itemWithOptions, setItemWithOptions] = useState<MenuItem | null>(null);
   const [isSplitting, setIsSplitting] = useState(false);
 
@@ -784,7 +784,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                     <div className="h-40 w-full relative border-b-4 border-black">
                       <img src={item.image} className="w-full h-full object-cover" />
                       <div className="absolute top-3 right-3 bg-black text-volt-green font-display font-black px-3 py-1 rounded-full text-lg shadow-xl">
-                        {item.price + (cardSelectedAddOns[item.id]?.reduce((s, a) => s + a.price, 0) || 0)} EGP
+                        {item.price + (cardSelectedChoices[item.id]?.reduce((s: number, a: any) => s + a.price, 0) || 0)} EGP
                       </div>
                     </div>
                     <div className="p-4 flex-1 flex flex-col justify-between">
@@ -798,16 +798,16 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                             {(() => {
                               const addons = typeof item.addOns === 'string' ? JSON.parse(item.addOns) : item.addOns;
                               return addons.map((addon: any, idx: number) => {
-                                const isSelected = cardSelectedAddOns[item.id]?.some(a => a.name === addon.name);
+                                const isSelected = cardSelectedChoices[item.id]?.some(a => a.name === addon.name);
                                 return (
                                   <button
                                     key={idx}
                                     onClick={() => {
-                                      const current = cardSelectedAddOns[item.id] || [];
+                                      const current = cardSelectedChoices[item.id] || [];
                                       if (isSelected) {
-                                        setCardSelectedAddOns({ ...cardSelectedAddOns, [item.id]: current.filter(a => a.name !== addon.name) });
+                                        setCardSelectedChoices({ ...cardSelectedChoices, [item.id]: current.filter(a => a.name !== addon.name) });
                                       } else {
-                                        setCardSelectedAddOns({ ...cardSelectedAddOns, [item.id]: [...current, addon] });
+                                        setCardSelectedChoices({ ...cardSelectedChoices, [item.id]: [...current, addon] });
                                       }
                                     }}
                                     className={`w-full flex justify-between items-center px-3 py-2 rounded-xl border-2 transition-all ${
@@ -830,10 +830,10 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                             <Lock className="w-4 h-4" /> Locked
                           </div>
                         ) : (() => {
-                          const currentAddOns = cardSelectedAddOns[item.id] || [];
+                          const currentAddOns = cardSelectedChoices[item.id] || [];
                           const existingInOrder = myOrder.find(o => 
                             o.item.id === item.id && 
-                            JSON.stringify(o.selectedAddOns) === JSON.stringify(currentAddOns)
+                            JSON.stringify(o.selectedChoices) === JSON.stringify(currentAddOns)
                           );
                           
                           if (existingInOrder) {
@@ -1024,13 +1024,13 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             onCoverLock={async () => {
               if (currentUser) {
                 const fullOrderItems = myOrder.map(c => {
-                  const addOnsTotal = c.selectedAddOns.reduce((s, a) => s + (a.price || 0), 0);
+                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.price || 0), 0);
                   return {
                     menuItemId: c.item.id,
                     name: c.item.name,
                     price: c.item.price + addOnsTotal,
                     quantity: c.quantity,
-                    modifiers: JSON.stringify(c.selectedAddOns),
+                    modifiers: JSON.stringify(c.selectedChoices),
                     specialNotes: c.specialNotes
                   };
                 });
@@ -1066,13 +1066,13 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
             onPayShare={async () => {
               if (currentUser) {
                 const fullOrderItems = myOrder.map(c => {
-                  const addOnsTotal = c.selectedAddOns.reduce((s, a) => s + (a.price || 0), 0);
+                  const addOnsTotal = c.selectedChoices.reduce((s: number, a: SelectedChoice) => s + (a.price || 0), 0);
                   return {
                     menuItemId: c.item.id,
                     name: c.item.name,
                     price: c.item.price + addOnsTotal,
                     quantity: c.quantity,
-                    modifiers: JSON.stringify(c.selectedAddOns),
+                    modifiers: JSON.stringify(c.selectedChoices),
                     specialNotes: c.specialNotes
                   };
                 });
