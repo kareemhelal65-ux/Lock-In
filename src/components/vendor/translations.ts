@@ -1,3 +1,187 @@
+/** Arabic display names for El Shabrawy menu items.
+ *  Key = English item name (as stored in DB), Value = Arabic display name.
+ *  Used in VendorRoster when lang === 'ar'. */
+export const menuItemNamesAr: Record<string, string> = {
+    // Crepes
+    "Potato Crepe": "كريب بطاطس",
+    "Roumi Cheese Potato Crepe": "كريب بطاطس بجبن رومي",
+    "Meat Burger Crepe": "كريب برجر لحمة",
+    "Chicken Crepe": "كريب فراخ",
+    "Classic Crepe": "كريب كلاسيك",
+    "Mexican Hot Dog Crepe": "كريب هوت دوج مكسيكي",
+    "Chicken Strips Crepe": "كريب ستريبس فراخ",
+    "Mix Mexican + Pane Crepe": "كريب ميكس مكسيكي + بانيه",
+    "Mix Cheddar + Pane Crepe": "كريب ميكس شيدر + بانيه",
+    "Mix Bolak + Pane Crepe": "كريب ميكس بالاك + بانيه",
+    "Mix Shawarma + Pane Crepe": "كريب ميكس شاورما + بانيه",
+    "Tuna Crepe": "كريب تونة",
+    // Sandwiches
+    "Chicken Shawarma": "شاورما فراخ",
+    "Beef Shawarma": "شاورما لحمة",
+    "Chicken Sandwich": "ساندويتش فراخ",
+    "Shish Tawook": "شيش طاووق",
+    "Chicken Fajita": "فاهيتا فراخ",
+    "Chicken Strips": "ستريبس فراخ",
+    "Jumbo Burger": "برجر جامبو",
+    "Cheddar Cheese Burger": "برجر شيدر",
+    "Egg & Cheese Burger Mix": "برجر بيض وجبن",
+    "Kofta": "كفتة",
+    "Mexican Hot Dog": "هوت دوج مكسيكي",
+    "Sausage (Sousis)": "سجق (سوسيس)",
+    "Hawawshi": "حواوشي",
+    // Platters & Fattah
+    "Chicken Shawarma Fattah": "فتة شاورما فراخ",
+    "Beef Shawarma Fattah": "فتة شاورما لحمة",
+    "Kofta Meal (3 pcs)": "وجبة كفتة (٣ قطع)",
+    "Shish Tawook Meal (5 pcs)": "وجبة شيش طاووق (٥ قطع)",
+    "Chicken Pane Meal (4 pcs)": "وجبة فراخ بانيه (٤ قطع)",
+    "Quarter Chicken Meal": "وجبة ربع فراخة",
+    "Half Chicken Meal": "وجبة نص فراخة",
+    // Pasta
+    "Pasta with Sauce": "مكرونة بالصلصة",
+    "Pasta with Sausage": "مكرونة بالسجق",
+    "Pasta with Minced Meat": "مكرونة باللحمة المفرومة",
+    // Traditional - Beans
+    "Shabrawy Beans": "فول الشبراوي",
+    "Fava Beans": "فول",
+    "Beans with Boiled Egg": "فول مع بيض مسلوق",
+    "Beans with Fried Egg": "فول مع بيض مقلي",
+    "Beans with Protein": "فول بروتين",
+    "Dynamite (Mix)": "دينامايت (ميكس)",
+    // Traditional - Falafel
+    "Falafel Shabrawy": "فلافل الشبراوي",
+    "Specialty Falafel": "فلافل مميزة",
+    "Falafel Boiled Egg": "فلافل مع بيض مسلوق",
+    "Falafel Fried Egg": "فلافل مع بيض مقلي",
+    "Falafel Tahabish": "فلافل تهابيش",
+    "Falafel with Egg": "فلافل بالبيض",
+    "Cheese Falafel": "فلافل بالجبن",
+    "Mozzarella Falafel": "فلافل موتزاريلا",
+    // Traditional - Potatoes
+    "Potatoes": "بطاطس",
+    "Purée with Butter": "بيوريه بالزبدة",
+    "Potatoes with Boiled Egg": "بطاطس مع بيض مسلوق",
+    "Potatoes with Sauce": "بطاطس بالصوص",
+    "Packet of Potatoes": "باكيت بطاطس",
+    "Cheddar Cheese Potatoes": "بطاطس شيدر",
+    "Potatoes (Ketchup + Mayo)": "بطاطس (كاتشب + مايونيز)",
+    "Cheese Potatoes": "بطاطس بالجبن",
+    "Potatoes with Protein": "بطاطس بروتين",
+    "Bazooka Potatoes": "بطاطس بازوكا",
+    "Tahabish Potatoes": "بطاطس تهابيش",
+    // Traditional - Eggs
+    "Boiled Egg": "بيض مسلوق",
+    "Fried Egg": "بيض مقلي",
+    "Eggs": "بيض",
+    "Cheese Eggs": "بيض بالجبن",
+    "Eggs with Protein": "بيض بروتين",
+    "Pizza Eggs": "بيض بيتزا",
+    "Apache Eggs": "بيض أباتشي",
+    // Rolls & Boxes
+    "Falafel Roll": "رول فلافل",
+    "Potato Roll": "رول بطاطس",
+    "Special Roll": "رول سبيشيال",
+    "Fried Cheese Roll": "رول جبن مقلي",
+    "Plain Beans Box": "بوكس فول سادة",
+    "Seasoned Beans Box": "بوكس فول متبل",
+    "Beans with Sauce Box": "بوكس فول بالصوص",
+    "3 Small Falafel Tablets": "٣ أقراص فلافل صغيرة",
+    "Large Falafel Tablet": "قرص فلافل كبير",
+    "Stuffed Falafel Tablet": "قرص فلافل محشو",
+    "Specialty Falafel Tablet (Cheese)": "قرص فلافل مميز (جبن)",
+    "Chick's Eye Tablet": "قرص عين الفرخة",
+    // Salads & Sides
+    "Pickles": "مخللات",
+    "Pickled Eggplant": "مخلل بتنجان",
+    "Green Salad": "سلطة خضراء",
+    "Marinated Tomatoes": "طماطم متبلة",
+    "Cheese with Tomato": "جبن بالطماطم",
+    "Tahini": "طحينة",
+    "Baba Ghanouj": "بابا غنوج",
+    "Coleslaw": "كولسلو",
+    "Fried Cheese Dish": "طبق جبن مقلي",
+    // Drinks
+    "Mineral Water (Small)": "مياه معدنية (صغير)",
+    "Mineral Water (Large)": "مياه معدنية (كبير)",
+    "Soda Can": "علبة سودا",
+};
+
+/** Arabic display names for menu choice group names */
+export const choiceGroupNamesAr: Record<string, string> = {
+    "Bread Type": "نوع الخبز",
+    "Chicken Style": "طريقة الفراخ",
+    "Filling": "الحشوة",
+    "Style": "الطريقة",
+    "Protein": "البروتين",
+    "Egg Style": "طريقة البيض",
+    "Cheese Type": "نوع الجبن",
+    "Sauce": "الصوص",
+    "Sauce/Topping": "الصوص / الإضافة",
+    "Roll Type": "نوع الرول",
+    "Extras": "إضافات",
+};
+
+/** Arabic display names for menu choice options */
+export const choiceOptionNamesAr: Record<string, string> = {
+    "Syrian": "سوري",
+    "Large/Baladi": "كبير / بلدي",
+    "Pane": "بانيه",
+    "Crispy": "كريسبي",
+    "Shish Tawook": "شيش طاووق",
+    "Fajita": "فاهيتا",
+    "Chicken Shawarma": "شاورما فراخ",
+    "Olive Oil": "زيت زيتون",
+    "Spicy": "حار",
+    "Eggplant": "بتنجان",
+    "Ghee": "سمن",
+    "Alexandrian": "إسكندراني",
+    "Sauce": "صوص",
+    "Minced Meat": "لحمة مفرومة",
+    "Sausage": "سجق",
+    "Stuffed": "محشو",
+    "Mix": "ميكس",
+    "Omelette": "أومليت",
+    "Chick's Eye": "عين الفرخة",
+    "Cheddar": "شيدر",
+    "Kiri": "كيري",
+    "Fries": "فريز",
+    "Chips": "تشيبس",
+    "Purée": "بيوريه",
+    "Coleslaw": "كولسلو",
+    "Baba Ghanouj": "بابا غنوج",
+    "Ketchup": "كاتشب",
+    "Mayo": "مايونيز",
+    "Roomy": "رومي",
+    "Mozzarella": "موتزاريلا",
+    "Pastrami": "بسطرمة",
+    "French Omelette": "أومليت فرنساوي",
+    "Shakshuka": "شكشوكة",
+    "Roomi": "رومي",
+    "Ketchup & Mayo": "كاتشب ومايونيز",
+    "Valentino": "فالنتينو",
+    "Bazooka": "بازوكا",
+    "Cheddar Sauce": "صوص شيدر",
+    "Smoked Turkey": "ديك رومي مدخن",
+    "Cheddar Cheese": "جبن شيدر",
+    "Mozzarella Cheese": "جبن موتزاريلا",
+};
+
+/** Arabic display names for menu categories */
+export const categoryNamesAr: Record<string, string> = {
+    "Crepes": "كريب",
+    "Sandwiches": "ساندويتشات",
+    "Platters & Fattah": "أطباق وفتة",
+    "Pasta": "مكرونة",
+    "Traditional": "تقليدي",
+    "Traditional - Beans": "تقليدي - فول",
+    "Traditional - Falafel": "تقليدي - فلافل",
+    "Traditional - Potatoes": "تقليدي - بطاطس",
+    "Traditional - Eggs": "تقليدي - بيض",
+    "Rolls & Boxes": "رولات وبوكسات",
+    "Salads & Sides": "سلطات وإضافات",
+    "Drinks": "مشروبات",
+};
+
 export const translations = {
     en: {
         // App Shell / Tabs
@@ -125,7 +309,22 @@ export const translations = {
         verifDelayed: "Changes requiring verification may take up to 24 hours to reflect on Consumer devices.",
         displayName: "Display Name",
         instapayInfo: "InstaPay Address (GPA)",
-        verifiedName: "Verified Full Name"
+        verifiedName: "Verified Full Name",
+
+        // Roster - Choice Groups Editor
+        choiceGroups: "Choice Groups",
+        addGroup: "+ Add Group",
+        required: "Required",
+        maxPick: "Max pick:",
+        radioHint: "→ Radio",
+        multiHint: "→ Multi (max {n})",
+        optionNamePlace: "Option name (e.g. Syrian Bread)",
+        groupNamePlace: "Group name (e.g. Bread Type)",
+        addOption2: "+ Add Option",
+        optionInStock: "In Stock",
+        noGroups: "No choice groups yet. Add a group to let customers customize this item.",
+        noImage: "No Image",
+        soldOutBadge: "SOLD OUT"
     },
     ar: {
         // App Shell / Tabs
@@ -253,6 +452,21 @@ export const translations = {
         verifDelayed: "التغييرات التي تتطلب التحقق قد تستغرق ما يصل إلى 24 ساعة لتظهر على أجهزة المستهلكين.",
         displayName: "اسم العرض",
         instapayInfo: "عنوان انستا باي (GPA)",
-        verifiedName: "الاسم الكامل الموثق"
+        verifiedName: "الاسم الكامل الموثق",
+
+        // Roster - Choice Groups Editor
+        choiceGroups: "مجموعات الاختيار",
+        addGroup: "+ إضافة مجموعة",
+        required: "إلزامي",
+        maxPick: "أقصى اختيار:",
+        radioHint: "→ اختيار واحد",
+        multiHint: "→ متعدد (حد أقصى {n})",
+        optionNamePlace: "اسم الخيار (مثال: خبز سوري)",
+        groupNamePlace: "اسم المجموعة (مثال: نوع الخبز)",
+        addOption2: "+ إضافة خيار",
+        optionInStock: "متوفر",
+        noGroups: "لا توجد مجموعات اختيار بعد. أضف مجموعة للسماح للعملاء بتخصيص هذا الصنف.",
+        noImage: "لا توجد صورة",
+        soldOutBadge: "نفذ"
     }
 };

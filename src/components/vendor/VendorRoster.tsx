@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Edit2, ShieldAlert, Sparkles, Upload, Plus, X, Save, ImageIcon } from 'lucide-react';
-import { translations } from './translations';
+import { translations, menuItemNamesAr, choiceGroupNamesAr, choiceOptionNamesAr, categoryNamesAr } from './translations';
 
 interface VendorRosterProps {
     vendorId: string;
@@ -10,6 +10,10 @@ interface VendorRosterProps {
 
 export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
     const t = translations[lang];
+    const tn = (name: string) => lang === 'ar' ? (menuItemNamesAr[name] || name) : name;
+    const tc = (cat: string) => lang === 'ar' ? (categoryNamesAr[cat] || cat) : cat;
+    const tg = (gName: string) => lang === 'ar' ? (choiceGroupNamesAr[gName] || gName) : gName;
+    const to = (oName: string) => lang === 'ar' ? (choiceOptionNamesAr[oName] || oName) : oName;
     const [menuItems, setMenuItems] = useState<any[]>([]);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<any>(null);
@@ -225,15 +229,15 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                         ) : (
                                                             <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-800 text-cool-gray/50">
                                                                 <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                                                                <span className="text-[10px] font-black uppercase tracking-widest opacity-50">No Image</span>
+                                                                <span className="text-[10px] font-black uppercase tracking-widest opacity-50">{t.noImage}</span>
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col items-start gap-1">
                                                         <div className="flex items-center gap-2">
-                                                            <p className="font-bold text-lg">{item.name}</p>
+                                                            <p className="font-bold text-lg">{tn(item.name)}</p>
                                                             {!item.inStock && (
-                                                                <span className="bg-electric-red text-white text-[10px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">SOLD OUT</span>
+                                                                <span className="bg-electric-red text-white text-[10px] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">{t.soldOutBadge}</span>
                                                             )}
                                                         </div>
                                                         {item.description && (
@@ -266,7 +270,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                     <option>Desserts</option>
                                                 </select>
                                             ) : (
-                                                <span className="text-cool-gray text-sm">{item.category}</span>
+                                                <span className="text-cool-gray text-sm">{tc(item.category)}</span>
                                             )}
                                         </div>
 
@@ -363,7 +367,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                         {isEditing && (
                                             <div className="col-span-full mt-2 p-4 bg-black/50 rounded-xl border border-cool-gray/20 space-y-4">
                                                 <div className="flex items-center justify-between">
-                                                    <p className="text-xs font-bold text-volt-green uppercase tracking-wider">Choice Groups</p>
+                                                    <p className="text-xs font-bold text-volt-green uppercase tracking-wider">{t.choiceGroups}</p>
                                                     <button
                                                         type="button"
                                                         onClick={() => setEditForm({
@@ -375,7 +379,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                         })}
                                                         className="text-xs text-volt-green font-bold uppercase hover:underline flex items-center gap-1"
                                                     >
-                                                        <Plus className="w-3 h-3" /> Add Group
+                                                        <Plus className="w-3 h-3" /> {t.addGroup}
                                                     </button>
                                                 </div>
 
@@ -390,7 +394,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                             <div className="flex flex-col md:flex-row gap-2 items-start md:items-center">
                                                                 <input
                                                                     type="text"
-                                                                    placeholder="Group name (e.g. Bread Type)"
+                                                                    placeholder={t.groupNamePlace}
                                                                     className="flex-1 bg-black border border-cool-gray/40 rounded px-2 py-1.5 text-white text-xs font-bold focus:border-volt-green focus:outline-none"
                                                                     value={group.groupName}
                                                                     onChange={e => {
@@ -399,6 +403,10 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                         setEditForm({ ...editForm, addOns: updated });
                                                                     }}
                                                                 />
+                                                                {/* Show Arabic translation hint */}
+                                                                {lang === 'ar' && group.groupName && choiceGroupNamesAr[group.groupName] && (
+                                                                    <span className="text-[10px] text-volt-green/70 whitespace-nowrap">{choiceGroupNamesAr[group.groupName]}</span>
+                                                                )}
                                                                 {/* Required toggle */}
                                                                 <label className="flex items-center gap-1.5 text-xs text-cool-gray cursor-pointer whitespace-nowrap">
                                                                     <input
@@ -411,11 +419,11 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                             setEditForm({ ...editForm, addOns: updated });
                                                                         }}
                                                                     />
-                                                                    <span className={group.required ? 'text-electric-red font-black' : ''}>Required</span>
+                                                                    <span className={group.required ? 'text-electric-red font-black' : ''}>{t.required}</span>
                                                                 </label>
                                                                 {/* Max select */}
                                                                 <div className="flex items-center gap-1 text-xs text-cool-gray whitespace-nowrap">
-                                                                    <span>Max pick:</span>
+                                                                    <span>{t.maxPick}</span>
                                                                     <input
                                                                         type="number"
                                                                         min={1}
@@ -428,7 +436,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                         }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-[10px] text-cool-gray/60 whitespace-nowrap">{group.maxSelect === 1 ? '→ Radio' : `→ Multi (max ${group.maxSelect})`}</span>
+                                                                <span className="text-[10px] text-cool-gray/60 whitespace-nowrap">{group.maxSelect === 1 ? t.radioHint : t.multiHint.replace('{n}', group.maxSelect)}</span>
                                                                 {/* Delete group */}
                                                                 <button
                                                                     type="button"
@@ -445,7 +453,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                     <div key={oIdx} className="flex flex-col md:flex-row gap-2 items-start md:items-center">
                                                                         <input
                                                                             type="text"
-                                                                            placeholder="Option name (e.g. Syrian Bread)"
+                                                                            placeholder={t.optionNamePlace}
                                                                             className="flex-1 bg-black border border-cool-gray/40 rounded px-2 py-1 text-white text-xs focus:border-volt-green focus:outline-none"
                                                                             value={opt.name}
                                                                             onChange={e => {
@@ -456,6 +464,10 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                                 setEditForm({ ...editForm, addOns: updated });
                                                                             }}
                                                                         />
+                                                                        {/* Arabic translation hint for option */}
+                                                                        {lang === 'ar' && opt.name && choiceOptionNamesAr[opt.name] && (
+                                                                            <span className="text-[10px] text-volt-green/70 whitespace-nowrap flex-shrink-0">{to(opt.name)}</span>
+                                                                        )}
                                                                         <div className="flex items-center gap-1 text-xs text-cool-gray">
                                                                             <span>+</span>
                                                                             <input
@@ -487,7 +499,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                                     setEditForm({ ...editForm, addOns: updated });
                                                                                 }}
                                                                             />
-                                                                            <span className={opt.inStock !== false ? 'text-volt-green' : 'text-cool-gray opacity-50'}>In Stock</span>
+                                                                            <span className={opt.inStock !== false ? 'text-volt-green' : 'text-cool-gray opacity-50'}>{t.optionInStock}</span>
                                                                         </label>
                                                                         <button
                                                                             type="button"
@@ -512,7 +524,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                         setEditForm({ ...editForm, addOns: updated });
                                                                     }}
                                                                     className="text-[10px] text-volt-green/60 font-bold uppercase hover:text-volt-green transition-colors"
-                                                                >+ Add Option</button>
+                                                                >{t.addOption2}</button>
                                                             </div>
                                                         </div>
                                                     );
@@ -520,9 +532,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
 
                                                 {/* If completely empty, show a helpful hint */}
                                                 {(editForm.addOns || []).length === 0 && (
-                                                    <p className="text-xs text-cool-gray/40 text-center py-2">
-                                                        No choice groups yet. Add a group to let customers customize this item.
-                                                    </p>
+                                                    <p className="text-xs text-cool-gray/40 text-center py-2">{t.noGroups}</p>
                                                 )}
                                             </div>
                                         )}
