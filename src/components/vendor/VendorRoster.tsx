@@ -405,7 +405,7 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                 />
                                                                 {/* Show Arabic translation hint */}
                                                                 {lang === 'ar' && group.groupName && choiceGroupNamesAr[group.groupName] && (
-                                                                    <span className="text-[10px] text-volt-green/70 whitespace-nowrap">{choiceGroupNamesAr[group.groupName]}</span>
+                                                                    <span className="text-[10px] text-volt-green/70 whitespace-nowrap">{tg(group.groupName)}</span>
                                                                 )}
                                                                 {/* Required toggle */}
                                                                 <label className="flex items-center gap-1.5 text-xs text-cool-gray cursor-pointer whitespace-nowrap">
