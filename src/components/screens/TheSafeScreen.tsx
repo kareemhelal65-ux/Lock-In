@@ -802,6 +802,7 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                                 return (
                                   <button
                                     key={idx}
+                                    disabled={addon.inStock === false}
                                     onClick={() => {
                                       const current = cardSelectedChoices[item.id] || [];
                                       if (isSelected) {
@@ -811,10 +812,17 @@ export default function TheSafeScreen({ safeId, userRole = 'guest', onClose, onC
                                       }
                                     }}
                                     className={`w-full flex justify-between items-center px-3 py-2 rounded-xl border-2 transition-all ${
-                                      isSelected ? 'bg-volt-green border-black text-black scale-[1.02]' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-black'
+                                      addon.inStock === false
+                                        ? 'bg-gray-200 border-gray-300 opacity-50 cursor-not-allowed grayscale'
+                                        : isSelected 
+                                          ? 'bg-volt-green border-black text-black scale-[1.02]' 
+                                          : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-black'
                                     }`}
                                   >
-                                    <span className="text-xs font-black uppercase">{addon.name}</span>
+                                    <div className="flex flex-col items-start">
+                                      <span className="text-xs font-black uppercase">{addon.name}</span>
+                                      {addon.inStock === false && <span className="text-[9px] text-electric-red uppercase font-black">Sold Out</span>}
+                                    </div>
                                     <span className="text-xs font-bold">+{addon.price} EGP</span>
                                   </button>
                                 );

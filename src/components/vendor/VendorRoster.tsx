@@ -474,6 +474,21 @@ export default function VendorRoster({ vendorId, lang }: VendorRosterProps) {
                                                                             />
                                                                             <span>EGP</span>
                                                                         </div>
+                                                                        <label className="flex items-center gap-1.5 text-xs text-cool-gray cursor-pointer">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={opt.inStock !== false}
+                                                                                className="accent-volt-green"
+                                                                                onChange={e => {
+                                                                                    const updated = [...editForm.addOns];
+                                                                                    const opts = [...updated[gIdx].options];
+                                                                                    opts[oIdx] = { ...opts[oIdx], inStock: e.target.checked };
+                                                                                    updated[gIdx] = { ...updated[gIdx], options: opts };
+                                                                                    setEditForm({ ...editForm, addOns: updated });
+                                                                                }}
+                                                                            />
+                                                                            <span className={opt.inStock !== false ? 'text-volt-green' : 'text-cool-gray opacity-50'}>In Stock</span>
+                                                                        </label>
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => {
